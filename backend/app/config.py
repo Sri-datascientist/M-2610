@@ -24,6 +24,20 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3001",
         "http://127.0.0.1:8000",
     ]
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:3001",
+        "http://localhost:8000",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3001",
+        "http://127.0.0.1:8000",
+    ]
+
+    # Postal Pincode Auto-Lookup API
+    POSTAL_API_BASE_URL: str = "https://api.postalpincode.in"
+    POSTAL_API_TIMEOUT_SECONDS: float = 5.0
 
     # Zoho CPaaS / ZeptoMail
     ZOHO_CPAAS_URL: str = "https://cpaas.zoho.in/v1.1/email"

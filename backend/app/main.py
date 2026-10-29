@@ -16,6 +16,7 @@ from databases.products import router as products_router
 from databases.referrals import router as referrals_router
 from databases.research_submissions import router as research_submissions_router
 from app.routers.auth import router as auth_router
+from app.api.v1.pincode import router as pincode_router
 
 from app.config import settings
 from databases.session import check_db_connection
@@ -39,13 +40,15 @@ app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=getattr(settings, "CORS_ORIGINS", settings.ALLOWED_ORIGINS),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # Core Routers
+app.include_router(pincode_router, prefix="/api/v1/pincode")
+app.include_router(pincode_router, prefix="/api/pincode")
 app.include_router(auth_router, prefix="/api/v1/auth")
 app.include_router(auth_router, prefix="/api/auth")
 app.include_router(adr_reports_router)
