@@ -24,6 +24,7 @@ import {
   FileText,
   GraduationCap,
   HeartHandshake,
+  Home,
   Layers2,
   Lock,
   Mail,
@@ -5714,9 +5715,11 @@ export function MeyvedaDoctorsPage() {
             <a
               href="#top"
               onClick={(e) => handleNavClick(e, "#top")}
-              className="font-semibold text-[#111111] transition-colors hover:text-[#E67230]"
+              className="inline-flex items-center justify-center size-9 rounded-full border border-[#EBE7DF] bg-white text-[#111111] hover:text-[#E67230] hover:border-[#E67230]/40 hover:bg-[#FAF9F6] transition-all shadow-2xs cursor-pointer"
+              title="Back to Top"
+              aria-label="Back to Top"
             >
-              Back to Top ↑
+              <Home className="size-4" />
             </a>
           </div>
         </div>

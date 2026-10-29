@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, ArrowLeft, Home } from "lucide-react";
 import meyvedaLogo from "@/assets/meyvedalogo.png";
 import { Mascot } from "@/components/ui/mascot";
 import { toast } from "sonner";
@@ -166,10 +166,11 @@ export function Login() {
 
           <Link
             to="/doctor"
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#555555] hover:text-[#E67230] transition-colors"
+            className="inline-flex items-center justify-center size-9 sm:size-10 rounded-full border border-[#EBE7DF] bg-white text-[#555555] hover:text-[#E67230] hover:border-[#E67230]/40 hover:bg-[#FAF9F6] transition-all shadow-2xs"
+            title="Back to Home"
+            aria-label="Back to Home"
           >
-            <ArrowLeft className="size-4" />
-            <span>Back to Home</span>
+            <Home className="size-4 sm:size-5" />
           </Link>
         </div>
       </header>

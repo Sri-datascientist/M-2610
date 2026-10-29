@@ -12,6 +12,7 @@ import {
   Mail,
   ChevronRight,
   ArrowLeft,
+  Home,
   ExternalLink,
 } from "lucide-react";
 import { seo } from "@/lib/seo";
@@ -108,8 +109,8 @@ export function TermsPage() {
         />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 text-xs font-semibold text-[#777777] mb-3">
-            <Link to="/" className="hover:text-[#E67230] transition-colors flex items-center gap-1">
-              <ArrowLeft className="size-3" /> Home
+            <Link to="/" className="hover:text-[#E67230] transition-colors inline-flex items-center justify-center size-6 rounded-full border border-[#EBE7DF] bg-white text-[#555555] hover:border-[#E67230]/40" title="Back to Home" aria-label="Back to Home">
+              <Home className="size-3.5" />
             </Link>
             <span>/</span>
             <span className="text-[#E67230] font-bold">Terms &amp; Conditions</span>
