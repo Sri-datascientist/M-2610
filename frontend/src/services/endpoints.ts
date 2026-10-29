@@ -1,0 +1,55 @@
+/**
+ * Centralized API Endpoints for Mey Veda Platform
+ */
+export const API_ENDPOINTS = {
+  auth: {
+    login: "/auth/login",
+    register: "/auth/register",
+    forgotPassword: "/auth/forgot-password",
+    resetPassword: "/auth/reset-password",
+    sendEmailOtp: "/auth/send-email-otp",
+    verifyEmailOtp: "/auth/verify-email-otp",
+    sendSmsOtp: "/auth/send-sms-otp",
+    verifySmsOtp: "/auth/verify-sms-otp",
+    verifyOtp: "/auth/verify-otp",
+    session: "/auth/session",
+    logout: "/auth/logout",
+  },
+  doctor: {
+    profile: "/doctor/profile",
+    appointments: "/doctor/appointments",
+    cases: "/doctor/cases",
+    prescriptions: "/doctor/prescriptions",
+    communication: "/doctor/communication",
+    referrals: "/doctor/referrals",
+    analytics: "/doctor/analytics",
+  },
+  clinical: {
+    medicines: "/clinical/medicines",
+    library: "/clinical/library",
+    compare: "/clinical/compare",
+    adr: "/clinical/adr",
+    research: "/clinical/research",
+    quality: "/clinical/quality",
+    manufacturers: "/clinical/manufacturers",
+  },
+  admin: {
+    stats: "/admin/stats",
+    doctors: "/admin/doctors",
+    manufacturers: "/admin/manufacturers",
+    approvals: "/admin/approvals",
+    queries: "/admin/queries",
+    content: "/admin/content",
+    users: "/admin/users",
+    settings: "/admin/settings",
+  },
+  manufacturer: {
+    overview: "/manufacturer/overview",
+    products: "/manufacturer/products",
+    responses: "/manufacturer/responses",
+    feedback: "/manufacturer/feedback",
+    territory: "/manufacturer/territory",
+    adrReports: "/manufacturer/adr-reports",
+    profile: "/manufacturer/profile",
+  },
+} as const;

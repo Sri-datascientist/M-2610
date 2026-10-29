@@ -1,0 +1,53 @@
+# Explicitly ignored by user instruction
+landing_page/
+landing_page
+
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Python cache & virtual environments
+__pycache__/
+*/__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*/.venv/
+*/venv/
+
+# Build artifacts
+dist/
+dist-ssr/
+build/
+*/dist/
+
+# Test & coverage caches
+.pytest_cache/
+*/.pytest_cache/
+.coverage
+htmlcov/
+coverage/
+
+# Environment files and secrets
+.env
+.env.*
+!.env.example
+*/.env
+*/.env.*
+!*/.env.example
+*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Tooling and IDE
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
+.eslintcache

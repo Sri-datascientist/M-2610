@@ -1,0 +1,24 @@
+# MSG91
+
+## Modules
+
+- [Campaign](https://docs.msg91.com/campaign/llms.txt): hiiii — Endpoints: Launch Campaign, Launch Campaign (For specific Segment)
+- [SMS](https://docs.msg91.com/sms/llms.txt): Send SMS: This API lets you easily send SMS. This API can be used to send both single and bulk messages.Add Template: To add a template in the SMS section of your MSG91 account OR to get a template I… — Endpoints: Send SMS, Add Template, Add Template Version, Get Template Details, Mark Default, SMS Logs, SMS Analytics
+- [OTP](https://docs.msg91.com/otp/llms.txt): SendOTP: To generate and send OTP messages.Verify OTP: To verify the OTP generated through the “SendOTP” API.Resend OTP: To resend the Same OTP again on the same mobile number, on which it was first… — Endpoints: SendOTP, Verify OTP, Resend OTP, Edit OTP Template, OTP Logs, OTP Analytics
+- [OTP Widget](https://docs.msg91.com/otp-widget/llms.txt) — Endpoints: Send OTP, Retry OTP, Verify OTP, Verify Access Token, Widget Logs, Widget Analytics
+- [Email](https://docs.msg91.com/email/llms.txt): Email Validation: To validate the email address or to verify if the Email address is active/deliverable or not.Send Emails using Template: This API is to send emails through a template.Create New Tem… — Endpoints: Email Validation, Send Email, Sending Emails Using Handlebars, Create HTML Template, Template Css Inliner, Get Email Templates, Template Version Details, Email Logs, Email Analytics
+- [WhatsApp](https://docs.msg91.com/whatsapp/llms.txt): Send Whatsapp Template: To send an outbound WhatsApp message using a template. This API is to initiate a conversation with the end user.Send message (once session started): Once the conversation has… — Endpoints: Create Template (Positional Variable), Send WhatsApp Template, Send Message (once Session Started), To Fetch Whatsapp Number, Get Templates, Interactive Wa With Buttons, Interactive Wa With List, Interactive Wa Send Location, Single Product Catalog, Multiple Product Catalog, Edit Template, Delete Template, ...
+- [Segmento ](https://docs.msg91.com/segmento/llms.txt): Create/Update Contact: The use of this API is to add or update contacts in the phonebook available in Segmento.Filter/Search Contact: To filter contacts in a phonebook based on specified criteria suc… — Endpoints: Create/update Contact, Filter/search Contact, Delete - Contacts, Get Phonebook Fields, Create User Events, User Journey, Get Product Catalog, Get failed Events, Get EventTypes
+- [Voice](https://docs.msg91.com/voice/llms.txt): Send Voice SMS: To initiate a voice call with a specified template.Execute an IVR/Flow to a number: To execute an IVR (Interactive Voice Response) flow to a specified phone number.Click to call or 2-… — Endpoints: Send Voice SMS, Execute An Ivr/flow To A Number, Click To Call Or 2-way Call, Get company Agents, Get sip-credentials, Get VPN credentials, Voice Logs, Get Template, Create Template, Get Voice File, Voice Logs, Get Call Recording, ...
+- [RCS](https://docs.msg91.com/rcs/llms.txt): Rcs - Calendar Event: RCS API for calendar eventRcs - Carousel: RCS API for CarouselRcs - Dial: RCS API to DialRcs - Media: RCS API for MediaRcs - Open Url: RCS API to open URLRcs - Rich Card RCS API… — Endpoints: Rcs - Dial, Rcs - Media, Rcs - Open Url, Rcs - Rich Card, Rcs - Share Location, Rcs - Suggested Replies, Rcs - Template, Rcs - View Location, Rcs - Calendar Event, Rcs - Carousel, Create Calendar Event, Carousel, ...
+- [Hello](https://docs.msg91.com/hello/llms.txt) — Endpoints: Hello Mail Send API, Assign Ticket, State Change API, Email Inbox List, Agent Bot List API , Close All Ticket, Close All Ticket by Filter ID, Mail Ticket List, Open Ticket, Get Saved Filter List by Agent ID, Get Save Filter list by Filter ID, Get Draft, ...
+- [Subaccount](https://docs.msg91.com/subaccount-1/llms.txt) — Endpoints: Add Client
+- [OneAPI](https://docs.msg91.com/oneapi-1/llms.txt) — Endpoints: OneAPI
+
+## Pages
+
+- [Start Your Cloud Communication](https://docs.msg91.com/overview.md): Explore MSG91 APIs and developer tools to build OTP verification, transactional messaging, multi-channel campaigns, and automated workflows across SMS, WhatsApp, Email, and Voice. Includes API refere…
+
+## Endpoints
+
+- [Update Group Settings](https://docs.msg91.com/update-group-settings-1.openapi.yml)
