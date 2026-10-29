@@ -319,8 +319,17 @@ export function AppShell({ children }: { children: ReactNode }) {
             {children}
           </motion.div>
         </main>
-        <footer className="border-t border-border px-6 py-3 text-xs text-muted-foreground">
-          Meyveda · Official AYUSH Practitioner Clinical Network · Verified Early Access System
+        <footer className="border-t border-border px-6 py-3 text-xs text-muted-foreground flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>Meyveda · Official AYUSH Practitioner Clinical Network · Verified Early Access System</span>
+          <div className="flex items-center gap-4">
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-primary hover:underline transition-colors">
+              Terms &amp; Conditions
+            </a>
+            <span>•</span>
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-primary hover:underline transition-colors">
+              Privacy Policy
+            </a>
+          </div>
         </footer>
       </div>
     </div>

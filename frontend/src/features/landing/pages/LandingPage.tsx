@@ -5674,6 +5674,22 @@ export function MeyvedaDoctorsPage() {
                 </li>
                 <li>
                   <Link
+                    to="/terms"
+                    className="hover:text-[#E67230] transition-colors text-left"
+                  >
+                    Terms &amp; Conditions
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/privacy"
+                    className="hover:text-[#E67230] transition-colors text-left"
+                  >
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     to="/login"
                     className="hover:text-[#E67230] transition-colors text-left"
                   >
@@ -5684,9 +5700,19 @@ export function MeyvedaDoctorsPage() {
             </div>
           </div>
 
-          {/* Bottom Bar: Copyright & Back to Top */}
+          {/* Bottom Bar: Copyright, Legal Links & Back to Top */}
           <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[#EBE7DF] pt-6 text-xs text-[#666666] sm:flex-row">
-            <span>© 2026 Meyveda. All rights reserved.</span>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+              <span>© {new Date().getFullYear()} Meyveda. All rights reserved.</span>
+              <span className="hidden sm:inline">•</span>
+              <Link to="/terms" className="hover:text-[#E67230] hover:underline transition-colors">
+                Terms &amp; Conditions
+              </Link>
+              <span className="hidden sm:inline">•</span>
+              <Link to="/privacy" className="hover:text-[#E67230] hover:underline transition-colors">
+                Privacy Policy
+              </Link>
+            </div>
             <a
               href="#top"
               onClick={(e) => handleNavClick(e, "#top")}
@@ -6057,7 +6083,26 @@ export function MeyvedaDoctorsPage() {
               )}
             </div>
 
-            <div className="pt-2">
+            <p className="text-[11px] text-[#777777] text-center leading-relaxed">
+              By registering, you agree to our{" "}
+              <Link
+                to="/terms"
+                target="_blank"
+                className="font-bold text-[#E67230] hover:underline"
+              >
+                Terms &amp; Conditions
+              </Link>{" "}
+              and{" "}
+              <Link
+                to="/privacy"
+                target="_blank"
+                className="font-bold text-[#E67230] hover:underline"
+              >
+                Privacy Policy
+              </Link>.
+            </p>
+
+            <div className="pt-1">
               <RegisterPrimaryButton
                 size="lg"
                 className="w-full"

@@ -22,6 +22,9 @@ import { DoctorLandingPage } from "@/features/landing";
 // Auth Features
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage } from "@/features/auth";
 
+// Legal Features
+import { TermsPage, PrivacyPage } from "@/features/legal";
+
 // Doctor Workspace Pages
 import {
   Home as DoctorHomePage,
@@ -193,6 +196,31 @@ export const resetPasswordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/reset-password",
   component: ResetPasswordPage,
+});
+
+// 2b. Legal & Compliance routes
+export const termsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/terms",
+  component: TermsPage,
+});
+
+export const termsAliasRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/terms-and-conditions",
+  component: TermsPage,
+});
+
+export const privacyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/privacy",
+  component: PrivacyPage,
+});
+
+export const privacyAliasRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/privacy-policy",
+  component: PrivacyPage,
 });
 
 // 3. Doctor Clinical Workspace (under DoctorWorkspaceLayout)
@@ -539,6 +567,10 @@ export const routeTree = rootRoute.addChildren([
   registerRoute,
   forgotPasswordRoute,
   resetPasswordRoute,
+  termsRoute,
+  termsAliasRoute,
+  privacyRoute,
+  privacyAliasRoute,
   doctorWorkspaceLayoutRoute.addChildren([
     doctorWorkspaceHomeRoute,
     doctorWsAliasRoute,

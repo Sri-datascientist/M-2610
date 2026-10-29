@@ -1045,6 +1045,28 @@ export function Register() {
                   )}
                 </div>
 
+                {/* Terms & Privacy Acceptance */}
+                <div className="pt-1 text-center">
+                  <p className="text-xs text-[#666666] leading-relaxed">
+                    By registering, you agree to our{" "}
+                    <Link
+                      to="/terms"
+                      target="_blank"
+                      className="font-bold text-[#E67230] hover:underline"
+                    >
+                      Terms &amp; Conditions
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      to="/privacy"
+                      target="_blank"
+                      className="font-bold text-[#E67230] hover:underline"
+                    >
+                      Privacy Policy
+                    </Link>.
+                  </p>
+                </div>
+
                 {/* Submit Primary Button */}
                 <div className="pt-2">
                   <button
@@ -1078,9 +1100,20 @@ export function Register() {
         </div>
       </div>
 
-      {/* Footer Copyright */}
-      <footer className="w-full py-4 sm:py-6 text-center text-xs text-[#888888] border-t border-[#EBE7DF] bg-white">
-        <p>© {new Date().getFullYear()} meyveda. Built for Ayurveda physicians.</p>
+      {/* Footer Copyright & Legal Links */}
+      <footer className="w-full py-4 sm:py-6 text-xs text-[#888888] border-t border-[#EBE7DF] bg-white">
+        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+          <p>© {new Date().getFullYear()} Meyveda. Built for <strong className="font-bold text-[#E65C24]">AYUSH</strong> physicians.</p>
+          <div className="flex items-center gap-4 font-medium">
+            <Link to="/terms" className="hover:text-[#E67230] hover:underline transition-colors">
+              Terms &amp; Conditions
+            </Link>
+            <span>•</span>
+            <Link to="/privacy" className="hover:text-[#E67230] hover:underline transition-colors">
+              Privacy Policy
+            </Link>
+          </div>
+        </div>
       </footer>
     </main>
   );
