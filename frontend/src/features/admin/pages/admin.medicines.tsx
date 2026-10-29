@@ -4,7 +4,7 @@ import { MedicinesDirectory } from "@/features/admin/medicines-page";
 export const Route = createFileRoute("/admin/medicines")({
   head: () => ({
     meta: [
-      { title: "Product management — Meyveda Grantha" },
+      { title: "Product management — meyveda" },
       {
         name: "description",
         content: "Review medicine submissions, product approvals, and maintain the product catalogue.",

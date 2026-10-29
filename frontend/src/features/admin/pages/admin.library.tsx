@@ -4,7 +4,7 @@ import { LibraryWorkspace } from "@/features/admin/library-page";
 export const Route = createFileRoute("/admin/library")({
   head: () => ({
     meta: [
-      { title: "Library management — Meyveda Grantha" },
+      { title: "Library management — meyveda" },
       {
         name: "description",
         content: "Classical texts, governed knowledge entries, and practitioner published content.",

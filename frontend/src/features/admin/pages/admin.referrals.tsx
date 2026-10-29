@@ -4,7 +4,7 @@ import { ReferralScoresPage } from "@/features/admin/referral-page";
 export const Route = createFileRoute("/admin/referrals")({
   head: () => ({
     meta: [
-      { title: "Referral scores — Meyveda Grantha" },
+      { title: "Referral scores — meyveda" },
       {
         name: "description",
         content: "Practitioner referral metrics, objective clinical scoring formula, and ranking leaderboard.",

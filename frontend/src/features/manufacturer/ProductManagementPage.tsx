@@ -222,7 +222,7 @@ export const ProductManagementPage: React.FC = () => {
         <div className="text-xs text-foreground/90 leading-relaxed">
           <span className="font-bold text-foreground">Catalog Governance Rule: </span>
           Products submitted by manufacturers are placed in <strong>"Under Review"</strong> until
-          authoritative approval is granted by the Central Grantha Admin AYUSH Board. Only
+          authoritative approval is granted by the Central Meyveda Admin AYUSH Board. Only
           explicitly approved products enter the live practitioner prescription directory. Approved
           products cannot be directly altered; changes require a proposed revision.
         </div>
@@ -945,7 +945,7 @@ export const ProductManagementPage: React.FC = () => {
               <p className="font-semibold text-primary">AYUSH Governance Protection</p>
               <p className="text-[11px] text-muted-foreground mt-0.5">
                 The current approved version remains active for prescribing doctors. Your proposed
-                updates will be sent to the Central Grantha Admin for evaluation without disrupting
+                updates will be sent to the Central Meyveda Admin for evaluation without disrupting
                 existing clinic stock.
               </p>
             </div>

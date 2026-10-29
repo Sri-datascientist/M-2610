@@ -4,7 +4,7 @@ import { CasesQueue } from "@/features/admin/cases-page";
 export const Route = createFileRoute("/admin/cases")({
   head: () => ({
     meta: [
-      { title: "Clinical Cases — Meyveda Grantha" },
+      { title: "Clinical Cases — meyveda" },
       { name: "description", content: "Oversight of clinical cases." },
     ],
   }),

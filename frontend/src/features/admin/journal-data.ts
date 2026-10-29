@@ -109,8 +109,8 @@ export const seedJournals: JournalRecord[] = [
     abstract:
       "Configured scheduled crawler pipeline connecting digital repositories of peer-reviewed classical clinical trials. Running in demonstration integration mode.",
     articleCount: 45,
-    authors: ["Grantha Digital Systems", "Ananya Iyer"],
-    externalUrl: "https://grantha.meyveda.example/sync/dhara-repo",
+    authors: ["Meyveda Research Systems", "Ananya Iyer"],
+    externalUrl: "https://research.meyveda.example/sync/dhara-repo",
     sample: true,
   },
   {

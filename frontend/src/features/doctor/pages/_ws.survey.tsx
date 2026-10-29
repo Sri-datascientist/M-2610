@@ -5,8 +5,8 @@ import { seo } from "@/lib/seo";
 export const Route = createFileRoute("/_ws/survey")({
   head: () =>
     seo(
-      "Practitioner Survey | Mey Veda Grantha",
-      "Participate in the Mey Veda Grantha clinical practice and AYUSH intelligence survey.",
+      "Practitioner Survey | Meyveda",
+      "Participate in the Meyveda clinical practice and AYUSH intelligence survey.",
     ),
   component: SurveyPage,
 });
@@ -35,7 +35,7 @@ export function SurveyPage() {
             <span>Survey Opening Shortly</span>
           </div>
           <p className="text-sm text-foreground/80 leading-relaxed">
-            Thank you for being part of the Mey Veda early access practitioner network. This survey module is being configured for clinical questions, classical formulary usage patterns, and research case preferences.
+            Thank you for being part of the Meyveda early access practitioner network. This survey module is being configured for clinical questions, classical formulary usage patterns, and research case preferences.
           </p>
           <div className="flex items-center gap-2 pt-2 text-xs text-muted-foreground">
             <CheckCircle className="h-4 w-4 text-emerald-600" />

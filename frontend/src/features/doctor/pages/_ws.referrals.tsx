@@ -48,7 +48,7 @@ export const Route = createFileRoute("/_ws/referrals")({
   head: () =>
     seo(
       "Doctor Referrals & Early Access",
-      "Invite qualified Ayurvedic physicians to the Mey Veda Grantha peer clinical network and track early access onboarding.",
+      "Invite qualified Ayurvedic physicians to the Meyveda peer clinical network and track early access onboarding.",
     ),
   component: ReferralsPage,
 });
@@ -331,7 +331,7 @@ export function ReferralsPage() {
       <PageHeader
         eyebrow="Practitioner Network"
         title="Referrals & Early Access"
-        desc="Invite qualified AYUSH physicians to the Mey Veda Grantha early access cohort. Help expand our peer-reviewed classical clinical network."
+        desc="Invite qualified AYUSH physicians to the Meyveda early access cohort. Help expand our peer-reviewed classical clinical network."
       />
 
       {/* Prototype Boundary & Status Banner */}
@@ -509,7 +509,7 @@ export function ReferralsPage() {
                 Eligibility Criteria for Early Access
               </h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Mey Veda Grantha is a closed professional environment. Early access privileges are
+                Meyveda is a closed professional environment. Early access privileges are
                 reserved exclusively for:
               </p>
               <ul className="space-y-2 text-xs">

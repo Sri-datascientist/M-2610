@@ -10,7 +10,7 @@ export function ModulePlaceholder({ path }: { path: AdminRoute }) {
       <PageHeader title={module.title} subtitle={module.summary} />
       <EmptyState
         title="This module is not available yet"
-        body="The screen is reserved for this Grantha Admin module. No records can be changed here yet."
+        body="The screen is reserved for this Meyveda Admin module. No records can be changed here yet."
       />
     </div>
   );

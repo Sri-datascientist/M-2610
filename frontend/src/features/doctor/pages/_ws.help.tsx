@@ -9,7 +9,7 @@ import { seo } from "@/lib/seo";
 import { apiClient } from "@/services/apiClient";
 
 export const Route = createFileRoute("/_ws/help")({
-  head: () => seo("Help & Support", "FAQs and support requests for the Mey Veda Grantha doctor workspace."),
+  head: () => seo("Help & Support", "FAQs and support requests for the Meyveda doctor workspace."),
   component: Help,
 });
 

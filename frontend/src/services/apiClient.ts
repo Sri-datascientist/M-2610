@@ -1,5 +1,5 @@
 /**
- * Unified API Client for Mey Veda Platform
+ * Unified API Client for Meyveda Platform
  */
 const RAW_BASE = import.meta.env.VITE_API_BASE_URL || "/api/v1";
 

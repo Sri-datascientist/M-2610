@@ -9,7 +9,7 @@ import { useStore } from "@/lib/admin-store";
 export const Route = createFileRoute("/admin/doctors/$doctorSlug")({
   head: () => ({
     meta: [
-      { title: "Doctor verification and management — Meyveda Grantha" },
+      { title: "Doctor verification and management — meyveda" },
       {
         name: "description",
         content: "Review a practitioner profile and verification application.",

@@ -53,7 +53,7 @@ export const DoctorResponsesPage: React.FC = () => {
           <span className="font-bold text-foreground">Practitioner Privacy & Access Policy: </span>
           Only responses explicitly tagged to products manufactured by your organization are shown.
           Direct patient identifiable health records (PHI) and confidential consultation transcripts
-          remain protected under Grantha Clinical Data Privacy policies.
+          remain protected under Meyveda Clinical Data Privacy policies.
         </div>
       </div>
 

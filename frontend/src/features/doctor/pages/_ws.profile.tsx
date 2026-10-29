@@ -576,7 +576,7 @@ export function Profile() {
             </div>
 
             <div className="rounded-xl border bg-surface/60 p-3 text-[11px] text-muted-foreground leading-relaxed">
-              <strong>Security Architecture Note:</strong> Mey Veda Grantha Phase 1 operates in a
+              <strong>Security Architecture Note:</strong> Meyveda Phase 1 operates in a
               client-side demonstration workspace. Remote password synchronization, session tokens,
               multi-factor authentication, and multi-tenant access control require production
               backend identity integration.

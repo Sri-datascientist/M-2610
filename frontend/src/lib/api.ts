@@ -1,5 +1,5 @@
 /**
- * Mey Veda API Client & Authentication Services
+ * Meyveda API Client & Authentication Services
  * Fully typed client communicating with FastAPI backend
  */
 
@@ -199,7 +199,7 @@ export async function apiRequest<T>(
 }
 
 /**
- * Mey Veda Auth API Methods
+ * Meyveda Auth API Methods
  */
 export const authApi = {
   /**

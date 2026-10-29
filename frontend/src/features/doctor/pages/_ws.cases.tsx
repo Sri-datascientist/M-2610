@@ -201,7 +201,7 @@ export function Cases() {
 
   const copyCitation = async (c: ClinicalCase) => {
     const medName = medById(c.medicineId)?.name ?? "Formulation";
-    const text = `${c.contributor}. Case Report: "${c.title}" (${c.id}). Intervention: ${medName}. Mey Veda Grantha Clinical Library (2026). Anonymised ID: ${c.patientCode}.`;
+    const text = `${c.contributor}. Case Report: "${c.title}" (${c.id}). Intervention: ${medName}. Meyveda Clinical Library (2026). Anonymised ID: ${c.patientCode}.`;
     const ok = await copyToClipboard(text);
     if (ok) {
       setCopiedCitation(true);
@@ -989,7 +989,7 @@ function ContributeSheet({
                     Editorial Moderation Notice:
                   </strong>
                   Submissions are reviewed by editorial clinical moderation before appearing in the
-                  shared Grantha case library. Nothing is published automatically.
+                  shared Meyveda case library. Nothing is published automatically.
                 </div>
               </div>
 

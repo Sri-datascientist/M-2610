@@ -4,7 +4,7 @@ import { OverviewPage } from "@/features/manufacturer/OverviewPage";
 export const Route = createFileRoute("/manufacturer/overview")({
   head: () => ({
     meta: [
-      { title: "Manufacturer Overview — Meyveda Grantha" },
+      { title: "Manufacturer Overview — meyveda" },
       { name: "description", content: "Ayurveda manufacturer metrics, formulations and pharmacovigilance." },
     ],
   }),

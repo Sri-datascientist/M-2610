@@ -1,6 +1,6 @@
-# Mey Veda Grantha — Consolidated Frontend Architecture
+# Meyveda — Consolidated Frontend Architecture
 
-Production-ready, consolidated frontend for the **Mey Veda Grantha** integrated Ayurveda healthcare platform.
+Production-ready, consolidated frontend for the **Meyveda** integrated Ayurveda healthcare platform.
 
 This consolidated application unifies the previously separate micro-applications (`admin_P1`, `doctor_landing_P1`, `doctor_P1`, and `manufacturer_P1`) into a single, high-performance Vite + React + TypeScript application with a unified TanStack Router, cohesive Tailwind CSS v4 design system, and explicit role/module boundaries.
 
@@ -13,7 +13,7 @@ The unified frontend maintains clean layout and access boundaries:
 ```text
 frontend/
 ├── public/                      # Static assets, branding graphics, robots.txt, manifest.json
-│   ├── brand/                   # Mey Veda marks and icons
+│   ├── brand/                   # Meyveda marks and icons
 │   ├── images/                  # Public clinic, doctor, and journey photography
 │   ├── favicon.ico
 │   └── robots.txt

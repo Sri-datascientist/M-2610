@@ -812,7 +812,7 @@ const knowledgeCategories = [
     query: "Charaka Samhita · Sutrasthana",
     sampleItem: {
       sanskrit: "चरकसंहिता · सूत्रस्थानम् (Dirghanjivitiya Adhyaya)",
-      botanical: "Mula Grantha (Foundational Clinical Treatise)",
+      botanical: "Foundational Classical Treatise",
       rasapanchaka: {
         rasa: "Siddhanta",
         guna: "Tridosha Siddhanta",
@@ -948,16 +948,16 @@ const corePrinciples = [
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Mey Veda Grantha | Ancient Wisdom. Clearer Evidence. Deeper Discovery." },
+      { title: "Meyveda | Ancient Wisdom. Clearer Evidence. Deeper Discovery." },
       {
         name: "description",
         content:
           "A more connected way to explore classical AYUSH, discover medicines, examine quality evidence, and build your own clinical research library.",
       },
-      { property: "og:title", content: "Mey Veda Grantha | For AYUSH Doctors" },
+      { property: "og:title", content: "Meyveda | For AYUSH Doctors" },
       {
         property: "og:description",
-        content: "Ancient Wisdom. Clearer Evidence. Deeper Discovery. Join Mey Veda Grantha.",
+        content: "Ancient Wisdom. Clearer Evidence. Deeper Discovery. Join Meyveda.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -4652,7 +4652,7 @@ export function MeyvedaDoctorsPage() {
       }
 
       toast.success(
-        `Welcome to Mey Veda Grantha, ${formattedName}! Your practitioner workspace is active.`,
+        `Welcome to Meyveda, ${formattedName}! Your practitioner workspace is active.`,
         { duration: 6000 }
       );
       setRegisterModalOpen(false);
@@ -4684,7 +4684,7 @@ export function MeyvedaDoctorsPage() {
   const [signInPassword, setSignInPassword] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // Grantha Landing Page Interactive Previews
+  // Meyveda Landing Page Interactive Previews
   const [currentAyushIndex, setCurrentAyushIndex] = useState(0);
 
   useEffect(() => {
@@ -5184,7 +5184,7 @@ export function MeyvedaDoctorsPage() {
             </div>
             <div className="lg:col-span-8 xl:col-span-8 lg:border-l lg:border-[#EBE7DF] lg:pl-10 xl:pl-12">
               <p className="text-base sm:text-lg lg:text-[18px] leading-relaxed sm:leading-[1.75] text-[#555555]">
-                Mey Veda Grantha connects authoritative Samhita literature, commercial formulation
+                Meyveda connects authoritative Samhita literature, commercial formulation
                 records, and batch-level testing evidence with your personal research—built
                 specifically for <strong className="font-bold text-[#E65C24]">AYUSH</strong> physicians.
               </p>
@@ -5238,7 +5238,7 @@ export function MeyvedaDoctorsPage() {
 
                   {/* Lower Content Area: Regular-weight, readable secondary description */}
                   <p className="mt-2.5 sm:mt-3 text-[13.5px] sm:text-[14px] lg:text-[13px] xl:text-[14px] font-normal leading-relaxed text-[#555555]">
-                    Trusted Grantha references, practice resources, HRMS tools, and compliance support in one place.
+                    Trusted clinical references, practice resources, HRMS tools, and compliance support in one place.
                   </p>
                 </div>
 
@@ -6098,7 +6098,7 @@ export function MeyvedaDoctorsPage() {
               Doctor Sign In
             </DialogTitle>
             <DialogDescription className="text-xs sm:text-sm text-[#555555] leading-relaxed mt-1">
-              Sign in to your Mey Veda Grantha workspace with your verified credentials.
+              Sign in to your Meyveda workspace with your verified credentials.
             </DialogDescription>
           </DialogHeader>
 

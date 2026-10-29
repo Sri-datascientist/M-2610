@@ -4,7 +4,7 @@ import { QualityWorkspace } from "@/features/admin/quality-page";
 export const Route = createFileRoute("/admin/quality")({
   head: () => ({
     meta: [
-      { title: "Quality & Batches — Meyveda Grantha" },
+      { title: "Quality & Batches — meyveda" },
       { name: "description", content: "Batch holds, releases, and quality alerts." },
     ],
   }),

@@ -248,7 +248,7 @@ export const ManufacturerProvider: React.FC<{ children: React.ReactNode }> = ({ 
               date: today,
               action: "Submitted",
               performedBy: profile.contactPerson,
-              notes: notes || "Submitted to Central Grantha Admin for approval",
+              notes: notes || "Submitted to Central Meyveda Admin for approval",
             },
           ],
         };

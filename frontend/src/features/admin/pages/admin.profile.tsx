@@ -34,10 +34,10 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/admin/profile")({
   head: () => ({
     meta: [
-      { title: "Administrator Profile — Meyveda Grantha" },
+      { title: "Administrator Profile — meyveda" },
       {
         name: "description",
-        content: "The administrator signed in to Meyveda Grantha.",
+        content: "The administrator signed in to meyveda.",
       },
     ],
   }),
@@ -61,12 +61,12 @@ export function ProfilePage() {
       <div>
         <PageHeader
           title="Administrator Profile"
-          subtitle="The account signed in for this Meyveda Grantha session."
+          subtitle="The account signed in for this meyveda session."
         />
         <section className="card-surface px-6 py-12 text-center">
           <h2 className="text-lg font-semibold">No administrator is signed in</h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            Sign in with a Meyveda Grantha administrator account to see this profile.
+            Sign in with a meyveda administrator account to see this profile.
           </p>
         </section>
       </div>
@@ -81,7 +81,7 @@ export function ProfilePage() {
     <div>
       <PageHeader
         title="Administrator Profile"
-        subtitle="The account signed in for this Meyveda Grantha session."
+        subtitle="The account signed in for this meyveda session."
         action={
           <Button type="button" variant="outline" onClick={() => setEditing(true)}>
             Edit Profile

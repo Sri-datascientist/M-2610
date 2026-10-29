@@ -4,7 +4,7 @@ import { ApprovalsQueue } from "@/features/admin/approvals-page";
 export const Route = createFileRoute("/admin/approvals")({
   head: () => ({
     meta: [
-      { title: "Product Approvals — Meyveda Grantha" },
+      { title: "Product Approvals — meyveda" },
       { name: "description", content: "Medicine submissions waiting for a decision." },
     ],
   }),

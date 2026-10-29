@@ -4,7 +4,7 @@ import { ProductManagementPage } from "@/features/manufacturer/ProductManagement
 export const Route = createFileRoute("/manufacturer/products")({
   head: () => ({
     meta: [
-      { title: "Product Management — Meyveda Grantha" },
+      { title: "Product Management — meyveda" },
       { name: "description", content: "Ayurvedic proprietary and classical medicine dossier management." },
     ],
   }),

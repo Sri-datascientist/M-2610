@@ -1,5 +1,5 @@
 /**
- * Centralized API Endpoints for Mey Veda Platform
+ * Centralized API Endpoints for Meyveda Platform
  */
 export const API_ENDPOINTS = {
   auth: {

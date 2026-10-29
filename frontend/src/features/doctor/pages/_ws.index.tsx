@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_ws/")({
   },
   head: () =>
     seo(
-      "Doctor Workspace | Mey Veda Grantha",
+      "Doctor Workspace | Meyveda",
       "Practitioner registration dashboard, unique referral invite link, and early access onboarding.",
     ),
   component: Home,
@@ -137,7 +137,7 @@ export function Home() {
   };
 
   const shareText = encodeURIComponent(
-    `Namaste Doctor, I invite you to join Mey Veda Grantha — verified AYUSH clinical network & research repository. Register with my invite code ${inviteCode}: ${fullInviteUrl}`,
+    `Namaste Doctor, I invite you to join Meyveda — verified AYUSH clinical network & research repository. Register with my invite code ${inviteCode}: ${fullInviteUrl}`,
   );
   const whatsappUrl = `https://api.whatsapp.com/send?text=${shareText}`;
 
@@ -163,7 +163,7 @@ export function Home() {
             </h1>
 
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xl">
-              Welcome to the Mey Veda Grantha early practitioner network. Share your exclusive invite link with fellow <strong className="font-bold text-[#E65C24]">AYUSH</strong> doctors to unlock early access rewards.
+              Welcome to the Meyveda early practitioner network. Share your exclusive invite link with fellow <strong className="font-bold text-[#E65C24]">AYUSH</strong> doctors to unlock early access rewards.
             </p>
           </div>
 

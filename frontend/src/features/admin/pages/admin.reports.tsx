@@ -4,7 +4,7 @@ import { ReportsWorkspace } from "@/features/admin/reports-page";
 export const Route = createFileRoute("/admin/reports")({
   head: () => ({
     meta: [
-      { title: "Reports — Meyveda Grantha" },
+      { title: "Reports — meyveda" },
       { name: "description", content: "Operational reports and exports." },
     ],
   }),

@@ -19,8 +19,8 @@ const ADMIN_SESSION_KEY = "meyveda-admin";
 export const Route = createFileRoute("/login")({
   head: () =>
     seo(
-      "Sign In | Mey Veda Grantha",
-      "Sign in to your Mey Veda Grantha account. Access your Doctor Workspace, Administrator console, or Manufacturer portal.",
+      "Sign In | Meyveda",
+      "Sign in to your Meyveda account. Access your Doctor Workspace, Administrator console, or Manufacturer portal.",
     ),
   component: Login,
 });
@@ -231,7 +231,7 @@ export function Login() {
             <div className="max-w-md w-full mx-auto">
               <div className="mb-6 sm:mb-8">
                 <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230] mb-1">
-                  MEY VEDA GRANTHA · SIGN IN
+                  MEYVEDA · SIGN IN
                 </p>
                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
                   Welcome back
@@ -375,7 +375,7 @@ export function Login() {
 
       {/* Footer Copyright */}
       <footer className="w-full py-4 sm:py-6 text-center text-xs text-[#888888] border-t border-[#EBE7DF] bg-white">
-        <p>© {new Date().getFullYear()} Meyveda Grantha. Built for <strong className="font-bold text-[#E65C24]">AYUSH</strong> physicians.</p>
+        <p>© {new Date().getFullYear()} meyveda. Built for <strong className="font-bold text-[#E65C24]">AYUSH</strong> physicians.</p>
       </footer>
     </main>
   );

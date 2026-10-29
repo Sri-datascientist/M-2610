@@ -311,7 +311,7 @@ export function JournalsPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Add New Journal Record</AlertDialogTitle>
               <AlertDialogDescription>
-                Index a peer-reviewed Ayurveda journal or clinical monograph into the Grantha research archive.
+                Index a peer-reviewed Ayurveda journal or clinical monograph into the Meyveda research archive.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="space-y-3.5 my-4">

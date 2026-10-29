@@ -353,7 +353,7 @@ export function Research() {
   const exportDossierJson = (f: Formulation) => {
     const payload = {
       dossierMetadata: {
-        system: "Mey Veda Grantha Doctor Research Portal (Phase 1)",
+        system: "Meyveda Doctor Research Portal (Phase 1)",
         owner: "Dr. Ananya Kulkarni",
         exportDate: new Date().toISOString(),
         disclaimer:
@@ -376,7 +376,7 @@ export function Research() {
 
   const copyDossierText = async (f: Formulation) => {
     const text = `=====================================================
-MEY VEDA GRANTHA — CONFIDENTIAL RESEARCH DOSSIER
+MEYVEDA — CONFIDENTIAL RESEARCH DOSSIER
 =====================================================
 LOCAL RECORD ID: ${f.localId} (Internal Research Identifier Only)
 FORMULATION NAME: ${f.name}
@@ -1146,7 +1146,7 @@ This dossier is an internal research record and preparation aid. It does not rep
                     <div className="border-b-2 border-primary pb-4 flex flex-wrap items-center justify-between gap-2">
                       <div>
                         <div className="text-xs uppercase tracking-widest font-bold text-primary">
-                          Mey Veda Grantha
+                          Meyveda
                         </div>
                         <h1 className="text-xl font-bold tracking-tight">
                           Confidential Research Dossier

@@ -71,7 +71,7 @@ export function ManufacturerLayout() {
                   Manufacturer Session Required
                 </h2>
                 <p className="mx-auto mt-2 text-sm text-muted-foreground">
-                  You need an active manufacturer session to access the Meyveda Grantha Manufacturer
+                  You need an active manufacturer session to access the meyveda Manufacturer
                   Portal.
                 </p>
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">

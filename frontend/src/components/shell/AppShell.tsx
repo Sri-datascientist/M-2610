@@ -320,7 +320,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </motion.div>
         </main>
         <footer className="border-t border-border px-6 py-3 text-xs text-muted-foreground">
-          Mey Veda Grantha · Official AYUSH Practitioner Clinical Network · Verified Early Access System
+          Meyveda · Official AYUSH Practitioner Clinical Network · Verified Early Access System
         </footer>
       </div>
     </div>

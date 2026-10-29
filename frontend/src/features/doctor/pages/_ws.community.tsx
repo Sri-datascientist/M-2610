@@ -714,7 +714,7 @@ export function CommunityPage() {
                     </a>
                   )}
                   <p className="text-[11px] text-muted-foreground italic border-t border-primary/20 pt-1.5">
-                    Notice: Mey Veda Grantha indexes open-access references and abstracts. Full text
+                    Notice: Meyveda indexes open-access references and abstracts. Full text
                     rights remain with the respective journal publishers.
                   </p>
                 </div>

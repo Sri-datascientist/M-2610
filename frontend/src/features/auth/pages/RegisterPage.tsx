@@ -30,7 +30,7 @@ import { setStoredToken, setStoredUser } from "@/lib/api";
 export const Route = createFileRoute("/register")({
   head: () =>
     seo(
-      "Register as a Verified Doctor | Mey Veda Grantha",
+      "Register as a Verified Doctor | Meyveda",
       "Official registration for AYUSH doctors (BAMS, BSMS, BNYS, BHMS, BUMS). Access classical monographs, clinical pharmacovigilance, and research intelligence.",
     ),
   component: Register,
@@ -481,7 +481,7 @@ export function Register() {
         },
       });
 
-      toast.success(`Welcome to Mey Veda, ${formattedName}!`, {
+      toast.success(`Welcome to Meyveda, ${formattedName}!`, {
         description: "Your verified doctor account has been successfully created.",
         duration: 5000,
       });
@@ -588,7 +588,7 @@ export function Register() {
             <div className="max-w-md w-full mx-auto">
               <div className="mb-6 sm:mb-8">
                 <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230] mb-1">
-                  MEY VEDA GRANTHA · REGISTRATION
+                  MEYVEDA · REGISTRATION
                 </p>
                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
                   Register as a Doctor
@@ -1069,7 +1069,7 @@ export function Register() {
                 <p className="text-xs sm:text-sm text-[#555555]">
                   Already have a doctor account?{" "}
                   <Link to="/login" className="font-bold text-[#E67230] hover:underline">
-                    Sign in to your Mey Veda Workspace
+                    Sign in to your Meyveda Workspace
                   </Link>
                 </p>
               </div>
@@ -1080,7 +1080,7 @@ export function Register() {
 
       {/* Footer Copyright */}
       <footer className="w-full py-4 sm:py-6 text-center text-xs text-[#888888] border-t border-[#EBE7DF] bg-white">
-        <p>© {new Date().getFullYear()} Meyveda Grantha. Built for Ayurveda physicians.</p>
+        <p>© {new Date().getFullYear()} meyveda. Built for Ayurveda physicians.</p>
       </footer>
     </main>
   );

@@ -26,10 +26,10 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
 export const Route = createFileRoute("/admin/notifications")({
   head: () => ({
     meta: [
-      { title: "Notifications — Meyveda Grantha" },
+      { title: "Notifications — meyveda" },
       {
         name: "description",
-        content: "Review items from the Meyveda Grantha admin modules.",
+        content: "Review items from the meyveda admin modules.",
       },
     ],
   }),

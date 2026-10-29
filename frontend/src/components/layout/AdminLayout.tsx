@@ -111,7 +111,7 @@ export function AdminLayout() {
             Administrator Session Required
           </h2>
           <p className="mx-auto mt-2 text-sm text-muted-foreground">
-            You must be authenticated as an authorized Meyveda Grantha platform administrator to access governance, verification, and audit tools.
+            You must be authenticated as an authorized meyveda platform administrator to access governance, verification, and audit tools.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <Link
@@ -156,7 +156,7 @@ export function AdminLayout() {
                               "mb-8 flex items-center px-2 md:max-lg:justify-center md:max-lg:px-0",
                               collapsed && "lg:justify-center lg:px-0",
                             )}
-                            aria-label="Meyveda Grantha Admin"
+                            aria-label="meyveda Admin"
                           >
                             <SidebarLogo className={cn(collapsed && "lg:w-[44px]")} />
                           </Link>
@@ -195,7 +195,7 @@ export function AdminLayout() {
                                 <BrandMark className="[&_img]:h-7" />
                               </Link>
                               <p className="ml-auto hidden text-sm text-muted-foreground sm:block">
-                                {admin?.role ?? "Grantha administration"}
+                                {admin?.role ?? "Meyveda administration"}
                               </p>
                               <div className="relative ml-auto sm:ml-0">
                                 <Link

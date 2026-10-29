@@ -14,7 +14,7 @@ export const Route = createFileRoute("/admin/doctors/")({
   validateSearch: doctorSearch,
   head: () => ({
     meta: [
-      { title: "Doctor verification and management — Meyveda Grantha" },
+      { title: "Doctor verification and management — meyveda" },
       {
         name: "description",
         content: "Review practitioner profiles and verification applications.",

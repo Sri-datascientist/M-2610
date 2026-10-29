@@ -2,7 +2,7 @@
  * Application Runtime Configuration
  */
 export const APP_CONFIG = {
-  name: "Mey Veda Grantha",
+  name: "Meyveda",
   version: "1.0.0",
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL || "/api",
   environment: import.meta.env.VITE_APP_ENV || "development",

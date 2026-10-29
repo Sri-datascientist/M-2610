@@ -468,7 +468,7 @@ export const seedSettings: PlatformSetting[] = [
     label: "Platform name",
     description: "The name shown to administrators in this portal.",
     kind: "text",
-    value: "Meyveda Grantha",
+    value: "meyveda",
     sensitive: false,
   },
   {

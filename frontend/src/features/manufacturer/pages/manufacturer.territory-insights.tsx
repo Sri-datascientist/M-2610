@@ -4,7 +4,7 @@ import { TerritoryInsightsPage } from "@/features/manufacturer/TerritoryInsights
 export const Route = createFileRoute("/manufacturer/territory-insights")({
   head: () => ({
     meta: [
-      { title: "Territory Insights — Meyveda Grantha" },
+      { title: "Territory Insights — meyveda" },
       { name: "description", content: "Ayurvedic doctor prescription density and regional clinical trends." },
     ],
   }),

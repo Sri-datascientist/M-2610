@@ -4,7 +4,7 @@ import { UsersWorkspace } from "@/features/admin/users-page";
 export const Route = createFileRoute("/admin/users")({
   head: () => ({
     meta: [
-      { title: "Users & Permissions — Meyveda Grantha" },
+      { title: "Users & Permissions — meyveda" },
       { name: "description", content: "Administrator accounts and access." },
     ],
   }),

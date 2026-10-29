@@ -31,12 +31,12 @@ function getTimeGreeting(): string {
 export const Route = createFileRoute("/admin/home")({
   head: () => ({
     meta: [
-      { title: "Overview — Meyveda Grantha" },
+      { title: "Overview — meyveda" },
       {
         name: "description",
         content: "Your overview of Ayurveda platform operations and reviews.",
       },
-      { property: "og:title", content: "Overview — Meyveda Grantha" },
+      { property: "og:title", content: "Overview — meyveda" },
       {
         property: "og:description",
         content: "Your overview of Ayurveda platform operations and reviews.",
