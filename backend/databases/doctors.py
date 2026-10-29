@@ -52,7 +52,15 @@ class DoctorProfile(BaseModel):
     email: EmailStr
     medical_license_number: str
     specialty: str
+    qualification: str | None = None
+    pincode: str | None = None
+    phone: str | None = None
+    invite_code: str | None = None
+    referred_by_invite_code: str | None = None
     verification_status: Literal["pending", "approved", "rejected"]
+    admin_notes: str | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class DoctorVerificationStatus(BaseModel):
@@ -66,7 +74,7 @@ class DoctorList(BaseModel):
 
 
 class VerificationDecision(BaseModel):
-    decision: Literal["approved", "rejected"]
+    decision: Literal["approved", "rejected", "pending"]
     notes: str | None = Field(default=None, max_length=2000)
 
 
@@ -78,7 +86,15 @@ def _build_doctor_profile(doctor: Doctor) -> DoctorProfile:
         email=email,
         medical_license_number=doctor.medical_license_number,
         specialty=doctor.specialty,
+        qualification=doctor.qualification or "BAMS",
+        pincode=doctor.pincode,
+        phone=doctor.phone,
+        invite_code=doctor.invite_code,
+        referred_by_invite_code=doctor.referred_by_invite_code,
         verification_status=doctor.verification_status,
+        admin_notes=doctor.admin_notes,
+        created_at=doctor.created_at,
+        updated_at=doctor.updated_at,
     )
 
 
@@ -309,11 +325,12 @@ def get_own_verification_status(
 @router.get(
     "/api/v1/admin/doctors",
     response_model=DoctorList,
-    summary="Admin: List registered doctors with search and pagination",
+    summary="Admin: List registered doctors with search, status filter, and pagination",
 )
 def list_doctors(
-    search: str | None = Query(default=None, description="Search doctor name, email, or license"),
-    limit: int = Query(default=20, ge=1, le=100),
+    search: str | None = Query(default=None, description="Search doctor name, email, license, or pincode"),
+    status: str | None = Query(default=None, description="Filter by status: pending, approved, rejected"),
+    limit: int = Query(default=100, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
     user: UserClaims = Depends(require_role("admin")),
     db: Session = Depends(get_db),
@@ -326,9 +343,26 @@ def list_doctors(
             or_(
                 Doctor.full_name.ilike(search_filter),
                 Doctor.medical_license_number.ilike(search_filter),
+                Doctor.specialty.ilike(search_filter),
+                Doctor.qualification.ilike(search_filter),
+                Doctor.pincode.ilike(search_filter),
+                Doctor.phone.ilike(search_filter),
+                Doctor.invite_code.ilike(search_filter),
                 User.email.ilike(search_filter),
             )
         )
+
+    if status and status.lower() != "all":
+        clean_status = status.lower()
+        if "pending" in clean_status or "review" in clean_status:
+            clean_status = "pending"
+        elif "verif" in clean_status or "approv" in clean_status:
+            clean_status = "approved"
+        elif "reject" in clean_status:
+            clean_status = "rejected"
+        query = query.filter(Doctor.verification_status == clean_status)
+
+    query = query.order_by(Doctor.created_at.desc())
 
     total = query.count()
     doctors = query.offset(offset).limit(limit).all()
@@ -381,9 +415,13 @@ def decide_doctor_verification(
     if payload.notes:
         doctor.admin_notes = payload.notes
 
+    # Resolve actor_id safely
+    actor_user = db.query(User).filter(User.id == user["sub"]).first() if user and "sub" in user else None
+    actor_id = actor_user.id if actor_user else None
+
     # Audit log entry for admin decision
     audit = AuditHistory(
-        actor_id=user["sub"],
+        actor_id=actor_id,
         action="DOCTOR_VERIFICATION_DECISION",
         target_entity="Doctor",
         target_id=doctor.id,
@@ -425,8 +463,11 @@ def update_doctor_as_admin(
     if payload.admin_notes is not None:
         doctor.admin_notes = payload.admin_notes
 
+    actor_user = db.query(User).filter(User.id == user["sub"]).first() if user and "sub" in user else None
+    actor_id = actor_user.id if actor_user else None
+
     audit = AuditHistory(
-        actor_id=user["sub"],
+        actor_id=actor_id,
         action="DOCTOR_ADMIN_UPDATE",
         target_entity="Doctor",
         target_id=doctor.id,

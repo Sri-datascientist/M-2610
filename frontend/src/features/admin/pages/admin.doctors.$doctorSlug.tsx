@@ -21,12 +21,28 @@ export const Route = createFileRoute("/admin/doctors/$doctorSlug")({
 
 export function DoctorProfilePage() {
   const { doctorSlug } = Route.useParams();
-  const { doctors, setChecklist, addDoctorNote, decideDoctor } = useCatalog();
+  const { doctors, isLoadingDoctors, setChecklist, addDoctorNote, decideDoctor } = useCatalog();
   const { can } = useStore();
   const navigate = useNavigate();
   const doctor = findDoctorBySlug(doctors, doctorSlug);
 
   if (!doctor) {
+    if (isLoadingDoctors) {
+      return (
+        <div>
+          <PageHeader
+            title="Doctors"
+            subtitle="Review practitioner profiles and verification applications."
+          />
+          <section className="card-surface px-6 py-12 text-center">
+            <h2 className="text-lg font-semibold">Loading doctor profile...</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+              Retrieving practitioner credentials from database.
+            </p>
+          </section>
+        </div>
+      );
+    }
     return (
       <div>
         <PageHeader

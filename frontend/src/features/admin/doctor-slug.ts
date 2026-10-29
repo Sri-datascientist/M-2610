@@ -59,5 +59,8 @@ export function findDoctorBySlug<T extends DoctorIdentity>(
   slug: string,
 ): T | undefined {
   const slugs = doctorSlugMap(doctors);
-  return doctors.find((doctor) => slugs.get(doctor.id) === slug);
+  const bySlug = doctors.find((doctor) => slugs.get(doctor.id) === slug);
+  if (bySlug) return bySlug;
+  const clean = slug.toLowerCase();
+  return doctors.find((doctor) => doctor.id.toLowerCase() === clean);
 }

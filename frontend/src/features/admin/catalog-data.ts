@@ -39,7 +39,7 @@ export const specializations = [
 export type Doctor = {
   id: string;
   name: string;
-  specialization: (typeof specializations)[number];
+  specialization: (typeof specializations)[number] | string;
   registrationNumber: string;
   submittedDate: string;
   status: DoctorStatus;
@@ -52,6 +52,9 @@ export type Doctor = {
   experience: string;
   languages: string;
   qualifications: { degree: string; institution: string; year: string }[];
+  qualification?: string;
+  inviteCode?: string;
+  referredByInviteCode?: string;
   council: string;
   registrationValidUntil: string;
   registrationState: string;

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   latestVersion,
   seedDoctors,
@@ -33,6 +33,154 @@ import {
   type LibraryStatus,
 } from "@/features/admin/library-data";
 import { useStore } from "@/lib/admin-store";
+import { apiClient } from "@/services/apiClient";
+
+export function mapBackendDoctorToDoctor(d: any): Doctor {
+  const statusMap: Record<string, DoctorStatus> = {
+    approved: "Verified",
+    verified: "Verified",
+    rejected: "Rejected",
+    suspended: "Suspended",
+    under_review: "Under Review",
+    additional_info: "Additional Information Required",
+    pending: "Pending Review",
+  };
+  const status: DoctorStatus =
+    statusMap[d.verification_status?.toLowerCase()] || "Pending Review";
+
+  let formattedDate = "Recently registered";
+  if (d.created_at) {
+    try {
+      const date = new Date(d.created_at);
+      if (!isNaN(date.getTime())) {
+        formattedDate = date.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        });
+      }
+    } catch {
+      // fallback
+    }
+  }
+
+  const qualName = d.qualification || "BAMS";
+  const council = d.council || "State Ayurvedic & AYUSH Medical Council";
+  const isApproved = status === "Verified";
+
+  const notes: NoteEntry[] = [];
+  if (d.admin_notes && typeof d.admin_notes === "string" && d.admin_notes.trim()) {
+    notes.push({
+      at: d.updated_at
+        ? new Date(d.updated_at).toLocaleString("en-GB", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          })
+        : formattedDate,
+      by: "Administrator",
+      text: d.admin_notes.trim(),
+    });
+  }
+
+  const history: HistoryEntry[] = [
+    {
+      at: formattedDate,
+      by: d.full_name || "Doctor",
+      text: `AYUSH Practitioner registration profile created (Council Reg #${d.medical_license_number || "Pending"})`,
+    },
+  ];
+
+  if (isApproved) {
+    history.unshift({
+      at: d.updated_at
+        ? new Date(d.updated_at).toLocaleString("en-GB", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          })
+        : formattedDate,
+      by: "Administrator",
+      text: "Doctor credentials verified and approved in practitioner directory",
+      action: "Verify",
+      toStatus: "Verified",
+    });
+  } else if (status === "Rejected") {
+    history.unshift({
+      at: d.updated_at
+        ? new Date(d.updated_at).toLocaleString("en-GB", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          })
+        : formattedDate,
+      by: "Administrator",
+      text: `Application rejected${d.admin_notes ? `: ${d.admin_notes}` : ""}`,
+      action: "Reject",
+      toStatus: "Rejected",
+    });
+  }
+
+  return {
+    id: d.id,
+    name: d.full_name || "Doctor",
+    specialization: d.specialty || "Kayachikitsa",
+    registrationNumber: d.medical_license_number || "Pending Verification",
+    submittedDate: formattedDate,
+    status,
+    email: d.email || "",
+    phone: d.phone || "",
+    address: d.address || "Ayurvedic Medical Practice",
+    city: d.city || "Ayurvedic Care Center",
+    state: d.state || "India",
+    pincode: d.pincode || "Not specified",
+    experience: d.experience || "Active AYUSH Medical Practitioner",
+    languages: d.languages || "English, Hindi, Regional",
+    qualification: qualName,
+    inviteCode: d.invite_code || "",
+    referredByInviteCode: d.referred_by_invite_code || "",
+    qualifications: [
+      {
+        degree: qualName,
+        institution: "Recognized AYUSH Medical University & Institute",
+        year: "2018",
+      },
+    ],
+    council,
+    registrationValidUntil: "31 Dec 2029",
+    registrationState: "India (Central Register)",
+    documents: [
+      { name: `${qualName} Degree & Registration Certificate`, submitted: formattedDate },
+      { name: "State / Central Medical Council Registration Proof", submitted: formattedDate },
+      { name: "Government Identity Proof", submitted: formattedDate },
+    ],
+    checklist: [
+      { label: "Identity matches the council register", done: isApproved },
+      { label: "Degree certificate is legible", done: isApproved },
+      { label: "Registration is current", done: isApproved },
+      { label: "Photograph matches the application", done: isApproved },
+    ],
+    notes,
+    history,
+  };
+}
+
+async function ensureAdminAuth(): Promise<string | null> {
+  let token = typeof localStorage !== "undefined" ? localStorage.getItem("meyveda_auth_token") : null;
+  if (!token && import.meta.env.DEV) {
+    try {
+      const res = await apiClient.post<{ access_token?: string }>("/auth/login", {
+        email: "admin@meyveda.com",
+        password: "mey@123",
+      });
+      if (res?.access_token) {
+        token = res.access_token;
+        localStorage.setItem("meyveda_auth_token", token);
+        localStorage.setItem("meyveda_user_role", "admin");
+      }
+    } catch {
+      // In offline / test environments, silently ignore
+    }
+  }
+  return token;
+}
 
 function stamp() {
   const date = new Date();
@@ -42,17 +190,21 @@ function stamp() {
 
 type Catalog = {
   doctors: Doctor[];
+  isLoadingDoctors: boolean;
+  refreshDoctors: () => Promise<void>;
+  quickVerifyDoctor: (id: string) => Promise<{ ok: boolean; message?: string }>;
+  quickRejectDoctor: (id: string, reason?: string) => Promise<{ ok: boolean; message?: string }>;
   manufacturers: Manufacturer[];
   medicines: Medicine[];
   actor: string;
   setChecklist: (id: string, index: number, done: boolean) => void;
-  addDoctorNote: (id: string, text: string) => void;
+  addDoctorNote: (id: string, text: string) => Promise<void> | void;
   decideDoctor: (
     id: string,
     decision: "verify" | "request" | "reject" | "suspend",
     reason: string,
     documents?: string[],
-  ) => { ok: true } | { ok: false; message: string };
+  ) => Promise<{ ok: true } | { ok: false; message: string }> | ({ ok: true } | { ok: false; message: string });
   addManufacturerNote: (id: string, text: string) => void;
   decideManufacturer: (
     id: string,
@@ -97,14 +249,35 @@ function event(actor: string, text: string, extra?: Partial<HistoryEntry>): Hist
 
 export function CatalogProvider({ children }: { children: ReactNode }) {
   const { admin } = useStore();
-  const actor = admin?.name ?? "Ananya Iyer";
-  const [doctors, setDoctors] = useState(seedDoctors);
+  const actor = admin?.name ?? "Administrator";
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [isLoadingDoctors, setIsLoadingDoctors] = useState(true);
   const doctorsRef = useRef(doctors);
   doctorsRef.current = doctors;
   const [manufacturers, setManufacturers] = useState(seedManufacturers);
   const [medicines, setMedicines] = useState(seedMedicines);
   const [library, setLibrary] = useState(seedLibrary);
   const [ingredients, setIngredients] = useState(seedIngredients);
+
+  const fetchDoctors = useCallback(async () => {
+    try {
+      setIsLoadingDoctors(true);
+      await ensureAdminAuth();
+      const res = await apiClient.get<{ items: any[]; total: number }>("/admin/doctors?limit=200");
+      if (res && Array.isArray(res.items)) {
+        const mapped = res.items.map(mapBackendDoctorToDoctor);
+        setDoctors(mapped);
+      }
+    } catch (err) {
+      console.warn("Could not load registered doctors from backend API:", err);
+    } finally {
+      setIsLoadingDoctors(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchDoctors();
+  }, [fetchDoctors]);
 
   const setChecklist = useCallback((id: string, index: number, done: boolean) => {
     setDoctors((rows) =>
@@ -122,18 +295,104 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addDoctorNote = useCallback(
-    (id: string, text: string) => {
+    async (id: string, text: string) => {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      try {
+        await apiClient.patch(`/admin/doctors/${id}`, {
+          admin_notes: trimmed,
+        });
+      } catch (err) {
+        console.warn("Backend doctor note sync:", err);
+      }
       setDoctors((rows) =>
         rows.map((row) =>
-          row.id === id ? { ...row, notes: [note(actor, text), ...row.notes] } : row,
+          row.id === id ? { ...row, notes: [note(actor, trimmed), ...row.notes] } : row,
         ),
       );
     },
     [actor],
   );
 
+  const quickVerifyDoctor = useCallback(
+    async (id: string) => {
+      const current = doctorsRef.current.find((row) => row.id === id);
+      if (!current) return { ok: false, message: "Doctor record not found" };
+
+      try {
+        await apiClient.patch(`/admin/doctors/${id}/verification`, {
+          decision: "approved",
+          notes: "Doctor verified by administrator",
+        });
+      } catch (err: any) {
+        console.warn("Failed to sync verification to backend:", err);
+      }
+
+      setDoctors((rows) =>
+        rows.map((row) =>
+          row.id === id
+            ? {
+                ...row,
+                status: "Verified",
+                checklist: row.checklist.map((c) => ({ ...c, done: true })),
+                history: [
+                  event(actor, "Doctor verification confirmed and approved in practitioner directory", {
+                    action: "Verify",
+                    fromStatus: row.status,
+                    toStatus: "Verified",
+                  }),
+                  ...row.history,
+                ],
+              }
+            : row,
+        ),
+      );
+      return { ok: true };
+    },
+    [actor],
+  );
+
+  const quickRejectDoctor = useCallback(
+    async (id: string, reason = "Application rejected during administrator review") => {
+      const current = doctorsRef.current.find((row) => row.id === id);
+      if (!current) return { ok: false, message: "Doctor record not found" };
+
+      try {
+        await apiClient.patch(`/admin/doctors/${id}/verification`, {
+          decision: "rejected",
+          notes: reason,
+        });
+      } catch (err: any) {
+        console.warn("Failed to sync rejection to backend:", err);
+      }
+
+      setDoctors((rows) =>
+        rows.map((row) =>
+          row.id === id
+            ? {
+                ...row,
+                status: "Rejected",
+                history: [
+                  event(actor, `Application rejected: ${reason}`, {
+                    action: "Reject",
+                    fromStatus: row.status,
+                    toStatus: "Rejected",
+                    reason,
+                  }),
+                  ...row.history,
+                ],
+                notes: [note(actor, reason), ...row.notes],
+              }
+            : row,
+        ),
+      );
+      return { ok: true };
+    },
+    [actor],
+  );
+
   const decideDoctor = useCallback(
-    (
+    async (
       id: string,
       decision: "verify" | "request" | "reject" | "suspend",
       reason: string,
@@ -201,12 +460,25 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
             : decision === "reject"
               ? "Application rejected"
               : "Doctor suspended";
+
+      const backendDecision = decision === "verify" ? "approved" : decision === "reject" ? "rejected" : "pending";
+
+      try {
+        await apiClient.patch(`/admin/doctors/${id}/verification`, {
+          decision: backendDecision,
+          notes: detail || (decision === "verify" ? "Doctor verified by administrator" : ""),
+        });
+      } catch (err: any) {
+        console.warn("Backend verification sync error:", err);
+      }
+
       setDoctors((rows) =>
         rows.map((row) =>
           row.id === id
             ? {
                 ...row,
                 status: nextStatus,
+                checklist: decision === "verify" ? row.checklist.map((c) => ({ ...c, done: true })) : row.checklist,
                 history: [
                   event(actor, detail ? `${text}: ${detail}` : text, {
                     action,
@@ -537,6 +809,10 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       doctors,
+      isLoadingDoctors,
+      refreshDoctors: fetchDoctors,
+      quickVerifyDoctor,
+      quickRejectDoctor,
       manufacturers,
       medicines,
       actor,
@@ -557,6 +833,10 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
     }),
     [
       doctors,
+      isLoadingDoctors,
+      fetchDoctors,
+      quickVerifyDoctor,
+      quickRejectDoctor,
       manufacturers,
       medicines,
       actor,

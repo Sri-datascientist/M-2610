@@ -1,5 +1,6 @@
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { NoPermission } from "@/components/admin/ui";
 import { focusRing, PageHeader } from "@/components/portal/brand";
 import {
@@ -43,14 +44,13 @@ type DoctorDecision = "verify" | "request" | "reject" | "suspend";
 const doctorsRoute = getRouteApi("/admin/doctors");
 
 export function DoctorsDirectory() {
-  const { doctors } = useCatalog();
+  const { doctors, isLoadingDoctors, quickVerifyDoctor, quickRejectDoctor } = useCatalog();
   const { status: requestedStatus } = (doctorsRoute.useSearch() ?? {}) as { status?: DoctorStatus | undefined };
   const updateSearch = doctorsRoute.useNavigate();
   const navigate = useNavigate();
   const slugs = useMemo(() => doctorSlugMap(doctors), [doctors]);
   const openDoctor = (doctor: Doctor) => {
-    const doctorSlug = slugs.get(doctor.id);
-    if (!doctorSlug) return;
+    const doctorSlug = slugs.get(doctor.id) || doctor.id;
     void navigate({ to: "/admin/doctors/$doctorSlug", params: { doctorSlug } });
   };
   const status: DoctorStatus | "all" = requestedStatus ?? "all";
@@ -69,7 +69,7 @@ export function DoctorsDirectory() {
   const rows = useMemo(() => {
     const needle = query.trim().toLowerCase();
     return doctors.filter((doctor) => {
-      const haystack = `${doctor.name} ${doctor.registrationNumber} ${doctor.city} ${doctor.state} ${doctor.pincode}`.toLowerCase();
+      const haystack = `${doctor.name} ${doctor.email} ${doctor.phone || ""} ${doctor.qualification || ""} ${doctor.inviteCode || ""} ${doctor.registrationNumber} ${doctor.city} ${doctor.state} ${doctor.pincode}`.toLowerCase();
       if (needle && !haystack.includes(needle)) return false;
       if (status !== "all" && doctor.status !== status) return false;
       if (specialization !== "all" && doctor.specialization !== specialization) return false;
@@ -81,42 +81,113 @@ export function DoctorsDirectory() {
 
   const columns: Column<Doctor>[] = [
     {
-      header: "Doctor",
+      header: "Doctor & Contact",
       cell: (row) => (
-        <Link
-          to="/admin/doctors/$doctorSlug"
-          params={{ doctorSlug: slugs.get(row.id) ?? row.id }}
-          className="font-semibold hover:text-primary"
-          onClick={(event) => event.stopPropagation()}
-        >
-          {row.name}
-        </Link>
-      ),
-    },
-    { header: "Specialization", cell: (row) => row.specialization },
-    { header: "Registration", cell: (row) => row.registrationNumber },
-    {
-      header: "Location",
-      cell: (row) => (
-        <span className="text-sm text-muted-foreground">
-          {row.city}, {row.state} ({row.pincode})
-        </span>
-      ),
-    },
-    { header: "Submitted Date", cell: (row) => row.submittedDate },
-    { header: "Status", cell: (row) => <ReviewBadge status={doctorStatusLabel(row.status)} /> },
-    {
-      header: "Actions",
-      cell: (row) => (
-        <Button asChild size="sm" variant="outline">
+        <div className="flex flex-col">
           <Link
             to="/admin/doctors/$doctorSlug"
             params={{ doctorSlug: slugs.get(row.id) ?? row.id }}
+            className="font-semibold text-foreground hover:text-primary transition-colors"
             onClick={(event) => event.stopPropagation()}
           >
-            Review
+            {row.name}
           </Link>
-        </Button>
+          <span className="text-xs text-muted-foreground">{row.email}</span>
+          {row.phone && (
+            <span className="text-[11px] text-muted-foreground font-mono">{row.phone}</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      header: "AYUSH Qualification",
+      cell: (row) => (
+        <div className="flex flex-col gap-1 items-start">
+          <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400 border border-amber-500/20">
+            {row.qualification || "BAMS"}
+          </span>
+          <span className="text-xs text-muted-foreground">{row.specialization}</span>
+        </div>
+      ),
+    },
+    {
+      header: "Council Reg No.",
+      cell: (row) => (
+        <div className="flex flex-col">
+          <span className="font-mono text-xs font-bold text-foreground bg-muted/70 px-2 py-0.5 rounded border border-border inline-block w-fit">
+            {row.registrationNumber}
+          </span>
+        </div>
+      ),
+    },
+    {
+      header: "Location (PIN)",
+      cell: (row) => (
+        <div className="text-sm">
+          <span className="font-medium text-foreground">{row.pincode ? `PIN: ${row.pincode}` : "—"}</span>
+          <span className="block text-xs text-muted-foreground">
+            {row.city || row.state}
+          </span>
+        </div>
+      ),
+    },
+    {
+      header: "Invite Code",
+      cell: (row) =>
+        row.inviteCode ? (
+          <span className="font-mono text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
+            {row.inviteCode}
+          </span>
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
+        ),
+    },
+    {
+      header: "Submitted",
+      cell: (row) => <span className="text-xs text-muted-foreground whitespace-nowrap">{row.submittedDate}</span>,
+    },
+    {
+      header: "Status",
+      cell: (row) => <ReviewBadge status={doctorStatusLabel(row.status)} />,
+    },
+    {
+      header: "Verification Actions",
+      cell: (row) => (
+        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+          <Button asChild size="sm" variant="outline" className="h-8 text-xs font-medium">
+            <Link
+              to="/admin/doctors/$doctorSlug"
+              params={{ doctorSlug: slugs.get(row.id) ?? row.id }}
+            >
+              Review
+            </Link>
+          </Button>
+          {row.status !== "Verified" && (
+            <Button
+              size="sm"
+              className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium shadow-none"
+              onClick={async () => {
+                await quickVerifyDoctor(row.id);
+                toast.success(`Verified ${row.name}`);
+              }}
+            >
+              Verify
+            </Button>
+          )}
+          {row.status !== "Rejected" && (
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-8 text-destructive hover:bg-destructive/10 text-xs font-medium"
+              onClick={async () => {
+                await quickRejectDoctor(row.id, "Rejected during administrative review");
+                toast.error(`Rejected ${row.name}`);
+              }}
+            >
+              Reject
+            </Button>
+          )}
+        </div>
       ),
     },
   ];
@@ -125,12 +196,18 @@ export function DoctorsDirectory() {
     <div>
       <PageHeader
         title="Doctor verification and management"
-        subtitle="Review practitioner profiles and verification applications."
+        subtitle="Review real practitioner profiles and manage verification status."
       />
       <SummaryRow
         items={[
           {
-            label: doctorStatusLabel("Pending Review"),
+            label: "All Doctors",
+            value: doctors.length,
+            pressed: status === "all",
+            onClick: () => setStatus("all"),
+          },
+          {
+            label: "Pending Verification",
             value: count("Pending Review"),
             pressed: status === "Pending Review",
             onClick: () =>
@@ -149,6 +226,12 @@ export function DoctorsDirectory() {
             pressed: status === "Verified",
             onClick: () => setStatus((current) => (current === "Verified" ? "all" : "Verified")),
           },
+          {
+            label: "Rejected",
+            value: count("Rejected"),
+            pressed: status === "Rejected",
+            onClick: () => setStatus((current) => (current === "Rejected" ? "all" : "Rejected")),
+          },
         ]}
       />
       <section className="card-surface">
@@ -158,7 +241,7 @@ export function DoctorsDirectory() {
               label="Search"
               value={query}
               onChange={setQuery}
-              placeholder="Doctor name or registration number"
+              placeholder="Search by doctor name, license number, email, phone, PIN, or invite code"
             />
           </div>
           <SelectField
@@ -180,13 +263,23 @@ export function DoctorsDirectory() {
             ]}
           />
         </div>
-        <DataTable
-          key={`${query}|${status}|${specialization}`}
-          rows={rows}
-          columns={columns}
-          onRowClick={openDoctor}
-          pageSize={6}
-        />
+        {isLoadingDoctors && doctors.length === 0 ? (
+          <div className="p-8 text-center text-sm text-muted-foreground">
+            Loading practitioner database records...
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="p-8 text-center text-sm text-muted-foreground">
+            No registered doctors match the selected search or filters.
+          </div>
+        ) : (
+          <DataTable
+            key={`${query}|${status}|${specialization}`}
+            rows={rows}
+            columns={columns}
+            onRowClick={openDoctor}
+            pageSize={10}
+          />
+        )}
       </section>
     </div>
   );
@@ -204,12 +297,12 @@ export function DoctorDetail({
   enabled: boolean;
   onBack: () => void;
   onChecklist: (index: number, done: boolean) => void;
-  onNote: (text: string) => void;
+  onNote: (text: string) => Promise<void> | void;
   onDecide: (
     decision: DoctorDecision,
     reason: string,
     documents?: string[],
-  ) => { ok: true } | { ok: false; message: string };
+  ) => Promise<{ ok: true } | { ok: false; message: string }> | ({ ok: true } | { ok: false; message: string });
 }) {
   const [tab, setTab] = useState<"Overview" | "Credentials" | "Documents" | "Review History">(
     "Overview",
@@ -224,12 +317,46 @@ export function DoctorDetail({
       <BackButton onClick={onBack} label="Back to doctors" />
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="type-record">{doctor.name}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="type-record">{doctor.name}</h2>
+            {doctor.qualification && (
+              <span className="rounded-md bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                {doctor.qualification}
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            {doctor.specialization} · {doctor.registrationNumber}
+            {doctor.specialization} · Reg #{doctor.registrationNumber} · {doctor.email}
           </p>
         </div>
-        <ReviewBadge status={doctorStatusLabel(doctor.status)} />
+        <div className="flex items-center gap-2">
+          <ReviewBadge status={doctorStatusLabel(doctor.status)} />
+          {enabled && !closed && doctor.status !== "Verified" && (
+            <Button
+              size="sm"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium"
+              onClick={async () => {
+                await Promise.resolve(onDecide("verify", "Doctor credentials verified by Administrator"));
+                toast.success(`Verified ${doctor.name}`);
+              }}
+            >
+              Verify & Approve
+            </Button>
+          )}
+          {enabled && !closed && doctor.status !== "Rejected" && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-destructive border-destructive/30 hover:bg-destructive/10 font-medium"
+              onClick={async () => {
+                await Promise.resolve(onDecide("reject", "Application rejected by Administrator"));
+                toast.error(`Rejected ${doctor.name}`);
+              }}
+            >
+              Reject
+            </Button>
+          )}
+        </div>
       </div>
       <div className="mt-4">
         {closed ? (
@@ -251,30 +378,51 @@ export function DoctorDetail({
       <div className="mt-4 space-y-4">
         {tab === "Overview" ? (
           <>
-            <DetailSection title="Professional profile">
+            <DetailSection title="Practitioner Information">
               <MetaList
                 rows={[
-                  { label: "Email", value: doctor.email },
-                  { label: "Phone", value: doctor.phone },
-                  { label: "Address", value: doctor.address || "Not specified" },
-                  { label: "City", value: doctor.city },
-                  { label: "State", value: doctor.state },
-                  { label: "PIN Code", value: doctor.pincode },
+                  { label: "Full Name", value: doctor.name },
+                  { label: "Email Address", value: doctor.email },
+                  { label: "Mobile / Phone", value: doctor.phone || "Not provided" },
+                  { label: "AYUSH Qualification", value: doctor.qualification || "BAMS" },
+                  { label: "Specialization", value: doctor.specialization },
+                  { label: "Council Registration No.", value: doctor.registrationNumber },
+                  { label: "PIN Code", value: doctor.pincode || "Not specified" },
+                  { label: "Practitioner Invite Code", value: doctor.inviteCode || "None generated" },
+                  { label: "Referred By Invite Code", value: doctor.referredByInviteCode || "Direct registration" },
+                  { label: "Registration Date", value: doctor.submittedDate },
+                  { label: "Practice Address", value: doctor.address || "Ayurvedic Medical Practice" },
+                  { label: "City & State", value: `${doctor.city}, ${doctor.state}` },
                   { label: "Experience", value: doctor.experience },
                   { label: "Languages", value: doctor.languages },
                 ]}
               />
             </DetailSection>
             <DetailSection title="Verification checklist">
+              <div className="mb-3 flex justify-between items-center">
+                <span className="text-xs text-muted-foreground">Verify practitioner credentials against medical registers</span>
+                {enabled && !closed && (
+                  <button
+                    type="button"
+                    className="text-xs text-primary font-medium hover:underline"
+                    onClick={() => {
+                      doctor.checklist.forEach((_, idx) => onChecklist(idx, true));
+                    }}
+                  >
+                    Mark all checked
+                  </button>
+                )}
+              </div>
               <ul className="space-y-2">
                 {doctor.checklist.map((item, index) => (
                   <li key={item.label}>
-                    <label className="flex items-center gap-2 text-sm">
+                    <label className="flex items-center gap-2 text-sm cursor-pointer">
                       <input
                         type="checkbox"
                         checked={item.done}
                         disabled={!enabled || closed}
                         onChange={() => onChecklist(index, !item.done)}
+                        className="rounded border-input text-primary focus:ring-primary/20"
                       />
                       {item.label}
                     </label>
@@ -373,7 +521,7 @@ function DoctorReviewActions({
     decision: DoctorDecision,
     reason: string,
     documents?: string[],
-  ) => { ok: true } | { ok: false; message: string };
+  ) => Promise<{ ok: true } | { ok: false; message: string }> | { ok: true } | { ok: false; message: string };
 }) {
   const [choice, setChoice] = useState<DoctorDecision | null>(null);
   const [detail, setDetail] = useState("");
@@ -392,7 +540,7 @@ function DoctorReviewActions({
     setBusy(false);
   };
 
-  const submit = () => {
+  const submit = async () => {
     if (!choice || busyRef.current) return;
     if (choice === "verify" && missingChecks.length > 0) {
       setDetailError("Complete every verification check before confirming verification.");
@@ -408,23 +556,30 @@ function DoctorReviewActions({
     }
     busyRef.current = true;
     setBusy(true);
-    const result = onDecide(choice, detail.trim(), choice === "request" ? requestedDocs : []);
-    busyRef.current = false;
-    setBusy(false);
-    if (!result.ok) {
-      setDetailError(result.message);
-      return;
+    try {
+      const result = await Promise.resolve(
+        onDecide(choice, detail.trim(), choice === "request" ? requestedDocs : [])
+      );
+      if (!result.ok) {
+        setDetailError(result.message);
+        return;
+      }
+      recorded(
+        choice === "verify"
+          ? "Verification confirmed"
+          : choice === "request"
+            ? "Additional information request saved"
+            : choice === "reject"
+              ? "Rejection recorded"
+              : "Suspension recorded",
+      );
+      close();
+    } catch (err: any) {
+      setDetailError(err.message || "An error occurred while saving decision");
+    } finally {
+      busyRef.current = false;
+      setBusy(false);
     }
-    recorded(
-      choice === "verify"
-        ? "Verification confirmed"
-        : choice === "request"
-          ? "Additional information request saved"
-          : choice === "reject"
-            ? "Rejection recorded"
-            : "Suspension recorded",
-    );
-    close();
   };
 
   if (!enabled) return <NoPermission />;
