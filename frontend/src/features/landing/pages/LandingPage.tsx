@@ -5141,7 +5141,7 @@ export function MeyvedaDoctorsPage() {
             <p className="mt-2 max-w-[460px] text-xs sm:text-sm leading-relaxed text-[#555555]">
               Bring trusted <strong className="font-bold text-[#E65C24]">AYUSH</strong> knowledge, clinical insights, and smarter practice management
               together in one place. Discover a more connected way to strengthen your practice and
-              deepen your knowledge.
+              deepen your knowledge with community grow the confidence.
             </p>
 
             {/* Action Buttons: Explore Doctor Dashboard CTA */}
@@ -5363,17 +5363,6 @@ export function MeyvedaDoctorsPage() {
                 >
                   <span>Register as a Doctor</span>
                 </button>
-                <a
-                  className="group inline-flex items-center gap-2 rounded-md border border-[#EBE7DF] bg-white px-6 py-3.5 text-sm font-bold text-[#111111] transition-all hover:border-[#E67230]/40 hover:bg-[#FAF9F6]"
-                  href="#find-medicines"
-                  onClick={(e) => handleNavClick(e, "#find-medicines")}
-                >
-                  <span>Explore Capabilities</span>
-                  <ArrowRight
-                    aria-hidden="true"
-                    className="size-4 text-[#E67230] transition-transform duration-200 group-hover:translate-x-1"
-                  />
-                </a>
               </div>
             </div>
           </div>
