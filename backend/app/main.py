@@ -17,6 +17,7 @@ from databases.referrals import router as referrals_router
 from databases.research_submissions import router as research_submissions_router
 from app.routers.auth import router as auth_router
 from app.api.v1.pincode import router as pincode_router
+from app.routers.territory import router as territory_router
 
 from app.config import settings
 from databases.session import check_db_connection
@@ -49,6 +50,8 @@ app.add_middleware(
 # Core Routers
 app.include_router(pincode_router, prefix="/api/v1/pincode")
 app.include_router(pincode_router, prefix="/api/pincode")
+app.include_router(territory_router, prefix="/api/v1/territory")
+app.include_router(territory_router, prefix="/api/territory")
 app.include_router(auth_router, prefix="/api/v1/auth")
 app.include_router(auth_router, prefix="/api/auth")
 app.include_router(adr_reports_router)
