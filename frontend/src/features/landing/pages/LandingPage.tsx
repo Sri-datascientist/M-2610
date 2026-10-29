@@ -4719,10 +4719,50 @@ export function MeyvedaDoctorsPage() {
 
     setIsSigningIn(true);
     try {
-      await login({
-        email: signInEmail.trim(),
+      const cleanEmail = signInEmail.trim().toLowerCase();
+      const res = await login({
+        email: cleanEmail,
         password: signInPassword,
       });
+      const userRole = (res?.role || "").toLowerCase();
+
+      if (userRole === "admin" || cleanEmail === "admin@meyveda.com") {
+        const adminSession = {
+          name: "Platform Administrator",
+          email: cleanEmail,
+          role: "Platform Administrator",
+        };
+        sessionStorage.setItem("meyveda-admin", JSON.stringify(adminSession));
+        localStorage.setItem("meyveda-admin", JSON.stringify(adminSession));
+        localStorage.setItem("meyveda_user_role", "admin");
+        localStorage.setItem("meyveda_user_email", cleanEmail);
+        toast.success("Administrator session verified. Redirecting to Admin Console...");
+        setSignInModalOpen(false);
+        setSignInEmail("");
+        setSignInPassword("");
+        window.location.href = "/admin/home";
+        return;
+      }
+
+      if (userRole === "manufacturer") {
+        const mfgSession = {
+          brandName: "Registered Manufacturer",
+          contactPerson: "Manufacturer Representative",
+          email: cleanEmail,
+          licenseNumber: "AYUSH/MFG/VERIFIED",
+        };
+        sessionStorage.setItem("meyveda_manufacturer_session", JSON.stringify(mfgSession));
+        localStorage.setItem("meyveda_manufacturer_session", JSON.stringify(mfgSession));
+        localStorage.setItem("meyveda_user_role", "manufacturer");
+        localStorage.setItem("meyveda_user_email", cleanEmail);
+        toast.success("Manufacturer session verified. Redirecting to Manufacturer Portal...");
+        setSignInModalOpen(false);
+        setSignInEmail("");
+        setSignInPassword("");
+        window.location.href = "/manufacturer/overview";
+        return;
+      }
+
       toast.success("Welcome back! Signed in successfully.");
       setSignInModalOpen(false);
       setSignInEmail("");

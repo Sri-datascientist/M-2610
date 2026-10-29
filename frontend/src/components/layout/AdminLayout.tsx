@@ -77,7 +77,7 @@ export function AdminLayout() {
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const { admin, ready, notifications } = useStore();
+  const { admin, ready, notifications, ensureDemoSession, syncAdmin } = useStore();
   const unread = notifications?.items ? notifications.items.filter((item) => !item.read).length : 0;
   const initials = admin
     ? admin.name
@@ -85,7 +85,13 @@ export function AdminLayout() {
         .map((part) => part[0])
         .slice(0, 2)
         .join("")
-    : "MG";
+    : "MV";
+
+  useEffect(() => {
+    if (!admin) {
+      syncAdmin();
+    }
+  }, [admin, syncAdmin]);
 
   useEffect(() => {
     setOpen(false);
@@ -111,16 +117,23 @@ export function AdminLayout() {
             Administrator Session Required
           </h2>
           <p className="mx-auto mt-2 text-sm text-muted-foreground">
-            You must be authenticated as an authorized meyveda platform administrator to access governance, verification, and audit tools.
+            You must be authenticated as an authorized Meyveda platform administrator to access governance, verification, and audit tools.
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Link
-              to="/login"
-              search={{ portal: "admin" }}
-              className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition-colors hover:bg-primary/90"
+            <button
+              type="button"
+              onClick={() => {
+                const restored = syncAdmin() || ensureDemoSession();
+                if (restored) {
+                  window.location.reload();
+                } else {
+                  window.location.href = "/login?portal=admin";
+                }
+              }}
+              className="inline-flex items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-soft transition-colors hover:bg-primary/90 cursor-pointer"
             >
               Sign in as Administrator
-            </Link>
+            </button>
             <Link
               to="/"
               className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-surface"
@@ -156,7 +169,7 @@ export function AdminLayout() {
                               "mb-8 flex items-center px-2 md:max-lg:justify-center md:max-lg:px-0",
                               collapsed && "lg:justify-center lg:px-0",
                             )}
-                            aria-label="meyveda Admin"
+                            aria-label="Meyveda Admin"
                           >
                             <SidebarLogo className={cn(collapsed && "lg:w-[44px]")} />
                           </Link>

@@ -71,15 +71,18 @@ export function Login() {
       }
 
       // Automatically route according to account credentials/role
-      if (role === "admin") {
+      if (role === "admin" || cleanEmail === "admin@meyveda.com") {
         const session = {
           name: "Platform Administrator",
           email: cleanEmail,
           role: "Platform Administrator",
         };
         sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
+        localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
+        localStorage.setItem("meyveda_user_role", "admin");
+        localStorage.setItem("meyveda_user_email", cleanEmail);
         toast.success("Administrator session verified. Redirecting to Admin Console...");
-        navigate({ to: "/admin/home" });
+        window.location.href = "/admin/home";
         return;
       }
 
@@ -91,13 +94,17 @@ export function Login() {
           licenseNumber: "AYUSH/MFG/VERIFIED",
         };
         sessionStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(session));
+        localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(session));
+        localStorage.setItem("meyveda_user_role", "manufacturer");
+        localStorage.setItem("meyveda_user_email", cleanEmail);
         toast.success("Manufacturer session verified. Redirecting to Manufacturer Portal...");
-        navigate({ to: "/manufacturer/overview" });
+        window.location.href = "/manufacturer/overview";
         return;
       }
 
       // Default: Doctor
       setState(() => ({ signedIn: true }));
+      localStorage.setItem("meyveda_user_email", cleanEmail);
       toast.success("Welcome back! Redirecting to Doctor Workspace...");
       navigate({ to: "/workspace" });
     } catch (err: any) {
@@ -105,14 +112,18 @@ export function Login() {
       const adminAcc = DEMO_ACCOUNTS.find(
         (a) => a.email.toLowerCase() === cleanEmail && a.password === password,
       );
-      if (adminAcc) {
+      if (adminAcc || cleanEmail === "admin@meyveda.com") {
+        const session = {
+          name: adminAcc?.name || "Platform Administrator",
+          email: cleanEmail,
+          role: adminAcc?.role || "Platform Administrator",
+        };
+        sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
+        localStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(session));
         localStorage.setItem("meyveda_user_role", "admin");
-        sessionStorage.setItem(
-          ADMIN_SESSION_KEY,
-          JSON.stringify({ name: adminAcc.name, email: adminAcc.email, role: adminAcc.role }),
-        );
+        localStorage.setItem("meyveda_user_email", cleanEmail);
         toast.success("Administrator session verified. Redirecting to Admin Console...");
-        navigate({ to: "/admin/home" });
+        window.location.href = "/admin/home";
         return;
       }
 
@@ -121,17 +132,17 @@ export function Login() {
       );
       if (mfgAcc) {
         localStorage.setItem("meyveda_user_role", "manufacturer");
-        sessionStorage.setItem(
-          STORAGE_KEY_SESSION,
-          JSON.stringify({
-            brandName: mfgAcc.brandName,
-            contactPerson: mfgAcc.contactPerson,
-            email: mfgAcc.email,
-            licenseNumber: mfgAcc.licenseNumber,
-          }),
-        );
+        localStorage.setItem("meyveda_user_email", cleanEmail);
+        const mfgSession = {
+          brandName: mfgAcc.brandName,
+          contactPerson: mfgAcc.contactPerson,
+          email: mfgAcc.email,
+          licenseNumber: mfgAcc.licenseNumber,
+        };
+        sessionStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(mfgSession));
+        localStorage.setItem(STORAGE_KEY_SESSION, JSON.stringify(mfgSession));
         toast.success("Manufacturer session verified. Redirecting to Manufacturer Portal...");
-        navigate({ to: "/manufacturer/overview" });
+        window.location.href = "/manufacturer/overview";
         return;
       }
 

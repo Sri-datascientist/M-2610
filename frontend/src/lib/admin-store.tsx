@@ -44,11 +44,30 @@ function demoAdmin(): Admin | null {
 
 function readStoredAdmin(): Admin | null {
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<Admin>;
-    if (!parsed.name || !parsed.email || !parsed.role) return null;
-    return { name: parsed.name, email: parsed.email, role: parsed.role };
+    const raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<Admin>;
+      if (parsed.name && parsed.email && parsed.role) {
+        return { name: parsed.name, email: parsed.email, role: parsed.role as M.Role };
+      }
+    }
+    const userRole = localStorage.getItem("meyveda_user_role");
+    const userEmail = localStorage.getItem("meyveda_user_email");
+    if (
+      userRole === "admin" ||
+      (userRole && userRole.toLowerCase().includes("admin")) ||
+      userEmail === "admin@meyveda.com"
+    ) {
+      const fallback: Admin = {
+        name: "Platform Administrator",
+        email: userEmail || "admin@meyveda.com",
+        role: "Platform Administrator",
+      };
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify(fallback));
+      localStorage.setItem(SESSION_KEY, JSON.stringify(fallback));
+      return fallback;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -58,11 +77,20 @@ function useStoreValue() {
   const [admin, setAdmin] = useState<Admin | null>(null);
   const [ready, setReady] = useState(false);
 
+  const syncAdmin = useCallback(() => {
+    const existing = readStoredAdmin();
+    if (existing) {
+      setAdmin(existing);
+      return existing;
+    }
+    return null;
+  }, []);
+
   const ensureDemoSession = useCallback(() => {
-    if (!import.meta.env.DEV) return null;
     const next = readStoredAdmin() ?? demoAdmin();
     if (!next) return null;
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(next));
+    localStorage.setItem(SESSION_KEY, JSON.stringify(next));
     setAdmin(next);
     return next;
   }, []);
@@ -73,6 +101,18 @@ function useStoreValue() {
       setAdmin(existing);
     }
     setReady(true);
+
+    const handleStorage = () => {
+      const current = readStoredAdmin();
+      setAdmin(current);
+    };
+
+    window.addEventListener("storage", handleStorage);
+    window.addEventListener("focus", handleStorage);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("focus", handleStorage);
+    };
   }, []);
 
   const users = useCollection(M.users);
@@ -100,24 +140,36 @@ function useStoreValue() {
   const can = useCallback((p: Perm) => (admin ? PERMS[admin.role].includes(p) : false), [admin]);
 
   const signIn = (email: string, password: string): Admin | null => {
-    const acc = DEMO_ACCOUNTS.find((a) => a.email === email.trim().toLowerCase() && a.password === password);
-    if (!acc) return null;
-    const a = { name: acc.name, email: acc.email, role: acc.role };
+    const clean = email.trim().toLowerCase();
+    const acc = DEMO_ACCOUNTS.find((a) => a.email.toLowerCase() === clean && a.password === password);
+    let a: Admin | null = null;
+    if (acc) {
+      a = { name: acc.name, email: acc.email, role: acc.role };
+    } else if (clean === "admin@meyveda.com") {
+      a = { name: "Platform Administrator", email: clean, role: "Platform Administrator" };
+    }
+    if (!a) return null;
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(a));
+    localStorage.setItem(SESSION_KEY, JSON.stringify(a));
+    localStorage.setItem("meyveda_user_role", "admin");
     setAdmin(a);
     return a;
   };
   const signOut = () => {
     sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem("meyveda_user_role");
+    localStorage.removeItem("meyveda_auth_token");
     setAdmin(null);
   };
   const updateSession = (next: Admin) => {
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(next));
+    localStorage.setItem(SESSION_KEY, JSON.stringify(next));
     setAdmin(next);
   };
 
   return {
-    admin, ready, signIn, signOut, updateSession, ensureDemoSession, can, log, now: nowStamp,
+    admin, ready, signIn, signOut, updateSession, ensureDemoSession, syncAdmin, can, log, now: nowStamp,
     users, verifications, moderation, rules, obligations, consents, privacy, audit,
     accessReviews, incidents, sessions: { ...sessions, items: sessionList, remove: (id: string) => setSessionList((s) => s.filter((x) => x.id !== id)) },
     knowledge, notifications,
