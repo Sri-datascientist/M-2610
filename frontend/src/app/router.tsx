@@ -390,6 +390,13 @@ export const adminCasesRoute = createRoute({
 export const adminDoctorsRoute = createRoute({
   getParentRoute: () => adminLayoutRoute,
   path: "/doctors",
+  validateSearch: (search: Record<string, unknown>) => {
+    const status = search["status"];
+    if (typeof status === "string") {
+      return { status };
+    }
+    return {};
+  },
   component: AdminDoctorsSection,
 });
 

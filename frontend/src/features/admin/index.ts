@@ -3,6 +3,8 @@ export { ApprovalsPage } from "./pages/admin.approvals";
 export { CasesQueue } from "./cases-page";
 export { CasesPage } from "./pages/admin.cases";
 export { DoctorProfilePage } from "./pages/admin.doctors.$doctorSlug";
+export { DoctorsDirectory } from "./doctors-page";
+export { DoctorsDirectory as DoctorsPage } from "./doctors-page";
 export { DoctorsSection } from "./pages/admin.doctors";
 export { FeedbackPage } from "./feedback-page";
 export { HomePage } from "./pages/admin.home";

@@ -1,4 +1,4 @@
-import { Link, getRouteApi, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { NoPermission } from "@/components/admin/ui";
@@ -41,25 +41,33 @@ import { cn } from "@/lib/utils";
 
 type DoctorDecision = "verify" | "request" | "reject" | "suspend";
 
-const doctorsRoute = getRouteApi("/admin/doctors");
-
 export function DoctorsDirectory() {
   const { doctors, isLoadingDoctors, quickVerifyDoctor, quickRejectDoctor } = useCatalog();
-  const { status: requestedStatus } = (doctorsRoute.useSearch() ?? {}) as { status?: DoctorStatus | undefined };
-  const updateSearch = doctorsRoute.useNavigate();
+  const search = useSearch({ strict: false }) as { status?: DoctorStatus | undefined } | undefined;
   const navigate = useNavigate();
   const slugs = useMemo(() => doctorSlugMap(doctors), [doctors]);
   const openDoctor = (doctor: Doctor) => {
     const doctorSlug = slugs.get(doctor.id) || doctor.id;
     void navigate({ to: "/admin/doctors/$doctorSlug", params: { doctorSlug } });
   };
-  const status: DoctorStatus | "all" = requestedStatus ?? "all";
+  const [internalStatus, setInternalStatus] = useState<DoctorStatus | "all">(
+    search?.status && (doctorStatuses as readonly string[]).includes(search.status)
+      ? search.status
+      : "all",
+  );
+  const status: DoctorStatus | "all" =
+    search?.status && (doctorStatuses as readonly string[]).includes(search.status)
+      ? search.status
+      : internalStatus;
+
   const setStatus = (
     next: DoctorStatus | "all" | ((current: DoctorStatus | "all") => DoctorStatus | "all"),
   ) => {
     const value = typeof next === "function" ? next(status) : next;
-    void (updateSearch as any)({
-      search: value === "all" ? {} : { status: value },
+    setInternalStatus(value);
+    void navigate({
+      to: "/admin/doctors",
+      search: (value === "all" ? {} : { status: value }) as any,
       replace: true,
     });
   };

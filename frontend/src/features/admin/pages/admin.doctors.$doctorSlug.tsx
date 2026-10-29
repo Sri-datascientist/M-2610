@@ -1,4 +1,4 @@
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate, useParams } from "@tanstack/react-router";
 import { PageHeader } from "@/components/portal/brand";
 import { Button } from "@/components/ui/button";
 import { findDoctorBySlug } from "@/features/admin/doctor-slug";
@@ -9,7 +9,7 @@ import { useStore } from "@/lib/admin-store";
 export const Route = createFileRoute("/admin/doctors/$doctorSlug")({
   head: () => ({
     meta: [
-      { title: "Doctor verification and management — meyveda" },
+      { title: "Doctor verification and management — Meyveda" },
       {
         name: "description",
         content: "Review a practitioner profile and verification application.",
@@ -20,7 +20,8 @@ export const Route = createFileRoute("/admin/doctors/$doctorSlug")({
 });
 
 export function DoctorProfilePage() {
-  const { doctorSlug } = Route.useParams();
+  const params = useParams({ strict: false }) as { doctorSlug?: string };
+  const doctorSlug = params?.doctorSlug || "";
   const { doctors, isLoadingDoctors, setChecklist, addDoctorNote, decideDoctor } = useCatalog();
   const { can } = useStore();
   const navigate = useNavigate();
