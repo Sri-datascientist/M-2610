@@ -331,7 +331,7 @@ export function ReferralsPage() {
       <PageHeader
         eyebrow="Practitioner Network"
         title="Referrals & Early Access"
-        desc="Invite qualified Ayurvedic physicians to the Mey Veda Grantha early access cohort. Help expand our peer-reviewed classical clinical network."
+        desc="Invite qualified AYUSH physicians to the Mey Veda Grantha early access cohort. Help expand our peer-reviewed classical clinical network."
       />
 
       {/* Prototype Boundary & Status Banner */}
@@ -569,7 +569,7 @@ export function ReferralsPage() {
             <div className="border-b pb-4 space-y-1">
               <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <UserPlus className="h-5 w-5 text-primary" />
-                Nominate an Ayurvedic Colleague for Early Access
+                Nominate an AYUSH Colleague for Early Access
               </h2>
               <p className="text-xs text-muted-foreground leading-relaxed">
                 Submit your colleague's professional details to issue a peer early access
@@ -702,7 +702,7 @@ export function ReferralsPage() {
                     className="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary"
                   />
                   <span>
-                    I confirm that the nominee is a bona fide registered Ayurvedic practitioner
+                    I confirm that the nominee is a bona fide registered AYUSH practitioner
                     holding valid qualifications from an accredited institution.
                   </span>
                 </label>

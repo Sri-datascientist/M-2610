@@ -286,14 +286,14 @@ const journeyStages = [
   {
     number: "03",
     label: "Decide",
-    subtitle: "Ayurveda assessment & clinical judgement",
+    subtitle: "AYUSH assessment & clinical judgement",
     title: "Bring assessment and clinical judgement together.",
     description:
-      "Record the Ayurveda clinical assessment and organise the information you need to make informed decisions for the case.",
+      "Record the AYUSH clinical assessment and organise the information you need to make informed decisions for the case.",
     image: stage3Image,
-    clinicalBadge: "Ayurveda Assessment & Clinical Judgement",
+    clinicalBadge: "AYUSH Assessment & Clinical Judgement",
     highlights: [
-      "Ayurveda clinical assessment",
+      "AYUSH clinical assessment",
       "Diagnosis coding",
       "Practitioner-led clinical decisions",
     ],
@@ -350,7 +350,7 @@ const workspaceFeatures = [
   },
   {
     number: "03",
-    title: "Ayurveda Assessment",
+    title: "AYUSH Assessment",
     description: "Capture the observations and assessments that shape your clinical thinking.",
     icon: ClipboardCheck,
   },
@@ -370,7 +370,7 @@ const workspaceFeatures = [
     number: "06",
     title: "Clinical Knowledge",
     description:
-      "Search across Ayurveda literature, formulations, concepts, therapies and research.",
+      "Search across AYUSH literature, formulations, concepts, therapies and research.",
     icon: BookOpen,
   },
 ];
@@ -827,7 +827,7 @@ const knowledgeCategories = [
   },
   {
     id: "concepts",
-    label: "Ayurvedic Concepts",
+    label: "AYUSH Concepts",
     subtitle: "Nidana, Agni, Srotas & Dhatu",
     icon: Layers2,
     query: "Agni Dushti & Ama Samprapti",
@@ -919,7 +919,7 @@ const corePrinciples = [
     num: "01",
     tag: "CLINICAL",
     title: "Built around your clinical workflow",
-    desc: "Designed around the authentic rhythm of an Ayurvedic consultation, preserving your clinical intuition and diagnostic autonomy.",
+    desc: "Designed around the authentic rhythm of an AYUSH consultation, preserving your clinical intuition and diagnostic autonomy.",
   },
   {
     num: "02",
@@ -952,9 +952,9 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "A more connected way to explore classical Ayurveda, discover medicines, examine quality evidence, and build your own clinical research library.",
+          "A more connected way to explore classical AYUSH, discover medicines, examine quality evidence, and build your own clinical research library.",
       },
-      { property: "og:title", content: "Mey Veda Grantha | For Ayurveda Doctors" },
+      { property: "og:title", content: "Mey Veda Grantha | For AYUSH Doctors" },
       {
         property: "og:description",
         content: "Ancient Wisdom. Clearer Evidence. Deeper Discovery. Join Mey Veda Grantha.",
@@ -1472,7 +1472,7 @@ export function WorkspaceOverviewPage({
             <div className="flex items-center justify-between font-bold text-[#111111]">
               <span className="flex items-center gap-1.5 text-xs text-[#111111]">
                 <FilePenLine className="size-3.5 text-[#DE6D05]" />
-                Rx: Classical Ayurvedic Treatment Protocol
+                Rx: Classical <strong className="font-bold text-[#E65C24]">AYUSH</strong> Treatment Protocol
               </span>
               <button
                 type="button"
@@ -2051,7 +2051,7 @@ export function WorkspacePrescriptionsPage() {
             </h4>
           </div>
           <p className="mt-0.5 text-xs text-[#6B6B6B]">
-            Classical Ayurvedic formulation registry, dose & anupana titration, and Pathya/Apathya
+            Classical <strong className="font-bold text-[#E65C24]">AYUSH</strong> formulation registry, dose & anupana titration, and Pathya/Apathya
             regimens
           </p>
         </div>
@@ -2373,7 +2373,7 @@ export function WorkspaceGuruShishyaPage() {
             </h4>
           </div>
           <p className="mt-0.5 text-xs text-[#6B6B6B]">
-            Supervised case discussions, senior Vaidya clinical oversight, and traditional Ayurvedic
+            Supervised case discussions, senior Vaidya clinical oversight, and traditional <strong className="font-bold text-[#E65C24]">AYUSH</strong>
             lineage learning
           </p>
         </div>
@@ -3728,7 +3728,7 @@ const MANAGED_SERVICES_DATA: ManagedServiceNode[] = [
     number: "01",
     title: "Physical Co-working Clinics",
     description:
-      "Grow your practice in shared physical clinics without building every facility from scratch. Access turnkey consultation suites and collaborative clinical environments designed for modern Ayurvedic medicine.",
+      "Grow your practice in shared physical clinics without building every facility from scratch. Access turnkey consultation suites and collaborative clinical environments designed for modern AYUSH medicine.",
     gradient: "linear-gradient(135deg, #F98F4B 0%, #E67230 50%, #C95618 100%)",
     glow: "0 12px 32px -4px rgba(230, 114, 48, 0.45)",
     border: "#E67230",
@@ -5073,7 +5073,7 @@ export function MeyvedaDoctorsPage() {
           <div className="meyveda-enter max-w-[540px] lg:max-w-[490px] xl:max-w-[520px]">
             {/* Section Eyebrow */}
             <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#E67230] sm:text-xs">
-              Dear AYUSH Practitioners,
+              Dear <strong className="font-bold text-[#E65C24]">AYUSH</strong> Practitioners,
             </p>
 
             {/* Headline — Refined editorial display font contrasting tastefully with body typography */}
@@ -5125,7 +5125,7 @@ export function MeyvedaDoctorsPage() {
 
             {/* Supporting paragraph text */}
             <p className="mt-2 max-w-[460px] text-xs sm:text-sm leading-relaxed text-[#555555]">
-              Bring trusted Ayurvedic knowledge, clinical insights, and smarter practice management
+              Bring trusted <strong className="font-bold text-[#E65C24]">AYUSH</strong> knowledge, clinical insights, and smarter practice management
               together in one place. Discover a more connected way to strengthen your practice,
               deepen your knowledge, and grow with confidence.
             </p>
@@ -5169,7 +5169,7 @@ export function MeyvedaDoctorsPage() {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-12 items-start">
             <div className="lg:col-span-4 xl:col-span-4">
               <p className="mb-2.5 text-xs font-bold uppercase tracking-wider text-[#E67230]">
-                Ayurveda Medical Intelligence
+                <strong className="font-bold text-[#E65C24]">AYUSH</strong> Medical Intelligence
               </p>
               <h2
                 id="practice-connected-title"
@@ -5186,7 +5186,7 @@ export function MeyvedaDoctorsPage() {
               <p className="text-base sm:text-lg lg:text-[18px] leading-relaxed sm:leading-[1.75] text-[#555555]">
                 Mey Veda Grantha connects authoritative Samhita literature, commercial formulation
                 records, and batch-level testing evidence with your personal research—built
-                specifically for Ayurveda physicians.
+                specifically for <strong className="font-bold text-[#E65C24]">AYUSH</strong> physicians.
               </p>
 
               {/* 3 Distinctive Doctor Value Cards: Balanced row on desktop, equal widths/heights, generous text room */}
@@ -5420,7 +5420,7 @@ export function MeyvedaDoctorsPage() {
 
             {/* Supporting paragraph */}
             <p className="mx-auto mt-5 max-w-2xl text-base sm:text-lg lg:text-[19px] leading-relaxed sm:leading-[1.75] text-[#555555]">
-              Connect with a growing community of Ayurveda and AYUSH practitioners who value classical knowledge, thoughtful clinical practice, and continuous learning. Exchange perspectives, share experiences, learn from peers, and grow together as a professional community.
+              Connect with a growing community of <strong className="font-bold text-[#E65C24]">AYUSH</strong> practitioners who value classical knowledge, thoughtful clinical practice, and continuous learning. Exchange perspectives, share experiences, learn from peers, and grow together as a professional community.
             </p>
 
             {/* Action Button: Single Primary WhatsApp CTA */}
@@ -5704,7 +5704,7 @@ export function MeyvedaDoctorsPage() {
               <MeyvedaLogo compact />
             </div>
             <DialogTitle className="text-xl sm:text-2xl font-extrabold text-[#111111]">
-              Register as an Ayurveda Doctor
+              Register as an <strong className="font-bold text-[#E65C24]">AYUSH</strong> Doctor
             </DialogTitle>
             <DialogDescription className="text-xs sm:text-sm text-[#555555] leading-relaxed mt-1">
               Join fellow AYUSH practitioners. Access classical literature, commercial medicine

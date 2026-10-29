@@ -209,7 +209,7 @@ export function Login() {
                   directions="/mascots/meyveda-doctor-directions.webp"
                   reactions="/mascots/meyveda-doctor-reactions.webp"
                   size={160}
-                  label="Meyveda Ayurveda Doctor Mascot"
+                  label="Meyveda AYUSH Doctor Mascot"
                   className="select-none"
                 />
               </div>
@@ -375,7 +375,7 @@ export function Login() {
 
       {/* Footer Copyright */}
       <footer className="w-full py-4 sm:py-6 text-center text-xs text-[#888888] border-t border-[#EBE7DF] bg-white">
-        <p>© {new Date().getFullYear()} Meyveda Grantha. Built for Ayurveda physicians.</p>
+        <p>© {new Date().getFullYear()} Meyveda Grantha. Built for <strong className="font-bold text-[#E65C24]">AYUSH</strong> physicians.</p>
       </footer>
     </main>
   );

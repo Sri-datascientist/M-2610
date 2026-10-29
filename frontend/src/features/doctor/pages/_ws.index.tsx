@@ -163,7 +163,7 @@ export function Home() {
             </h1>
 
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xl">
-              Welcome to the Mey Veda Grantha early practitioner network. Share your exclusive invite link with fellow AYUSH doctors to unlock early access rewards.
+              Welcome to the Mey Veda Grantha early practitioner network. Share your exclusive invite link with fellow <strong className="font-bold text-[#E65C24]">AYUSH</strong> doctors to unlock early access rewards.
             </p>
           </div>
 
@@ -192,7 +192,7 @@ export function Home() {
               Your Unique Referral Invite Link
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              Invite AYUSH doctors (BAMS, BSMS, BNYS, BHMS, BUMS). Once they complete registration with your unique code, your referral reward is recorded.
+              Invite <strong className="font-bold text-[#E65C24]">AYUSH</strong> doctors (BAMS, BSMS, BNYS, BHMS, BUMS). Once they complete registration with your unique code, your referral reward is recorded.
             </p>
           </div>
 
