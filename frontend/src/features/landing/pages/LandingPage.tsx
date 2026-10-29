@@ -5126,8 +5126,8 @@ export function MeyvedaDoctorsPage() {
             {/* Supporting paragraph text */}
             <p className="mt-2 max-w-[460px] text-xs sm:text-sm leading-relaxed text-[#555555]">
               Bring trusted <strong className="font-bold text-[#E65C24]">AYUSH</strong> knowledge, clinical insights, and smarter practice management
-              together in one place. Discover a more connected way to strengthen your practice,
-              deepen your knowledge, and grow with confidence.
+              together in one place. Discover a more connected way to strengthen your practice and
+              deepen your knowledge.
             </p>
 
             {/* Action Buttons: Explore Doctor Dashboard CTA */}
@@ -5146,11 +5146,6 @@ export function MeyvedaDoctorsPage() {
                 Explore Doctor Dashboard
               </RegisterPrimaryButton>
             </div>
-
-            {/* Understated Supporting Line */}
-            <p className="mt-3 text-xs font-semibold tracking-wide text-[#6B6B6B]/90">
-              Classical references · Medicine intelligence · Personal research
-            </p>
           </div>
         </div>
       </section>
