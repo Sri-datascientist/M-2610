@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   CheckCircle2,
@@ -15,11 +15,12 @@ import {
   EyeOff,
   Clock,
   AlertCircle,
-  FileCheck2,
   Gift,
+  ArrowRight,
+  ArrowLeft,
 } from "lucide-react";
-import { AuthLayout } from "@/components/AuthLayout";
-import { Btn, Field, inputCls } from "@/components/ui-kit";
+import meyvedaLogo from "@/assets/meyvedalogo.png";
+import { Mascot } from "@/components/ui/mascot";
 import { setState } from "@/lib/store";
 import { seo } from "@/lib/seo";
 import { cn } from "@/lib/utils";
@@ -35,44 +36,13 @@ export const Route = createFileRoute("/register")({
   component: Register,
 });
 
-/* -------------------------------------------------------------------------- */
-/*             RECOGNIZED AYUSH MEDICAL QUALIFICATIONS (NCISM / NCH)          */
-/* -------------------------------------------------------------------------- */
-
 export const AYUSH_QUALIFICATIONS = [
-  {
-    code: "BAMS",
-    title: "BAMS",
-    label: "BAMS — Bachelor of Ayurvedic Medicine and Surgery",
-    system: "Ayurveda",
-  },
-  {
-    code: "BSMS",
-    title: "BSMS",
-    label: "BSMS — Bachelor of Siddha Medicine and Surgery",
-    system: "Siddha",
-  },
-  {
-    code: "BNYS",
-    title: "BNYS",
-    label: "BNYS — Bachelor of Naturopathy and Yogic Sciences",
-    system: "Naturopathy & Yoga",
-  },
-  {
-    code: "BHMS",
-    title: "BHMS",
-    label: "BHMS — Bachelor of Homeopathic Medicine and Surgery",
-    system: "Homoeopathy",
-  },
-  {
-    code: "BUMS",
-    title: "BUMS",
-    label: "BUMS — Bachelor of Unani Medicine and Surgery",
-    system: "Unani",
-  },
+  { code: "BAMS", label: "BAMS — Ayurveda" },
+  { code: "BSMS", label: "BSMS — Siddha" },
+  { code: "BNYS", label: "BNYS — Naturopathy & Yoga" },
+  { code: "BHMS", label: "BHMS — Homoeopathy" },
+  { code: "BUMS", label: "BUMS — Unani" },
 ] as const;
-
-export type AyushQualificationCode = (typeof AYUSH_QUALIFICATIONS)[number]["code"];
 
 export function Register() {
   const navigate = useNavigate();
@@ -80,16 +50,19 @@ export function Register() {
   // 1. Full Name
   const [fullName, setFullName] = useState("");
 
-  // 2. Qualification (Strictly: BAMS, BSMS, BNYS, BHMS, BUMS)
-  const [qualification, setQualification] = useState<AyushQualificationCode>("BAMS");
+  // 2. Qualification
+  const [qualification, setQualification] = useState("BAMS");
 
-  // 3. Pincode
+  // 3. City
+  const [city, setCity] = useState("");
+
+  // 4. PIN Code
   const [pincode, setPincode] = useState("");
 
-  // 4. Doctor Registration Number
+  // 5. Doctor Registration Number
   const [doctorRegNumber, setDoctorRegNumber] = useState("");
 
-  // 5. Email + OTP Verification
+  // 6. Email + OTP Verification
   const [email, setEmail] = useState("");
   const [emailOtpSent, setEmailOtpSent] = useState(false);
   const [emailOtpInput, setEmailOtpInput] = useState("");
@@ -98,9 +71,8 @@ export function Register() {
   const [emailVerifying, setEmailVerifying] = useState(false);
   const [emailCooldown, setEmailCooldown] = useState(0);
   const [emailToken, setEmailToken] = useState<string | null>(null);
-  const [emailDemoOtp, setEmailDemoOtp] = useState<string | null>(null);
 
-  // 6. Mobile + OTP Verification
+  // 7. Mobile + OTP Verification
   const [mobile, setMobile] = useState("");
   const [mobileOtpSent, setMobileOtpSent] = useState(false);
   const [mobileOtpInput, setMobileOtpInput] = useState("");
@@ -109,18 +81,14 @@ export function Register() {
   const [mobileVerifying, setMobileVerifying] = useState(false);
   const [mobileCooldown, setMobileCooldown] = useState(0);
   const [mobileToken, setMobileToken] = useState<string | null>(null);
-  const [mobileDemoOtp, setMobileDemoOtp] = useState<string | null>(null);
 
-  // 7. Password
+  // 8. Password
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // 8. Practitioner Statutory Declaration & Ethics Agreement
-  const [declaration, setDeclaration] = useState(false);
-
-  // 9. Invite / Referral Code (Verified with Backend)
+  // 9. Invite / Referral Code
   const [inviteCode, setInviteCode] = useState(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -138,7 +106,7 @@ export function Register() {
 
   // Submission & Form State
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Cooldown timers
   useEffect(() => {
@@ -157,16 +125,22 @@ export function Register() {
     return () => clearInterval(interval);
   }, [mobileCooldown]);
 
+  // Auto-validate invite code if passed via URL parameter
+  useEffect(() => {
+    if (inviteCode && inviteCode.length === 5) {
+      handleValidateInvite(inviteCode);
+    }
+  }, []);
+
   /* ------------------------------------------------------------------------ */
   /*                         EMAIL OTP HANDLERS                               */
   /* ------------------------------------------------------------------------ */
   const handleSendEmailOtp = async () => {
-    const trimmedEmail = email.trim().toLowerCase();
-    if (!trimmedEmail || !trimmedEmail.includes("@") || !trimmedEmail.includes(".")) {
-      setErrors((prev) => ({ ...prev, email: "Please enter a valid practitioner email address." }));
+    if (!email.includes("@")) {
+      setErrorMessage("Please enter a valid email address.");
       return;
     }
-    setErrors((prev) => ({ ...prev, email: "" }));
+    setErrorMessage(null);
     setEmailSending(true);
 
     try {
@@ -177,23 +151,18 @@ export function Register() {
         demo_otp?: string | null;
         expires_in?: number;
       }>("/auth/send-email-otp", {
-        email: trimmedEmail,
+        email: email.trim().toLowerCase(),
       });
 
       setEmailOtpSent(true);
       setEmailCooldown(60);
-      if (res.demo_otp) {
-        setEmailDemoOtp(res.demo_otp);
-      } else {
-        setEmailDemoOtp(null);
-      }
-
-      toast.success(res.message || `Verification code sent to ${trimmedEmail}`, {
-        description: "Valid for 5 minutes. Check your inbox and spam folder.",
+      toast.success(res.message || `Verification code sent to ${email}`, {
+        description: "Valid for 5 minutes. Please check your inbox and spam folder.",
       });
     } catch (err: any) {
-      const msg = err?.message || "Failed to send email verification code.";
+      const msg = err?.message || "Failed to dispatch email verification code.";
       toast.error(msg);
+      setErrorMessage(msg);
       const match = msg.match(/wait (\d+) seconds/i);
       if (match && match[1]) {
         setEmailCooldown(parseInt(match[1], 10));
@@ -228,7 +197,7 @@ export function Register() {
         if (res.verification_token) {
           setEmailToken(res.verification_token);
         }
-        setErrors((prev) => ({ ...prev, email: "" }));
+        setErrorMessage(null);
         toast.success("Email address verified successfully!");
       } else {
         toast.error(res.message || "Invalid verification code.");
@@ -246,11 +215,11 @@ export function Register() {
   const handleSendMobileOtp = async () => {
     const cleaned = mobile.replace(/\D/g, "");
     if (cleaned.length < 10) {
-      setErrors((prev) => ({ ...prev, mobile: "Please enter a valid 10-digit Indian mobile number." }));
+      setErrorMessage("Please enter a valid 10-digit Indian mobile number.");
       return;
     }
     const finalMobile = cleaned.slice(-10);
-    setErrors((prev) => ({ ...prev, mobile: "" }));
+    setErrorMessage(null);
     setMobileSending(true);
 
     try {
@@ -266,18 +235,13 @@ export function Register() {
 
       setMobileOtpSent(true);
       setMobileCooldown(60);
-      if (res.demo_otp) {
-        setMobileDemoOtp(res.demo_otp);
-      } else {
-        setMobileDemoOtp(null);
-      }
-
       toast.success(res.message || `SMS verification code sent to +91 ${finalMobile}`, {
         description: "Valid for 5 minutes.",
       });
     } catch (err: any) {
       const msg = err?.message || "Failed to dispatch SMS verification code.";
       toast.error(msg);
+      setErrorMessage(msg);
       const match = msg.match(/wait (\d+) seconds/i);
       if (match && match[1]) {
         setMobileCooldown(parseInt(match[1], 10));
@@ -313,7 +277,7 @@ export function Register() {
         if (res.verification_token) {
           setMobileToken(res.verification_token);
         }
-        setErrors((prev) => ({ ...prev, mobile: "" }));
+        setErrorMessage(null);
         toast.success("Mobile phone verified successfully!");
       } else {
         toast.error(res.message || "Invalid SMS verification code.");
@@ -381,73 +345,70 @@ export function Register() {
     }
   };
 
-  // Auto-validate invite code if passed via URL parameter (?ref=... or ?invite=...)
-  useEffect(() => {
-    if (inviteCode && inviteCode.length === 5) {
-      handleValidateInvite(inviteCode);
-    }
-  }, []);
-
   /* ------------------------------------------------------------------------ */
   /*                     SUBMIT DOCTOR REGISTRATION                           */
   /* ------------------------------------------------------------------------ */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: Record<string, string> = {};
+    setErrorMessage(null);
 
     const cleanName = fullName.trim();
     if (!cleanName || cleanName.length < 3) {
-      newErrors.fullName = "Doctor Full Name is required (minimum 3 characters).";
+      setErrorMessage("Doctor Full Name is required (minimum 3 characters).");
+      return;
     }
 
     if (!qualification) {
-      newErrors.qualification = "Please select your AYUSH medical degree (BAMS, BSMS, BNYS, BHMS, BUMS).";
+      setErrorMessage("Please select your AYUSH medical degree (BAMS, BSMS, BNYS, BHMS, BUMS).");
+      return;
     }
 
     const cleanPin = pincode.trim();
     if (!cleanPin || !/^[1-9][0-9]{5}$/.test(cleanPin)) {
-      newErrors.pincode = "Please enter a valid 6-digit Indian PIN code.";
+      setErrorMessage("Please enter a valid 6-digit Indian PIN code.");
+      return;
     }
 
     const cleanReg = doctorRegNumber.trim();
     if (!cleanReg) {
-      newErrors.doctorRegNumber = "Doctor Registration Number is required (e.g. State Council / NCISM).";
+      setErrorMessage("Doctor Registration Number is required (e.g. State Council / NCISM).");
+      return;
     }
 
     if (!emailVerified) {
-      newErrors.email = "Please verify your Email Address using the OTP code.";
+      setErrorMessage("Please verify your Email Address using the OTP code.");
+      return;
     }
 
+    const cleanedMobile = mobile.replace(/\D/g, "").slice(-10);
     if (!mobileVerified) {
-      newErrors.mobile = "Please verify your Mobile Number using the SMS code.";
+      setErrorMessage("Please verify your Mobile Number using the SMS code.");
+      return;
     }
 
     if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters long.";
+      setErrorMessage("Password must be at least 6 characters long.");
+      return;
     }
 
     if (password !== confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match.";
-    }
-
-    if (!declaration) {
-      newErrors.declaration = "You must accept the statutory AYUSH practitioner declaration to register.";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      const firstError = Object.values(newErrors)[0];
-      toast.error(firstError);
+      setErrorMessage("Passwords do not match.");
       return;
     }
 
     setIsSubmitting(true);
 
     const formattedName = cleanName.startsWith("Dr.") ? cleanName : `Dr. ${cleanName}`;
-    const cleanedMobile = mobile.replace(/\D/g, "").slice(-10);
-
-    const selectedQualObj = AYUSH_QUALIFICATIONS.find((q) => q.code === qualification);
-    const systemName = selectedQualObj?.system || "Ayurveda";
+    const systemName =
+      qualification === "BSMS"
+        ? "Siddha"
+        : qualification === "BNYS"
+          ? "Naturopathy & Yoga"
+          : qualification === "BHMS"
+            ? "Homoeopathy"
+            : qualification === "BUMS"
+              ? "Unani"
+              : "Ayurveda";
 
     try {
       const regResponse = await apiClient.post<{
@@ -475,13 +436,12 @@ export function Register() {
         invite_code: inviteCode.trim().toUpperCase() || undefined,
       });
 
-      // Save token in storage
       if (regResponse?.access_token) {
         localStorage.setItem("meyveda_auth_token", regResponse.access_token);
+        localStorage.setItem("meyveda_user_role", "doctor");
         setStoredToken(regResponse.access_token);
       }
 
-      // Save user session in state
       setState((s) => ({
         signedIn: true,
         doctor: {
@@ -507,7 +467,6 @@ export function Register() {
         },
       }));
 
-      // Cache user object
       setStoredUser({
         id: regResponse.id,
         email: regResponse.email,
@@ -529,552 +488,600 @@ export function Register() {
 
       navigate({ to: "/workspace" });
     } catch (err: any) {
-      toast.error(err?.message || "Registration failed. Please check your credentials and retry.");
+      const msg = err?.message || "Registration failed. Please check your credentials and retry.";
+      setErrorMessage(msg);
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const isFormReady =
-    fullName.trim().length >= 3 &&
-    Boolean(qualification) &&
-    /^[1-9][0-9]{5}$/.test(pincode.trim()) &&
-    doctorRegNumber.trim().length > 0 &&
-    emailVerified &&
-    mobileVerified &&
-    password.length >= 6 &&
-    password === confirmPassword &&
-    declaration &&
-    !isSubmitting;
-
   return (
-    <AuthLayout
-      title="Register as a doctor"
-      desc="Create your verified AYUSH medical practitioner account. Connect to classical monographs, clinical intelligence, and pharmacovigilance."
-    >
-      <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
-        {/* 1. FULL NAME */}
-        <Field
-          label="Full Name *"
-          hint="Official name as recorded in your Medical Council Registration"
-          error={errors.fullName}
-        >
-          <div className="relative">
-            <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="text"
-              required
-              className={cn(inputCls, "pl-9 text-sm")}
-              placeholder=""
-              value={fullName}
-              onChange={(e) => {
-                setFullName(e.target.value);
-                if (errors.fullName) setErrors((prev) => ({ ...prev, fullName: "" }));
-              }}
-            />
-          </div>
-        </Field>
-
-        {/* 2. QUALIFICATION (Strictly: BAMS, BSMS, BNYS, BHMS, BUMS) */}
-        <Field
-          label="Qualification * (AYUSH Medical Degree)"
-          hint="Select your primary degree recognized under NCISM / NCH"
-          error={errors.qualification}
-        >
-          <div className="space-y-2">
-            <div className="relative">
-              <GraduationCap className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <select
-                required
-                className={cn(inputCls, "pl-9 bg-card cursor-pointer text-sm font-medium")}
-                value={qualification}
-                onChange={(e) => {
-                  setQualification(e.target.value as AyushQualificationCode);
-                  if (errors.qualification) setErrors((prev) => ({ ...prev, qualification: "" }));
-                }}
-              >
-                {AYUSH_QUALIFICATIONS.map((q) => (
-                  <option key={q.code} value={q.code}>
-                    {q.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Quick-Select Qualification Badges */}
-            <div className="flex flex-wrap gap-1.5 pt-0.5">
-              {AYUSH_QUALIFICATIONS.map((q) => {
-                const isSelected = qualification === q.code;
-                return (
-                  <button
-                    key={q.code}
-                    type="button"
-                    onClick={() => {
-                      setQualification(q.code);
-                      if (errors.qualification) setErrors((prev) => ({ ...prev, qualification: "" }));
-                    }}
-                    className={cn(
-                      "rounded-lg border px-3 py-1.5 text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5",
-                      isSelected
-                        ? "border-primary bg-primary text-primary-foreground shadow-xs"
-                        : "border-border bg-card text-muted-foreground hover:border-primary/50 hover:text-foreground",
-                    )}
-                  >
-                    <span>{q.code}</span>
-                    <span className={cn("text-[10px] font-normal opacity-80", isSelected ? "text-primary-foreground" : "text-muted-foreground")}>
-                      ({q.system})
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </Field>
-
-        {/* 3. PINCODE & 4. DOCTOR REGISTRATION NUMBER */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Field
-            label="PIN Code *"
-            hint="6-digit Indian postal code"
-            error={errors.pincode}
+    <main className="min-h-screen w-full bg-[#FAF9F6] text-[#111111] flex flex-col justify-between selection:bg-[#E67230]/20 selection:text-[#111111]">
+      {/* Top Bar / Simple Navigation */}
+      <header className="w-full border-b border-[#EBE7DF] bg-white/80 backdrop-blur-md sticky top-0 z-40">
+        <div className="mx-auto flex h-16 sm:h-20 max-w-[1320px] items-center justify-between px-5 sm:px-8 lg:px-12">
+          <Link
+            to="/doctor"
+            className="inline-flex items-center gap-2 group transition-opacity hover:opacity-90"
+            aria-label="Back to Meyveda Home"
           >
-            <div className="relative">
-              <MapPin className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                required
-                maxLength={6}
-                pattern="[0-9]{6}"
-                inputMode="numeric"
-                className={cn(inputCls, "pl-9 font-mono tracking-wider text-sm")}
-                placeholder=""
-                value={pincode}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, "").slice(0, 6);
-                  setPincode(val);
-                  if (errors.pincode) setErrors((prev) => ({ ...prev, pincode: "" }));
-                }}
-              />
-            </div>
-          </Field>
-
-          <Field
-            label="Doctor Registration Number *"
-            hint="NCISM / State Council Reg No."
-            error={errors.doctorRegNumber}
-          >
-            <div className="relative">
-              <ShieldCheck className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                required
-                className={cn(inputCls, "pl-9 font-mono text-sm uppercase")}
-                placeholder=""
-                value={doctorRegNumber}
-                onChange={(e) => {
-                  setDoctorRegNumber(e.target.value);
-                  if (errors.doctorRegNumber) setErrors((prev) => ({ ...prev, doctorRegNumber: "" }));
-                }}
-              />
-            </div>
-          </Field>
-        </div>
-
-        {/* 5. EMAIL (SEND AND VERIFY OTP) */}
-        <div className="rounded-xl border border-border bg-card p-3.5 space-y-2.5 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-              <Mail className="h-3.5 w-3.5 text-primary" /> Email Address *
-            </span>
-            {emailVerified ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-600 border border-emerald-500/30">
-                <CheckCircle2 className="h-3 w-3" /> Verified
-              </span>
-            ) : (
-              <span className="text-[11px] font-medium text-amber-600 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" /> OTP verification required
-              </span>
-            )}
-          </div>
-
-          <div className="flex gap-2">
-            <input
-              type="email"
-              required
-              disabled={emailVerified}
-              className={cn(inputCls, "flex-1 text-sm disabled:opacity-75 disabled:bg-muted/30")}
-              placeholder=""
-              autoComplete="off"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (emailVerified) {
-                  setEmailVerified(false);
-                  setEmailToken(null);
-                }
-                if (errors.email) setErrors((prev) => ({ ...prev, email: "" }));
-              }}
+            <img
+              src={meyvedaLogo}
+              alt="Meyveda Logo"
+              width={1755}
+              height={492}
+              className="h-8 sm:h-9 lg:h-10 w-auto object-contain"
             />
-            {!emailVerified && (
-              <button
-                type="button"
-                disabled={emailSending || !email.includes("@") || emailCooldown > 0}
-                onClick={handleSendEmailOtp}
-                className="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-primary px-3 py-2 text-xs font-bold text-primary-foreground shadow-2xs transition-colors hover:bg-primary/90 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-              >
-                {emailSending ? (
-                  "Sending..."
-                ) : emailCooldown > 0 ? (
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" /> {emailCooldown}s
-                  </span>
-                ) : emailOtpSent ? (
-                  "Resend OTP"
-                ) : (
-                  "Send OTP"
-                )}
-              </button>
-            )}
-            {emailVerified && (
-              <button
-                type="button"
-                onClick={() => {
-                  setEmailVerified(false);
-                  setEmailOtpSent(false);
-                  setEmailOtpInput("");
-                  setEmailToken(null);
-                }}
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
-                title="Change email"
-              >
-                <RotateCcw className="h-3 w-3" /> Change
-              </button>
-            )}
-          </div>
+          </Link>
 
-          {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
-
-          {/* Email OTP Verification Box */}
-          {emailOtpSent && !emailVerified && (
-            <div className="rounded-lg border border-primary/30 bg-primary-soft/40 p-3 space-y-2 animate-in fade-in-50">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-primary flex items-center gap-1">
-                  <ShieldCheck className="h-3.5 w-3.5" /> Enter 6-Digit Email OTP
-                </span>
-                <span className="text-[11px] text-muted-foreground">Valid for 5 minutes • Check inbox & spam</span>
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  maxLength={6}
-                  inputMode="numeric"
-                  className={cn(inputCls, "font-mono tracking-widest text-center text-sm font-bold bg-card")}
-                  placeholder="• • • • • •"
-                  value={emailOtpInput}
-                  onChange={(e) => setEmailOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                />
-                <button
-                  type="button"
-                  disabled={emailVerifying || emailOtpInput.trim().length < 6}
-                  onClick={handleVerifyEmailOtp}
-                  className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-2xs hover:bg-emerald-700 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-                >
-                  {emailVerifying ? "Verifying..." : "Verify OTP"}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 6. MOBILE (SEND AND VERIFY OTP) */}
-        <div className="rounded-xl border border-border bg-card p-3.5 space-y-2.5 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-              <Phone className="h-3.5 w-3.5 text-primary" /> Mobile Number *
-            </span>
-            {mobileVerified ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-600 border border-emerald-500/30">
-                <CheckCircle2 className="h-3 w-3" /> Verified
-              </span>
-            ) : (
-              <span className="text-[11px] font-medium text-amber-600 flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" /> SMS OTP required
-              </span>
-            )}
-          </div>
-
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <span className="absolute top-1/2 left-3 -translate-y-1/2 text-xs font-bold text-muted-foreground">
-                +91
-              </span>
-              <input
-                type="tel"
-                required
-                maxLength={10}
-                disabled={mobileVerified}
-                className={cn(inputCls, "pl-11 font-mono text-sm disabled:opacity-75 disabled:bg-muted/30")}
-                placeholder=""
-                autoComplete="off"
-                value={mobile}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, "").slice(0, 10);
-                  setMobile(val);
-                  if (mobileVerified) {
-                    setMobileVerified(false);
-                    setMobileToken(null);
-                  }
-                  if (errors.mobile) setErrors((prev) => ({ ...prev, mobile: "" }));
-                }}
-              />
-            </div>
-            {!mobileVerified && (
-              <button
-                type="button"
-                disabled={mobileSending || mobile.replace(/\D/g, "").length < 10 || mobileCooldown > 0}
-                onClick={handleSendMobileOtp}
-                className="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-primary px-3 py-2 text-xs font-bold text-primary-foreground shadow-2xs transition-colors hover:bg-primary/90 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-              >
-                {mobileSending ? (
-                  "Sending..."
-                ) : mobileCooldown > 0 ? (
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" /> {mobileCooldown}s
-                  </span>
-                ) : mobileOtpSent ? (
-                  "Resend SMS"
-                ) : (
-                  "Send OTP"
-                )}
-              </button>
-            )}
-            {mobileVerified && (
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileVerified(false);
-                  setMobileOtpSent(false);
-                  setMobileOtpInput("");
-                  setMobileToken(null);
-                }}
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
-                title="Change mobile"
-              >
-                <RotateCcw className="h-3 w-3" /> Change
-              </button>
-            )}
-          </div>
-
-          {errors.mobile && <p className="text-xs text-destructive">{errors.mobile}</p>}
-
-          {/* Mobile OTP Verification Box */}
-          {mobileOtpSent && !mobileVerified && (
-            <div className="rounded-lg border border-primary/30 bg-primary-soft/40 p-3 space-y-2 animate-in fade-in-50">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-primary flex items-center gap-1">
-                  <ShieldCheck className="h-3.5 w-3.5" /> Enter 6-Digit SMS OTP
-                </span>
-                <span className="text-[11px] text-muted-foreground">Valid for 5 minutes • Check SMS</span>
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  maxLength={6}
-                  inputMode="numeric"
-                  className={cn(inputCls, "font-mono tracking-widest text-center text-sm font-bold bg-card")}
-                  placeholder="• • • • • •"
-                  value={mobileOtpInput}
-                  onChange={(e) => setMobileOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                />
-                <button
-                  type="button"
-                  disabled={mobileVerifying || mobileOtpInput.trim().length < 6}
-                  onClick={handleVerifyMobileOtp}
-                  className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-2xs hover:bg-emerald-700 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-                >
-                  {mobileVerifying ? "Verifying..." : "Verify OTP"}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* 7. PASSWORD & CONFIRM PASSWORD */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <Field label="Password *" hint="Minimum 6 characters" error={errors.password}>
-            <div className="relative">
-              <Lock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                className={cn(inputCls, "pl-9 pr-9 text-sm")}
-                placeholder=""
-                autoComplete="new-password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (errors.password) setErrors((prev) => ({ ...prev, password: "" }));
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </Field>
-
-          <Field label="Confirm Password *" error={errors.confirmPassword}>
-            <div className="relative">
-              <Lock className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                required
-                className={cn(inputCls, "pl-9 pr-9 text-sm")}
-                placeholder=""
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(e) => {
-                  setConfirmPassword(e.target.value);
-                  if (errors.confirmPassword) setErrors((prev) => ({ ...prev, confirmPassword: "" }));
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
-              >
-                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </Field>
-        </div>
-
-        {/* 8. INVITE / REFERRAL CODE (Verified by Backend) */}
-        <div className="rounded-xl border border-border bg-card p-3.5 space-y-2.5 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-              <Gift className="h-3.5 w-3.5 text-primary" /> Invite / Referral Code (Optional)
-            </span>
-            {inviteStatus.checked && inviteStatus.valid ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-bold text-emerald-600 border border-emerald-500/30">
-                <CheckCircle2 className="h-3 w-3" /> Valid Invite
-              </span>
-            ) : inviteStatus.checked && !inviteStatus.valid ? (
-              <span className="text-[11px] font-medium text-destructive flex items-center gap-1">
-                <AlertCircle className="h-3 w-3" /> Invalid Code
-              </span>
-            ) : (
-              <span className="text-[11px] text-muted-foreground">
-                3 letters + 2 numbers (e.g. MSV77)
-              </span>
-            )}
-          </div>
-
-          <div className="flex gap-2">
-            <input
-              type="text"
-              maxLength={5}
-              autoComplete="off"
-              className={cn(inputCls, "flex-1 font-mono uppercase tracking-widest text-sm font-bold")}
-              placeholder=""
-              value={inviteCode}
-              onChange={(e) => {
-                const val = e.target.value.toUpperCase().slice(0, 5);
-                setInviteCode(val);
-                if (inviteStatus.checked) {
-                  setInviteStatus({ checked: false, valid: false });
-                }
-              }}
-              onBlur={() => {
-                if (inviteCode.trim().length === 5 && !inviteStatus.checked) {
-                  handleValidateInvite(inviteCode);
-                }
-              }}
-            />
-            <button
-              type="button"
-              disabled={inviteValidating || inviteCode.trim().length < 5}
-              onClick={() => handleValidateInvite(inviteCode)}
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-lg bg-secondary px-3.5 py-2 text-xs font-bold text-secondary-foreground shadow-2xs transition-colors hover:bg-secondary/80 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed border border-border"
+          <div className="flex items-center gap-4 sm:gap-6">
+            <Link
+              to="/doctor"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#555555] hover:text-[#E67230] transition-colors"
             >
-              {inviteValidating ? "Checking..." : inviteStatus.valid ? "Verified ✓" : "Verify Code"}
-            </button>
+              <ArrowLeft className="size-4" />
+              <span>Back to Home</span>
+            </Link>
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-[#E67230] hover:underline"
+            >
+              <span>Sign In</span>
+              <ArrowRight className="size-3.5" />
+            </Link>
           </div>
-
-          {inviteStatus.checked && inviteStatus.valid && inviteStatus.doctorName && (
-            <p className="text-xs font-medium text-emerald-600 flex items-center gap-1">
-              <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-              Referred by {inviteStatus.doctorName}. Referral reward will be credited upon registration.
-            </p>
-          )}
-
-          {inviteStatus.checked && !inviteStatus.valid && (
-            <p className="text-xs text-destructive flex items-center gap-1">
-              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-              {inviteStatus.message || "Invalid invite code. Check with your referring colleague."}
-            </p>
-          )}
         </div>
+      </header>
 
-        {/* 9. PRACTITIONER STATUTORY DECLARATION QUESTION & AFFIRMATION */}
-        <div className="rounded-xl border border-border bg-card p-4 space-y-2.5 shadow-2xs">
-          <div className="flex items-center gap-2">
-            <FileCheck2 className="h-4 w-4 text-primary shrink-0" />
-            <span className="text-xs font-bold text-foreground uppercase tracking-wider">
-              Practitioner Statutory Declaration & Ethics Agreement
-            </span>
-          </div>
-          <label className="flex items-start gap-2.5 cursor-pointer text-xs leading-relaxed text-foreground/90">
-            <input
-              type="checkbox"
-              required
-              className="mt-1 h-4 w-4 rounded border-border accent-primary cursor-pointer shrink-0"
-              checked={declaration}
-              onChange={(e) => {
-                setDeclaration(e.target.checked);
-                if (errors.declaration) setErrors((prev) => ({ ...prev, declaration: "" }));
+      {/* Main Content Area */}
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-10 my-4 sm:my-8">
+        <div className="w-full max-w-[1080px] bg-white rounded-3xl border border-[#EBE7DF] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+          {/* LEFT SIDE: Interactive Doctor Mascot & Registration Presentation */}
+          <div className="lg:col-span-5 bg-gradient-to-b from-[#FFFBF8] to-[#FAF9F6] border-b lg:border-b-0 lg:border-r border-[#EBE7DF] p-6 sm:p-8 lg:p-10 flex flex-col items-center justify-between text-center relative overflow-hidden">
+            <div
+              className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply"
+              style={{
+                background:
+                  "radial-gradient(ellipse 70% 60% at 50% 40%, rgba(230, 114, 48, 0.12) 0%, rgba(250, 249, 246, 0) 70%)",
               }}
             />
-            <div className="space-y-1 text-muted-foreground">
-              <p className="font-semibold text-foreground">I solemnly declare and affirm that:</p>
-              <ul className="list-disc pl-4 space-y-1 text-[11px]">
-                <li>I hold the recognized AYUSH degree ({qualification}) selected above from an accredited university.</li>
-                <li>I am registered with the National Commission for Indian System of Medicine (NCISM), National Commission for Homoeopathy (NCH), or a recognized State Medical Council under the Registration Number entered.</li>
-                <li>I will adhere to clinical pharmacovigilance, Adverse Drug Reaction (ADR) reporting, and ethical AYUSH practice.</li>
-              </ul>
+
+            <div className="relative z-10 w-full">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E67230]/10 text-xs font-bold text-[#E67230] mb-3">
+                <ShieldCheck className="size-3.5" />
+                <span>DOCTOR ONBOARDING</span>
+              </span>
+              <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#111111]">
+                Register as an Ayurveda Doctor
+              </h2>
+              <p className="mt-1 text-xs sm:text-sm text-[#666666] max-w-xs mx-auto leading-relaxed">
+                Join fellow Ayurvedic physicians. Access classical literature, commercial medicine
+                intelligence, batch quality evidence, and your private research library.
+              </p>
             </div>
-          </label>
-          {errors.declaration && <p className="text-xs text-destructive">{errors.declaration}</p>}
-        </div>
 
-        {/* SUBMIT BUTTON */}
-        <div className="pt-2">
-          <Btn
-            type="submit"
-            className="w-full text-sm font-bold py-3 shadow-sm cursor-pointer"
-            disabled={!isFormReady}
-          >
-            {isSubmitting ? "Registering Practitioner Account..." : "Complete Doctor Registration"}
-          </Btn>
-          {!isFormReady && (
-            <p className="mt-2 text-center text-[11px] text-muted-foreground">
-              {!emailVerified || !mobileVerified
-                ? "Please verify both Email and Mobile No using the 6-digit OTP codes."
-                : "Please fill all required (*) fields and accept the declaration."}
-            </p>
-          )}
-        </div>
-      </form>
+            <div className="relative z-10 my-4 sm:my-6 flex flex-col items-center justify-center">
+              <div className="relative flex items-center justify-center p-2 rounded-full bg-white shadow-xs border border-[#EBE7DF]/80">
+                <Mascot
+                  directions="/mascots/meyveda-doctor-directions.webp"
+                  reactions="/mascots/meyveda-doctor-reactions.webp"
+                  size={160}
+                  label="Meyveda Ayurveda Doctor Mascot"
+                  className="select-none"
+                />
+              </div>
+              <p className="mt-2.5 font-mono text-[11px] text-[#888888]">
+                Hover around · Click mascot to interact
+              </p>
+            </div>
 
-      <p className="mt-6 text-center text-sm text-muted-foreground">
-        Already registered?{" "}
-        <Link to="/login" className="font-bold text-primary hover:underline">
-          Sign in to your Mey Veda Workspace
-        </Link>
-      </p>
-    </AuthLayout>
+            <div className="relative z-10 w-full pt-4 border-t border-[#EBE7DF]/60 flex items-center justify-center gap-4 text-xs text-[#555555]">
+              <span className="font-semibold text-[#111111]">Verified AYUSH Doctor Platform</span>
+              <span>·</span>
+              <span>256-bit SSL</span>
+            </div>
+          </div>
+
+          {/* RIGHT SIDE: Clean, Professional Registration Form */}
+          <div className="lg:col-span-7 p-6 sm:p-10 lg:p-12 flex flex-col justify-center">
+            <div className="max-w-md w-full mx-auto">
+              <div className="mb-6 sm:mb-8">
+                <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230] mb-1">
+                  MEY VEDA GRANTHA · REGISTRATION
+                </p>
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
+                  Register as a Doctor
+                </h1>
+                <p className="mt-2 text-xs sm:text-sm text-[#666666] leading-relaxed">
+                  Join the verified AYUSH doctor network and access your clinical research desk.
+                </p>
+              </div>
+
+              {/* Error Message if any */}
+              {errorMessage && (
+                <div
+                  role="alert"
+                  className="mb-5 rounded-lg border border-[#E67230]/40 bg-[#FFFBF8] p-3.5 text-xs sm:text-sm text-[#111111] leading-relaxed"
+                >
+                  <span className="font-bold text-[#E67230]">Notice: </span>
+                  {errorMessage}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
+                {/* 1. Full Name */}
+                <div>
+                  <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                    Full Name *
+                  </label>
+                  <div className="relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                      <User className="size-4" />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Dr. Ramesh Vaidya"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* 2. Qualification & City */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                      Qualification *
+                    </label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                        <GraduationCap className="size-4" />
+                      </div>
+                      <select
+                        required
+                        value={qualification}
+                        onChange={(e) => setQualification(e.target.value)}
+                        className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm text-[#111111] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors cursor-pointer"
+                      >
+                        {AYUSH_QUALIFICATIONS.map((q) => (
+                          <option key={q.code} value={q.code}>
+                            {q.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                      City
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Pune / Mumbai"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="w-full rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* 3. PIN Code & Doctor Registration Number */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                      PIN Code *
+                    </label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                        <MapPin className="size-4" />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        maxLength={6}
+                        pattern="[0-9]{6}"
+                        inputMode="numeric"
+                        placeholder="411001"
+                        value={pincode}
+                        onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm font-mono text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                      Registration Number *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="AYUSH-REG-12345"
+                      value={doctorRegNumber}
+                      onChange={(e) => setDoctorRegNumber(e.target.value)}
+                      className="w-full rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2.5 sm:py-3 text-sm uppercase font-mono text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* 4. Email Address & OTP */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-[#111111]">
+                      Email Address *
+                    </label>
+                    {emailVerified ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        <CheckCircle2 className="size-3" /> Verified
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-[#E67230] font-medium">
+                        OTP verification required
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                        <Mail className="size-4" />
+                      </div>
+                      <input
+                        type="email"
+                        required
+                        disabled={emailVerified}
+                        placeholder="doctor@practice.com"
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (emailVerified) {
+                            setEmailVerified(false);
+                            setEmailToken(null);
+                          }
+                        }}
+                        className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors disabled:bg-[#FAF9F6] disabled:text-[#777777]"
+                      />
+                    </div>
+                    {!emailVerified && (
+                      <button
+                        type="button"
+                        disabled={emailSending || !email.includes("@") || emailCooldown > 0}
+                        onClick={handleSendEmailOtp}
+                        className="px-4 py-2.5 sm:py-3 rounded-md bg-[#E67230] hover:bg-[#D15F1F] text-white text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer shadow-xs"
+                      >
+                        {emailSending ? (
+                          "Sending..."
+                        ) : emailCooldown > 0 ? (
+                          <span className="flex items-center gap-1">
+                            <Clock className="size-3.5" /> {emailCooldown}s
+                          </span>
+                        ) : emailOtpSent ? (
+                          "Resend OTP"
+                        ) : (
+                          "Send OTP"
+                        )}
+                      </button>
+                    )}
+                    {emailVerified && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEmailVerified(false);
+                          setEmailOtpSent(false);
+                          setEmailOtpInput("");
+                          setEmailToken(null);
+                        }}
+                        className="px-3 py-2.5 text-xs text-[#888888] hover:text-[#111111] flex items-center gap-1 transition-colors cursor-pointer"
+                        title="Change email"
+                      >
+                        <RotateCcw className="size-3.5" /> Change
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Email OTP Verification Input */}
+                  {emailOtpSent && !emailVerified && (
+                    <div className="mt-2.5 p-3 rounded-md bg-[#FFFBF8] border border-[#E67230]/30 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-[#E67230] flex items-center gap-1">
+                          <ShieldCheck className="size-3.5" /> Enter 6-Digit Email OTP
+                        </span>
+                        <span className="text-[11px] text-[#777777]">Valid for 5 minutes</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          maxLength={6}
+                          inputMode="numeric"
+                          placeholder="••••••"
+                          value={emailOtpInput}
+                          onChange={(e) => setEmailOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          className="flex-1 rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2 text-sm text-center font-mono font-bold tracking-widest text-[#111111] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          disabled={emailVerifying || emailOtpInput.trim().length < 6}
+                          onClick={handleVerifyEmailOtp}
+                          className="px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                        >
+                          {emailVerifying ? "Verifying..." : "Verify OTP"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 5. Mobile Number & SMS OTP */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-[#111111]">
+                      Mobile Number *
+                    </label>
+                    {mobileVerified ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        <CheckCircle2 className="size-3" /> Verified
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-[#E67230] font-medium">
+                        SMS OTP required
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-xs font-bold text-[#888888]">
+                        +91
+                      </span>
+                      <input
+                        type="tel"
+                        required
+                        maxLength={10}
+                        disabled={mobileVerified}
+                        placeholder="98765 43210"
+                        value={mobile}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, "").slice(0, 10);
+                          setMobile(val);
+                          if (mobileVerified) {
+                            setMobileVerified(false);
+                            setMobileToken(null);
+                          }
+                        }}
+                        className="w-full rounded-md border border-[#EBE7DF] bg-white pl-12 pr-4 py-2.5 sm:py-3 text-sm font-mono text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors disabled:bg-[#FAF9F6] disabled:text-[#777777]"
+                      />
+                    </div>
+                    {!mobileVerified && (
+                      <button
+                        type="button"
+                        disabled={mobileSending || mobile.replace(/\D/g, "").length < 10 || mobileCooldown > 0}
+                        onClick={handleSendMobileOtp}
+                        className="px-4 py-2.5 sm:py-3 rounded-md bg-[#E67230] hover:bg-[#D15F1F] text-white text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer shadow-xs"
+                      >
+                        {mobileSending ? (
+                          "Sending..."
+                        ) : mobileCooldown > 0 ? (
+                          <span className="flex items-center gap-1">
+                            <Clock className="size-3.5" /> {mobileCooldown}s
+                          </span>
+                        ) : mobileOtpSent ? (
+                          "Resend SMS"
+                        ) : (
+                          "Send OTP"
+                        )}
+                      </button>
+                    )}
+                    {mobileVerified && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileVerified(false);
+                          setMobileOtpSent(false);
+                          setMobileOtpInput("");
+                          setMobileToken(null);
+                        }}
+                        className="px-3 py-2.5 text-xs text-[#888888] hover:text-[#111111] flex items-center gap-1 transition-colors cursor-pointer"
+                        title="Change mobile"
+                      >
+                        <RotateCcw className="size-3.5" /> Change
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Mobile OTP Verification Input */}
+                  {mobileOtpSent && !mobileVerified && (
+                    <div className="mt-2.5 p-3 rounded-md bg-[#FFFBF8] border border-[#E67230]/30 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-[#E67230] flex items-center gap-1">
+                          <ShieldCheck className="size-3.5" /> Enter 6-Digit SMS OTP
+                        </span>
+                        <span className="text-[11px] text-[#777777]">Valid for 5 minutes</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          maxLength={6}
+                          inputMode="numeric"
+                          placeholder="••••••"
+                          value={mobileOtpInput}
+                          onChange={(e) => setMobileOtpInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          className="flex-1 rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2 text-sm text-center font-mono font-bold tracking-widest text-[#111111] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none"
+                        />
+                        <button
+                          type="button"
+                          disabled={mobileVerifying || mobileOtpInput.trim().length < 6}
+                          onClick={handleVerifyMobileOtp}
+                          className="px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                        >
+                          {mobileVerifying ? "Verifying..." : "Verify OTP"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 6. Password & Confirm Password */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                      Password *
+                    </label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                        <Lock className="size-4" />
+                      </div>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        required
+                        placeholder="••••••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-10 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#888888] hover:text-[#111111] cursor-pointer"
+                      >
+                        {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                      Confirm Password *
+                    </label>
+                    <div className="relative">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                        <Lock className="size-4" />
+                      </div>
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        required
+                        placeholder="••••••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-10 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#888888] hover:text-[#111111] cursor-pointer"
+                      >
+                        {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 7. Invite / Referral Code */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-[#111111]">
+                      Invite / Referral Code <span className="font-normal text-[#777777]">(Optional)</span>
+                    </label>
+                    {inviteStatus.checked && inviteStatus.valid ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        <CheckCircle2 className="size-3" /> Valid Invite
+                      </span>
+                    ) : inviteStatus.checked && !inviteStatus.valid ? (
+                      <span className="text-[11px] text-red-600 font-medium">
+                        Invalid Code
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-[#777777]">
+                        3 letters + 2 numbers (e.g. MSV77)
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                        <Gift className="size-4" />
+                      </div>
+                      <input
+                        type="text"
+                        maxLength={5}
+                        placeholder="MSV77"
+                        value={inviteCode}
+                        onChange={(e) => {
+                          const val = e.target.value.toUpperCase().slice(0, 5);
+                          setInviteCode(val);
+                          if (inviteStatus.checked) {
+                            setInviteStatus({ checked: false, valid: false });
+                          }
+                        }}
+                        onBlur={() => {
+                          if (inviteCode.trim().length === 5 && !inviteStatus.checked) {
+                            handleValidateInvite(inviteCode);
+                          }
+                        }}
+                        className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm font-mono uppercase font-bold tracking-wider text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      disabled={inviteValidating || inviteCode.trim().length < 5}
+                      onClick={() => handleValidateInvite(inviteCode)}
+                      className="px-4 py-2.5 sm:py-3 rounded-md border border-[#EBE7DF] bg-[#FAF9F6] hover:bg-white text-xs font-bold text-[#111111] transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+                    >
+                      {inviteValidating ? "Checking..." : inviteStatus.valid ? "Verified ✓" : "Verify Code"}
+                    </button>
+                  </div>
+                  {inviteStatus.checked && inviteStatus.valid && inviteStatus.doctorName && (
+                    <p className="mt-1 text-xs text-emerald-600 font-medium flex items-center gap-1">
+                      <CheckCircle2 className="size-3.5 shrink-0" />
+                      Referred by {inviteStatus.doctorName}. Referral reward will be credited upon registration.
+                    </p>
+                  )}
+                  {inviteStatus.checked && !inviteStatus.valid && (
+                    <p className="mt-1 text-xs text-red-600 font-medium flex items-center gap-1">
+                      <AlertCircle className="size-3.5 shrink-0" />
+                      {inviteStatus.message || "Invalid invite code. Please recheck."}
+                    </p>
+                  )}
+                </div>
+
+                {/* Submit Primary Button */}
+                <div className="pt-2">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full h-12 sm:h-13 rounded-md bg-[#E67230] hover:bg-[#D15F1F] text-white font-bold text-base flex items-center justify-center gap-2 shadow-[0_4px_16px_-4px_rgba(230,114,48,0.4)] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#E67230] focus-visible:ring-offset-2 cursor-pointer"
+                  >
+                    {isSubmitting ? (
+                      <span>Registering with Backend...</span>
+                    ) : (
+                      <>
+                        <span>Register as a Doctor</span>
+                        <ArrowRight className="size-4" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+
+              {/* Sign In Link Footer */}
+              <div className="mt-8 pt-6 border-t border-[#EBE7DF] text-center">
+                <p className="text-xs sm:text-sm text-[#555555]">
+                  Already have a doctor account?{" "}
+                  <Link to="/login" className="font-bold text-[#E67230] hover:underline">
+                    Sign in to your Mey Veda Workspace
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Copyright */}
+      <footer className="w-full py-4 sm:py-6 text-center text-xs text-[#888888] border-t border-[#EBE7DF] bg-white">
+        <p>© {new Date().getFullYear()} Meyveda Grantha. Built for Ayurveda physicians.</p>
+      </footer>
+    </main>
   );
 }
