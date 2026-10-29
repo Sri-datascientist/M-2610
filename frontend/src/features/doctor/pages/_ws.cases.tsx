@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { copyToClipboard } from "@/lib/clipboard";
 import {
   Btn,
   Chip,
@@ -198,13 +199,17 @@ export function Cases() {
     searchParams.age,
   ].filter(Boolean).length;
 
-  const copyCitation = (c: ClinicalCase) => {
+  const copyCitation = async (c: ClinicalCase) => {
     const medName = medById(c.medicineId)?.name ?? "Formulation";
     const text = `${c.contributor}. Case Report: "${c.title}" (${c.id}). Intervention: ${medName}. Mey Veda Grantha Clinical Library (2026). Anonymised ID: ${c.patientCode}.`;
-    navigator.clipboard?.writeText(text);
-    setCopiedCitation(true);
-    toast.success("Citation copied to clipboard");
-    setTimeout(() => setCopiedCitation(false), 2000);
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setCopiedCitation(true);
+      toast.success("Citation copied to clipboard");
+      setTimeout(() => setCopiedCitation(false), 2000);
+    } else {
+      toast.error("Could not copy citation. Please copy manually.");
+    }
   };
 
   return (

@@ -21,6 +21,7 @@ import { ingById, references, type Reference } from "@/lib/mock-data";
 import { seo } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/services/apiClient";
+import { copyToClipboard } from "@/lib/clipboard";
 
 type LibraryCategory = "AFI" | "API" | "Classical";
 
@@ -249,13 +250,13 @@ export function Library() {
       ? `${item.sanskritVerse}\n\n${item.transliteration ?? ""}\n\n— ${item.title} (${item.shlokaNumber ?? item.part})`
       : `${item.title}: ${item.entry}\n${item.translation ?? ""}`;
 
-    try {
-      await navigator.clipboard.writeText(textToCopy.trim());
+    const ok = await copyToClipboard(textToCopy.trim());
+    if (ok) {
       setCopiedId(item.id);
       toast.success("Sanskrit shloka copied to clipboard!");
       setTimeout(() => setCopiedId(null), 2000);
-    } catch {
-      toast.error("Could not copy to clipboard");
+    } else {
+      toast.error("Could not copy to clipboard. Please copy manually.");
     }
   };
 

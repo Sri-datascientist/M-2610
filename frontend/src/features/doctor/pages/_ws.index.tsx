@@ -18,6 +18,7 @@ import { useStore, getState } from "@/lib/store";
 import { seo } from "@/lib/seo";
 import { apiClient } from "@/services/apiClient";
 import { toast } from "sonner";
+import { copyToClipboard } from "@/lib/clipboard";
 import dhanvantari from "@/assets/Dhanvantari2.png";
 
 export const Route = createFileRoute("/_ws/")({
@@ -113,18 +114,26 @@ export function Home() {
   const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:5173";
   const fullInviteUrl = `${origin}/register?ref=${inviteCode}`;
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(fullInviteUrl);
-    setCopiedLink(true);
-    toast.success("Invite link copied to clipboard!");
-    setTimeout(() => setCopiedLink(false), 2500);
+  const handleCopyLink = async () => {
+    const success = await copyToClipboard(fullInviteUrl);
+    if (success) {
+      setCopiedLink(true);
+      toast.success("Invite link copied to clipboard!");
+      setTimeout(() => setCopiedLink(false), 2500);
+    } else {
+      toast.error("Could not copy link to clipboard. Please copy manually.");
+    }
   };
 
-  const handleCopyCode = () => {
-    navigator.clipboard.writeText(inviteCode);
-    setCopiedCode(true);
-    toast.success(`Invite code ${inviteCode} copied!`);
-    setTimeout(() => setCopiedCode(false), 2500);
+  const handleCopyCode = async () => {
+    const success = await copyToClipboard(inviteCode);
+    if (success) {
+      setCopiedCode(true);
+      toast.success(`Invite code ${inviteCode} copied!`);
+      setTimeout(() => setCopiedCode(false), 2500);
+    } else {
+      toast.error("Could not copy code to clipboard. Please copy manually.");
+    }
   };
 
   const shareText = encodeURIComponent(

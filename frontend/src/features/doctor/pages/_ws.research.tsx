@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
+import { copyToClipboard } from "@/lib/clipboard";
 import { Btn, Empty, Field, MockUpload, PageHeader, Pill, inputCls } from "@/components/ui-kit";
 import {
   Dialog,
@@ -373,7 +374,7 @@ export function Research() {
     });
   };
 
-  const copyDossierText = (f: Formulation) => {
+  const copyDossierText = async (f: Formulation) => {
     const text = `=====================================================
 MEY VEDA GRANTHA — CONFIDENTIAL RESEARCH DOSSIER
 =====================================================
@@ -428,10 +429,14 @@ REGULATORY NOTICE:
 This dossier is an internal research record and preparation aid. It does not replace official statutory approvals, pharmacopoeial monographs or clinical trials.
 =====================================================`;
 
-    navigator.clipboard?.writeText(text);
-    setCopiedDossier(true);
-    toast.success("Dossier text copied to clipboard");
-    setTimeout(() => setCopiedDossier(false), 2000);
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setCopiedDossier(true);
+      toast.success("Dossier text copied to clipboard");
+      setTimeout(() => setCopiedDossier(false), 2000);
+    } else {
+      toast.error("Could not copy dossier. Please copy manually.");
+    }
   };
 
   return (

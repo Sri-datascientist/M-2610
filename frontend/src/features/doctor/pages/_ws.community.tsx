@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { copyToClipboard } from "@/lib/clipboard";
 import {
   Btn,
   Chip,
@@ -467,10 +468,14 @@ export function CommunityPage() {
     updateSearch({ tab: "my-publications", id: undefined });
   };
 
-  const copyPublicationLink = (pub: Publication) => {
+  const copyPublicationLink = async (pub: Publication) => {
     const url = `${window.location.origin}/community?id=${pub.id}`;
-    navigator.clipboard?.writeText(url);
-    toast.success("Publication link copied to clipboard");
+    const ok = await copyToClipboard(url);
+    if (ok) {
+      toast.success("Publication link copied to clipboard");
+    } else {
+      toast.error("Could not copy link. Please copy manually.");
+    }
   };
 
   // Count active author items
