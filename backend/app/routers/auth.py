@@ -23,6 +23,13 @@ from app.services.sms_otp_service import sms_otp_service
 
 router = APIRouter(tags=["auth"])
 
+SYSTEM_INVITE_CODES: dict[str, str] = {
+    "MEY26": "Meyveda Platform Invitation",
+    "AYUSH": "AYUSH Statutory Council",
+    "MEY01": "Meyveda Founding Council",
+    "MSV77": "Dr. SRIKANTHAN S",
+}
+
 
 def generate_unique_invite_code(db: Session, seed: str | None = None) -> str:
     """Generate a unique 3-letter + 2-digit invite code (e.g. MEY42, DOC89, SRI15)."""
@@ -202,18 +209,21 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
         # Generate unique 3-letter + 2-digit invite code for the new doctor
         new_doc_code = generate_unique_invite_code(db, full_name)
 
-        # Validate incoming invite code if provided
-        validated_code = None
-        referrer_doc = None
-        if payload.invite_code and payload.invite_code.strip():
-            clean_code = payload.invite_code.strip().upper()
-            referrer_doc = db.query(Doctor).filter(Doctor.invite_code == clean_code).first()
-            if not referrer_doc:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Invalid invite code. Please enter a valid 5-character invite code or leave blank.",
-                )
-            validated_code = clean_code
+        # Validate incoming invite code (compulsory for practitioner registration)
+        if not payload.invite_code or not payload.invite_code.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invite code is compulsory for registration. Please enter a valid 5-character invite code.",
+            )
+
+        clean_code = payload.invite_code.strip().upper()
+        referrer_doc = db.query(Doctor).filter(Doctor.invite_code == clean_code).first()
+        if not referrer_doc and clean_code not in SYSTEM_INVITE_CODES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid invite code. Please enter a valid 5-character invite code provided by a verified practitioner.",
+            )
+        validated_code = clean_code
 
         new_doctor = Doctor(
             user_id=new_user.id,
@@ -447,6 +457,13 @@ def validate_invite_code(code: str, db: Session = Depends(get_db)):
             invite_code=clean_code,
             doctor_name=doc.full_name,
             message=f"Valid invite code from {doc.full_name}",
+        )
+    if clean_code in SYSTEM_INVITE_CODES:
+        return ValidateInviteResponse(
+            valid=True,
+            invite_code=clean_code,
+            doctor_name=SYSTEM_INVITE_CODES[clean_code],
+            message=f"Valid official invite code ({SYSTEM_INVITE_CODES[clean_code]})",
         )
     return ValidateInviteResponse(
         valid=False,

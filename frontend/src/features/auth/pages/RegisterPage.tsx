@@ -396,6 +396,25 @@ export function Register() {
       return;
     }
 
+    const cleanInvite = inviteCode.trim().toUpperCase();
+    if (!cleanInvite) {
+      setErrorMessage("Invite code is compulsory for registration. Please enter your 5-character invite code.");
+      toast.error("Invite code is compulsory for registration.");
+      return;
+    }
+
+    if (cleanInvite.length < 5) {
+      setErrorMessage("Invite code must be 5 characters (e.g. MSV77).");
+      toast.error("Invite code must be 5 characters.");
+      return;
+    }
+
+    if (inviteStatus.checked && !inviteStatus.valid) {
+      setErrorMessage(inviteStatus.message || "Invalid invite code. Please enter a valid invite code.");
+      toast.error("Invalid invite code. Please enter a valid invite code.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     const formattedName = cleanName.startsWith("Dr.") ? cleanName : `Dr. ${cleanName}`;
@@ -433,7 +452,7 @@ export function Register() {
         mobile: `+91 ${cleanedMobile}`,
         phone: cleanedMobile,
         verification_token: emailToken || undefined,
-        invite_code: inviteCode.trim().toUpperCase() || undefined,
+        invite_code: cleanInvite,
       });
 
       if (regResponse?.access_token) {
@@ -981,7 +1000,7 @@ export function Register() {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="block text-xs sm:text-sm font-bold text-[#111111]">
-                      Invite / Referral Code <span className="font-normal text-[#777777]">(Optional)</span>
+                      Invite / Referral Code <span className="text-[#E67230] font-bold">*</span>
                     </label>
                     {inviteStatus.checked && inviteStatus.valid ? (
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
@@ -992,8 +1011,8 @@ export function Register() {
                         Invalid Code
                       </span>
                     ) : (
-                      <span className="text-[11px] text-[#777777]">
-                        3 letters + 2 numbers (e.g. MSV77)
+                      <span className="text-[11px] text-[#E67230] font-semibold">
+                        Compulsory · 3 letters + 2 numbers (e.g. MSV77)
                       </span>
                     )}
                   </div>
@@ -1004,6 +1023,7 @@ export function Register() {
                       </div>
                       <input
                         type="text"
+                        required
                         maxLength={5}
                         placeholder="MSV77"
                         value={inviteCode}

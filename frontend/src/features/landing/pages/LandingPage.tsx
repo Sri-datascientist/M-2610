@@ -4619,6 +4619,20 @@ export function MeyvedaDoctorsPage() {
       return;
     }
 
+    const cleanInvite = doctorInviteCode.trim().toUpperCase();
+    if (!cleanInvite) {
+      toast.error("Invite code is compulsory for registration.");
+      return;
+    }
+    if (cleanInvite.length < 5) {
+      toast.error("Invite code must be 5 characters (e.g. MSV77).");
+      return;
+    }
+    if (doctorInviteStatus.checked && !doctorInviteStatus.valid) {
+      toast.error("Invalid invite code. Please enter a valid invite code.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const cleanedMobile = doctorPhone.replace(/\D/g, "").slice(-10);
@@ -4643,7 +4657,7 @@ export function MeyvedaDoctorsPage() {
         mobile: `+91 ${cleanedMobile}`,
         phone: cleanedMobile,
         verification_token: emailToken || undefined,
-        invite_code: doctorInviteCode.trim().toUpperCase() || undefined,
+        invite_code: cleanInvite,
       });
 
       if (res?.access_token) {
@@ -6025,7 +6039,7 @@ export function MeyvedaDoctorsPage() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs sm:text-sm font-bold text-[#111111]">
-                  Invite Code (Optional)
+                  Invite Code <span className="text-[#E65C24] font-bold">*</span>
                 </label>
                 {doctorInviteStatus.checked && doctorInviteStatus.valid ? (
                   <span className="text-[11px] font-bold text-emerald-600">
@@ -6036,16 +6050,17 @@ export function MeyvedaDoctorsPage() {
                     ✕ Invalid Code
                   </span>
                 ) : (
-                  <span className="text-[10px] text-[#777777]">
-                    3 letters + 2 numbers (e.g. MSV77)
+                  <span className="text-[10px] text-[#E65C24] font-semibold">
+                    Compulsory · 3 letters + 2 numbers (e.g. MSV77)
                   </span>
                 )}
               </div>
               <div className="flex gap-2">
                 <input
                   type="text"
+                  required
                   maxLength={5}
-                  placeholder=""
+                  placeholder="MSV77"
                   autoComplete="off"
                   value={doctorInviteCode}
                   onChange={(e) => {

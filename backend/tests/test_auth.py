@@ -63,6 +63,7 @@ def test_successful_doctor_registration(client):
         "full_name_or_company": "Dr. Sarah Connor",
         "medical_license_or_contact_name": "MED-998877",
         "specialty_or_contact_email": "Cardiology",
+        "invite_code": "MEY26",
     }
     response = client.post("/api/v1/auth/register", json=payload)
     assert response.status_code == 201
@@ -73,6 +74,43 @@ def test_successful_doctor_registration(client):
     assert "hashed_password" not in data
 
 
+def test_doctor_registration_compulsory_invite_code(client):
+    # 1. Missing invite code fails
+    payload_no_invite = {
+        "email": "noinvite@example.com",
+        "password": "Password123!",
+        "role": "doctor",
+        "full_name_or_company": "Dr. No Invite",
+        "medical_license_or_contact_name": "MED-NOINVITE-1",
+        "specialty_or_contact_email": "Ayurveda",
+    }
+    res1 = client.post("/api/v1/auth/register", json=payload_no_invite)
+    assert res1.status_code == 400
+    assert "Invite code is compulsory" in res1.json()["detail"]
+
+    # 2. Invalid invite code fails
+    payload_bad_invite = {
+        **payload_no_invite,
+        "email": "badinvite@example.com",
+        "medical_license_or_contact_name": "MED-BADINVITE-1",
+        "invite_code": "ZZZ99",
+    }
+    res2 = client.post("/api/v1/auth/register", json=payload_bad_invite)
+    assert res2.status_code == 400
+    assert "Invalid invite code" in res2.json()["detail"]
+
+    # 3. Valid invite code succeeds
+    payload_good_invite = {
+        **payload_no_invite,
+        "email": "goodinvite@example.com",
+        "medical_license_or_contact_name": "MED-GOODINVITE-1",
+        "invite_code": "MEY26",
+    }
+    res3 = client.post("/api/v1/auth/register", json=payload_good_invite)
+    assert res3.status_code == 201
+    assert res3.json()["email"] == "goodinvite@example.com"
+
+
 def test_duplicate_email_registration_rejected(client):
     payload = {
         "email": "duplicate@example.com",
@@ -81,6 +119,7 @@ def test_duplicate_email_registration_rejected(client):
         "full_name_or_company": "Dr. First",
         "medical_license_or_contact_name": "MED-111111",
         "specialty_or_contact_email": "General",
+        "invite_code": "MEY26",
     }
     res1 = client.post("/api/v1/auth/register", json=payload)
     assert res1.status_code == 201
@@ -99,6 +138,7 @@ def test_duplicate_medical_license_rejected(client):
         "full_name_or_company": "Dr. First",
         "medical_license_or_contact_name": "MED-UNIQUE-999",
         "specialty_or_contact_email": "Ayurveda",
+        "invite_code": "MEY26",
     }
     res1 = client.post("/api/v1/auth/register", json=payload1)
     assert res1.status_code == 201
@@ -110,6 +150,7 @@ def test_duplicate_medical_license_rejected(client):
         "full_name_or_company": "Dr. Second",
         "medical_license_or_contact_name": "MED-UNIQUE-999",
         "specialty_or_contact_email": "Ayurveda",
+        "invite_code": "MEY26",
     }
     res2 = client.post("/api/v1/auth/register", json=payload2)
     assert res2.status_code == 409
@@ -164,6 +205,7 @@ def test_login_incorrect_password(client):
         "full_name_or_company": "Dr. Wrong",
         "medical_license_or_contact_name": "MED-554433",
         "specialty_or_contact_email": "Pediatrics",
+        "invite_code": "MEY26",
     }
     client.post("/api/v1/auth/register", json=reg_payload)
 
@@ -184,6 +226,7 @@ def test_get_me_with_authenticated_jwt(client):
         "full_name_or_company": "Dr. Profile",
         "medical_license_or_contact_name": "MED-776655",
         "specialty_or_contact_email": "Dermatology",
+        "invite_code": "MEY26",
     }
     client.post("/api/v1/auth/register", json=reg_payload)
 
@@ -309,6 +352,7 @@ def test_logout_revokes_token(client):
         "role": "doctor",
         "full_name": "Dr. Logout Test",
         "doctor_register_number": "MED-LOGOUT-001",
+        "invite_code": "MEY26",
     }
     reg_res = client.post("/api/v1/auth/register", json=reg_payload)
     assert reg_res.status_code == 201
