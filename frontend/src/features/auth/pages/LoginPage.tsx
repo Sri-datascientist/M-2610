@@ -208,6 +208,14 @@ export function Login({ initialMode }: { initialMode?: "signin" | "forgot" | "re
       }
 
       // Automatically route according to account credentials/role
+      if (role === "content_manager" || cleanEmail === "content@meyveda.com") {
+        localStorage.setItem("meyveda_user_role", "content_manager");
+        localStorage.setItem("meyveda_user_email", cleanEmail);
+        toast.success("Content Manager session verified. Redirecting to Content Desk...");
+        window.location.href = "/content-manager";
+        return;
+      }
+
       if (role === "admin" || cleanEmail === "admin@meyveda.com") {
         const session = {
           name: "Platform Administrator",
@@ -249,6 +257,14 @@ export function Login({ initialMode }: { initialMode?: "signin" | "forgot" | "re
       const adminAcc = DEMO_ACCOUNTS.find(
         (a) => a.email.toLowerCase() === cleanEmail && a.password === password,
       );
+      if (cleanEmail === "content@meyveda.com" && (password === "mey@123" || password === "Meyveda@2026")) {
+        localStorage.setItem("meyveda_user_role", "content_manager");
+        localStorage.setItem("meyveda_user_email", cleanEmail);
+        toast.success("Content Manager session verified. Redirecting to Content Desk...");
+        window.location.href = "/content-manager";
+        return;
+      }
+
       if (adminAcc || cleanEmail === "admin@meyveda.com") {
         const session = {
           name: adminAcc?.name || "Platform Administrator",

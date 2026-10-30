@@ -173,8 +173,7 @@ export function AboutUsPage() {
               About us
             </Link>
             <Link
-              to="/"
-              hash="public-relation"
+              to="/public-relations"
               className="whitespace-nowrap py-2 text-[15px] font-semibold text-[#555555] transition-colors hover:text-[#111111]"
             >
               Public relation
@@ -186,8 +185,7 @@ export function AboutUsPage() {
               Contact us
             </Link>
             <Link
-              to="/"
-              hash="blogs"
+              to="/blogs"
               className="whitespace-nowrap py-2 text-[15px] font-semibold text-[#555555] transition-colors hover:text-[#111111]"
             >
               Blogs

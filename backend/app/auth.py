@@ -13,7 +13,7 @@ from databases.schema.models import User
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
-Role = Literal["manufacturer", "doctor", "admin"]
+Role = Literal["manufacturer", "doctor", "admin", "content_manager"]
 
 
 class UserClaims(TypedDict):
@@ -126,7 +126,7 @@ def get_current_user_claims(
     subject = claims.get("sub")
     role = claims.get("role")
 
-    if not isinstance(subject, str) or role not in ("manufacturer", "doctor", "admin"):
+    if not isinstance(subject, str) or role not in ("manufacturer", "doctor", "admin", "content_manager"):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid bearer token claims",

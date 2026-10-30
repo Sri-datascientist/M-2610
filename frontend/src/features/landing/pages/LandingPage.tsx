@@ -84,9 +84,9 @@ import { ClusterFranchiseePartnerSection } from "../components/ClusterFranchisee
 const navigation = [
   { label: "For Doctors", href: "#top" },
   { label: "About us", href: "/about" },
-  { label: "Public relation", href: "#public-relation" },
+  { label: "Public relation", href: "/public-relations" },
   { label: "Contact us", href: "/contact" },
-  { label: "Blogs", href: "#blogs" },
+  { label: "Blogs", href: "/blogs" },
 ];
 
 const AYUSH_SYSTEMS = [
@@ -5649,8 +5649,8 @@ export function MeyvedaDoctorsPage() {
                 </li>
                 <li>
                   <a
-                    href="#blogs"
-                    onClick={(e) => handleNavClick(e, "#blogs")}
+                    href="/blogs"
+                    onClick={(e) => handleNavClick(e, "/blogs")}
                     className="hover:text-[#E67230] transition-colors"
                   >
                     Blogs
@@ -5658,8 +5658,8 @@ export function MeyvedaDoctorsPage() {
                 </li>
                 <li>
                   <a
-                    href="#pr"
-                    onClick={(e) => handleNavClick(e, "#pr")}
+                    href="/public-relations"
+                    onClick={(e) => handleNavClick(e, "/public-relations")}
                     className="hover:text-[#E67230] transition-colors"
                   >
                     Public Relations

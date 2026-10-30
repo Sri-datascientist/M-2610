@@ -21,6 +21,9 @@ import { DoctorLandingPage } from "@/features/landing";
 import { ClusterFranchisePage } from "@/features/landing";
 import { ContactUsPage } from "@/features/landing";
 import { AboutUsPage } from "@/features/landing";
+import { PublicRelationsPage } from "@/features/landing";
+import { BlogsPage } from "@/features/landing";
+import { ContentManagerPage } from "@/features/cms";
 
 // Auth Features
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage } from "@/features/auth";
@@ -210,6 +213,42 @@ export const aboutAliasRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/about-us",
   component: AboutUsPage,
+});
+
+export const publicRelationsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/public-relations",
+  component: PublicRelationsPage,
+});
+
+export const publicRelationsAliasRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/pr",
+  component: PublicRelationsPage,
+});
+
+export const blogsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/blogs",
+  component: BlogsPage,
+});
+
+export const blogsAliasRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/blog",
+  component: BlogsPage,
+});
+
+export const contentManagerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/content-manager",
+  component: ContentManagerPage,
+});
+
+export const contentManagerAliasRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/cms",
+  component: ContentManagerPage,
 });
 
 // 2. Auth routes
@@ -621,6 +660,12 @@ export const routeTree = rootRoute.addChildren([
   contactAliasRoute,
   aboutRoute,
   aboutAliasRoute,
+  publicRelationsRoute,
+  publicRelationsAliasRoute,
+  blogsRoute,
+  blogsAliasRoute,
+  contentManagerRoute,
+  contentManagerAliasRoute,
   loginRoute,
   registerRoute,
   forgotPasswordRoute,

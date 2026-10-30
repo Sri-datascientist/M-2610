@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from databases.session import Base
 
 # Enums
-UserRoleEnum = Enum("doctor", "manufacturer", "admin", name="user_role")
+UserRoleEnum = Enum("doctor", "manufacturer", "admin", "content_manager", name="user_role")
 UserStatusEnum = Enum("active", "pending", "suspended", "inactive", name="user_status")
 VerificationStatusEnum = Enum("pending", "approved", "rejected", name="verification_status")
 
@@ -401,6 +401,51 @@ class ContactMessage(Base):
 
     status: Mapped[str] = mapped_column(String(50), default="New", nullable=False, index=True)
     admin_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )
+
+
+class PublicRelation(Base):
+    __tablename__ = "public_relations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    title: Mapped[str] = mapped_column(String(300), nullable=False, index=True)
+    slug: Mapped[str] = mapped_column(String(320), unique=True, index=True, nullable=False)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    media_source: Mapped[str] = mapped_column(String(150), default="Meyveda Media Desk", nullable=False)
+    media_source_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    category: Mapped[str] = mapped_column(String(100), default="Press Release", nullable=False, index=True)
+    cover_image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    published_date: Mapped[date] = mapped_column(Date, default=date.today, nullable=False)
+    is_featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), default="published", nullable=False, index=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )
+
+
+class BlogPost(Base):
+    __tablename__ = "blog_posts"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    title: Mapped[str] = mapped_column(String(300), nullable=False, index=True)
+    slug: Mapped[str] = mapped_column(String(320), unique=True, index=True, nullable=False)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    author_name: Mapped[str] = mapped_column(String(200), default="Meyveda Clinical Desk", nullable=False)
+    author_role: Mapped[str] = mapped_column(String(200), default="AYUSH Clinical Research", nullable=False)
+    category: Mapped[str] = mapped_column(String(100), default="Clinical Practice", nullable=False, index=True)
+    cover_image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    reading_time: Mapped[str] = mapped_column(String(50), default="5 min read", nullable=False)
+    tags: Mapped[list[str] | None] = mapped_column(JSON, default=list, nullable=True)
+    is_featured: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    status: Mapped[str] = mapped_column(String(50), default="published", nullable=False, index=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(

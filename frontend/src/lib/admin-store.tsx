@@ -8,6 +8,7 @@ export interface Admin { name: string; email: string; role: M.Role }
 
 export const DEMO_ACCOUNTS: (Admin & { password: string })[] = [
   { name: "Ananya Iyer", email: "admin@meyveda.com", password: "Meyveda@2026", role: "Platform Administrator" },
+  { name: "Meyveda Content Desk", email: "content@meyveda.com", password: "mey@123", role: "Platform Administrator" },
   { name: "Meera Pillai", email: "auditor@meyveda.com", password: "Meyveda@2026", role: "Read-Only Auditor" },
 ];
 

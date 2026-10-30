@@ -3,6 +3,8 @@ export { MeyvedaDoctorsPage as DoctorLandingPage } from "./pages/DoctorLandingPa
 export { ClusterFranchisePage } from "./pages/ClusterFranchisePage";
 export { ContactUsPage } from "./pages/ContactUsPage";
 export { AboutUsPage } from "./pages/AboutUsPage";
+export { PublicRelationsPage } from "./pages/PublicRelationsPage";
+export { BlogsPage } from "./pages/BlogsPage";
 export {
   ClusterFranchiseePartnerSection,
   ClusterFranchiseePartnerSection as ClusterFranchisePartnerSection,

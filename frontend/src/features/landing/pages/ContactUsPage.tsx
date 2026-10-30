@@ -212,8 +212,7 @@ export function ContactUsPage() {
               About us
             </Link>
             <Link
-              to="/"
-              hash="public-relation"
+              to="/public-relations"
               className="whitespace-nowrap py-2 text-[15px] font-semibold text-[#555555] transition-colors hover:text-[#111111]"
             >
               Public relation
@@ -225,8 +224,7 @@ export function ContactUsPage() {
               Contact us
             </Link>
             <Link
-              to="/"
-              hash="blogs"
+              to="/blogs"
               className="whitespace-nowrap py-2 text-[15px] font-semibold text-[#555555] transition-colors hover:text-[#111111]"
             >
               Blogs
@@ -697,12 +695,12 @@ export function ContactUsPage() {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" hash="why-meyveda" className="hover:text-[#E67230] transition-colors">
+                  <Link to="/about" className="hover:text-[#E67230] transition-colors">
                     About us
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" hash="public-relation" className="hover:text-[#E67230] transition-colors">
+                  <Link to="/public-relations" className="hover:text-[#E67230] transition-colors">
                     Public relation
                   </Link>
                 </li>
@@ -712,7 +710,7 @@ export function ContactUsPage() {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" hash="blogs" className="hover:text-[#E67230] transition-colors">
+                  <Link to="/blogs" className="hover:text-[#E67230] transition-colors">
                     Blogs
                   </Link>
                 </li>
