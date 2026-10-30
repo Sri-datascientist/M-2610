@@ -162,3 +162,16 @@ export function validateAuthenticEmail(raw: string): {
   return { valid: true, cleanEmail: email };
 }
 
+/**
+ * Formats a doctor's display name with a single "Dr. " prefix,
+ * cleanly stripping duplicate titles like "Dr. Dr.", "dr.", "Doctor", etc.
+ */
+export function formatDoctorDisplayName(rawName?: string | null): string {
+  if (!rawName) return "Dr. Practitioner";
+  const cleaned = rawName.trim().replace(/^(?:(?:dr\b\.?|doctor\b)\s*)+/gi, "").trim();
+  if (!cleaned) return "Dr. Practitioner";
+  const capitalized = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+  return `Dr. ${capitalized}`;
+}
+
+

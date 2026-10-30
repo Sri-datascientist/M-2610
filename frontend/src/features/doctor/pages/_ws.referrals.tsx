@@ -33,6 +33,7 @@ import {
   sanitizeMobileInput,
   validateIndianMobile,
   validateAuthenticEmail,
+  formatDoctorDisplayName,
 } from "@/lib/validation";
 
 export interface ReferralsSearchParams {
@@ -632,7 +633,7 @@ export function ReferralsPage() {
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-[#111111] leading-snug">
-                      Invitation Email Dispatched to Dr. {inviteSuccessInfo.name}!
+                      Invitation Email Dispatched to {formatDoctorDisplayName(inviteSuccessInfo.name)}!
                     </h3>
                     <p className="text-xs text-[#555555] mt-0.5">
                       An official personalized early access invitation has been dispatched to their inbox.
@@ -648,7 +649,7 @@ export function ReferralsPage() {
                         Recipient Colleague
                       </span>
                       <span className="font-bold text-[#111111] text-sm mt-0.5 block">
-                        Dr. {inviteSuccessInfo.name}
+                        {formatDoctorDisplayName(inviteSuccessInfo.name)}
                       </span>
                       <span className="inline-block mt-1 text-[11px] font-semibold text-[#555555] px-2 py-0.5 bg-[#FAF9F6] rounded border border-[#EBE7DF]">
                         {inviteSuccessInfo.qualification}

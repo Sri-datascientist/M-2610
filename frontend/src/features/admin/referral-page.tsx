@@ -43,6 +43,7 @@ import { apiClient } from "@/services/apiClient";
 import { copyToClipboard } from "@/lib/clipboard";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { formatDoctorDisplayName } from "@/lib/validation";
 
 export interface ColleagueInvitation {
   id: string;
@@ -437,7 +438,7 @@ export function ReferralScoresPage() {
                       >
                         <td className="px-4 py-3.5">
                           <div className="font-bold text-foreground text-sm flex items-center gap-1.5">
-                            <span>Dr. {inv.colleague_name}</span>
+                            <span>{formatDoctorDisplayName(inv.colleague_name)}</span>
                           </div>
                           <div className="text-[11px] text-muted-foreground font-mono flex items-center gap-1 mt-0.5">
                             <Mail className="size-3 text-muted-foreground/70" />
@@ -660,7 +661,7 @@ export function ReferralScoresPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-3 rounded-lg border border-border bg-card space-y-1">
                   <span className="text-xs text-muted-foreground block">Colleague Full Name</span>
-                  <span className="font-bold text-foreground">Dr. {selectedInvite.colleague_name}</span>
+                  <span className="font-bold text-foreground">{formatDoctorDisplayName(selectedInvite.colleague_name)}</span>
                 </div>
                 <div className="p-3 rounded-lg border border-border bg-card space-y-1">
                   <span className="text-xs text-muted-foreground block">Medical Qualification</span>

@@ -81,3 +81,20 @@ async def health(response: Response):
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
         return {"status": "unhealthy", "project": settings.PROJECT_NAME, "database": db_status}
     return {"status": "ok", "project": settings.PROJECT_NAME, "database": db_status}
+
+@app.get('/meyvedalogo.png')
+async def get_meyveda_logo(response: Response):
+    from fastapi.responses import FileResponse
+    from pathlib import Path
+    candidates = [
+        Path('frontend/public/meyvedalogo.png'),
+        Path('../frontend/public/meyvedalogo.png'),
+        Path('frontend/dist/meyvedalogo.png'),
+        Path('../frontend/dist/meyvedalogo.png'),
+    ]
+    for p in candidates:
+        if p.exists():
+            return FileResponse(p, media_type='image/png')
+    response.status_code = status.HTTP_404_NOT_FOUND
+    return {'error': 'Logo not found'}
+

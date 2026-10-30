@@ -211,6 +211,27 @@ class ZohoCpaasEmailProvider(BaseEmailProvider):
             return False
 
 
+def format_doctor_display_name(name: str | None) -> str:
+    """
+    Format a doctor's name with a single 'Dr. ' prefix, eliminating duplicates like 'Dr. Dr. ...'.
+    Examples:
+      'Akshara' -> 'Dr. Akshara'
+      'Dr. Akshara' -> 'Dr. Akshara'
+      'Dr. Dr. Akshara' -> 'Dr. Akshara'
+      'Dr Akshara' -> 'Dr. Akshara'
+      'Doctor Akshara' -> 'Dr. Akshara'
+    """
+    if not name:
+        return "Dr. Practitioner"
+    import re
+    cleaned = name.strip()
+    cleaned = re.sub(r'^(?:(?:dr\b\.?|doctor\b)\s*)+', '', cleaned, flags=re.IGNORECASE).strip()
+    if not cleaned:
+        return "Dr. Practitioner"
+    cleaned = cleaned[0].upper() + cleaned[1:] if len(cleaned) > 1 else cleaned.upper()
+    return f"Dr. {cleaned}"
+
+
 class EmailOtpService:
     def __init__(self):
         self._lock = threading.Lock()
@@ -352,25 +373,41 @@ class EmailOtpService:
         app_url: str = "http://localhost:3000",
     ) -> dict[str, any]:
         import urllib.parse
+        import re
+
         clean_email = colleague_email.strip().lower()
-        clean_name = colleague_name.strip()
         clean_mobile = colleague_mobile.strip()
         clean_qual = colleague_qualification.strip() or "BAMS"
-        clean_inviter = inviter_name.strip()
         clean_inviter_qual = inviter_qualification.strip() or "Vaidya"
+
+        # Format doctor names with a single 'Dr. ' prefix to prevent duplicate "Dr. Dr. ..."
+        display_inviter = format_doctor_display_name(inviter_name)
+        display_colleague = format_doctor_display_name(colleague_name)
+
+        # For the registration prefill query string, provide clean name without duplicate prefix
+        raw_clean_colleague_name = re.sub(r'^(?:(?:dr\b\.?|doctor\b)\s*)+', '', colleague_name.strip(), flags=re.IGNORECASE).strip() or colleague_name.strip()
 
         # Build direct registration link prefilled with all 4 parameters + invite code
         query_params = urllib.parse.urlencode({
             "ref": invite_code,
-            "name": clean_name,
+            "name": raw_clean_colleague_name,
             "email": clean_email,
             "mobile": clean_mobile,
             "qualification": clean_qual,
         })
         base_clean = app_url.rstrip("/")
+
+        # Logo URL configuration with production fallback for live email clients (e.g. Gmail)
+        prod_fallback = os.getenv("MEYVEDA_APP_URL", "http://13.203.156.195").rstrip("/")
+        if not base_clean or "localhost" in base_clean or "127.0.0.1" in base_clean:
+            logo_base = prod_fallback
+        else:
+            logo_base = base_clean
+
+        logo_url = f"{logo_base}/meyvedalogo.png"
         registration_url = f"{base_clean}/register?{query_params}"
 
-        subject = f"Dr. {clean_inviter} has invited you to join Meyveda — AYUSH Early Access"
+        subject = f"{display_inviter} has invited you to join Meyveda — AYUSH Early Access"
 
         html_body = f"""<!DOCTYPE html>
 <html>
@@ -385,13 +422,13 @@ class EmailOtpService:
       <td align="center">
         <table width="100%" border="0" cellpadding="0" cellspacing="0" style="max-width: 580px; background-color: #ffffff; border-radius: 16px; border: 1px solid #EBE7DF; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); overflow: hidden;">
           
-          <!-- Header Banner -->
+          <!-- Header Banner with Official Meyveda Logo -->
           <tr>
-            <td style="background-color: #FAF7F2; padding: 28px 32px; border-bottom: 2px solid #E67230; text-align: center;">
-              <h1 style="margin: 0; font-size: 26px; font-weight: 800; color: #111111; letter-spacing: -0.5px;">
-                mey<span style="color: #E67230;">veda</span>
-              </h1>
-              <p style="margin: 6px 0 0 0; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #777777; font-weight: 600;">
+            <td style="background-color: #FAF7F2; padding: 26px 32px 22px 32px; border-bottom: 2px solid #E67230; text-align: center;">
+              <a href="{base_clean or prod_fallback}" target="_blank" style="text-decoration: none; display: inline-block;">
+                <img src="{logo_url}" alt="Meyveda — Reinvent You" width="168" height="47" style="display: block; margin: 0 auto; height: 44px; width: auto; max-width: 190px; border: 0; outline: none; text-decoration: none;" />
+              </a>
+              <p style="margin: 8px 0 0 0; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #777777; font-weight: 600;">
                 Ancient Wisdom · Modern Practice · Clinical Intelligence
               </p>
             </td>
@@ -402,16 +439,16 @@ class EmailOtpService:
             <td style="padding: 32px 32px 24px 32px;">
               <div style="background-color: #FFF7ED; border-left: 4px solid #E67230; padding: 14px 18px; border-radius: 4px; margin-bottom: 24px;">
                 <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #9A3412; font-weight: 600;">
-                  Personal Invitation from Dr. {clean_inviter} ({clean_inviter_qual})
+                  Personal Invitation from {display_inviter} ({clean_inviter_qual})
                 </p>
               </div>
 
               <p style="font-size: 16px; font-weight: 700; color: #111111; margin: 0 0 16px 0;">
-                Dear Dr. {clean_name},
+                Dear {display_colleague},
               </p>
 
               <p style="font-size: 14px; line-height: 1.6; color: #444444; margin: 0 0 16px 0;">
-                Your friend and esteemed colleague, <strong>Dr. {clean_inviter}</strong>, has personally nominated you for early access to <strong>Meyveda</strong> — India's premier digital platform and clinical desk dedicated to verified AYUSH medical practitioners.
+                Your friend and esteemed colleague, <strong>{display_inviter}</strong>, has personally nominated you for early access to <strong>Meyveda</strong> — India's premier digital platform and clinical desk dedicated to verified AYUSH medical practitioners.
               </p>
 
               <p style="font-size: 14px; line-height: 1.6; color: #444444; margin: 0 0 20px 0;">
@@ -488,7 +525,7 @@ class EmailOtpService:
               <!-- Sign-off -->
               <p style="font-size: 13px; line-height: 1.5; color: #555555; margin: 20px 0 0 0;">
                 Warm regards,<br>
-                <strong>Dr. {clean_inviter}</strong> &amp; The Meyveda Clinical Onboarding Team
+                <strong>{display_inviter}</strong> &amp; The Meyveda Clinical Onboarding Team
               </p>
             </td>
           </tr>
@@ -517,7 +554,7 @@ class EmailOtpService:
             email=clean_email,
             subject=subject,
             html_body=html_body,
-            to_name=f"Dr. {clean_name}",
+            to_name=display_colleague,
         )
 
         return {
