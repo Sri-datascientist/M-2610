@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -15,56 +16,150 @@ import {
   Network,
   Users,
   Compass,
+  Scale,
+  Activity,
+  FileCheck2,
+  Boxes,
+  Stethoscope,
+  ChevronRight,
+  Lock,
+  Globe2,
+  LineChart,
 } from "lucide-react";
 import meyvedaLogo from "@/assets/meyvedalogo.png";
 import { MEYVEDA_CONTACT } from "@/lib/contact-info";
 
-const CORE_PILLARS = [
+interface ImpactPillar {
+  id: string;
+  number: string;
+  title: string;
+  tagline: string;
+  summary: string;
+  bullets: string[];
+  metricLabel: string;
+  metricValue: string;
+  icon: typeof ShieldCheck;
+  highlightColor: string;
+  accentBg: string;
+}
+
+const IMPACT_PILLARS: ImpactPillar[] = [
   {
-    icon: BookOpen,
-    title: "Classical Knowledge Integrity",
-    description:
-      "Rooted firmly in classical literature (Brihat Trayi and Laghu Trayi texts), classical formulations, and authentic Rasapanchaka pharmacology. We honor traditional wisdom while organizing it into structured, accessible digital references.",
-  },
-  {
+    id: "credibility",
+    number: "01",
+    title: "Eliminating the Credibility Gap",
+    tagline: "Statutory Verification & National ABDM Gateway Integration",
+    summary:
+      "We equip qualified AYUSH practitioners with verified digital health identities (ABDM-HPR), linking state council registrations directly to standardized electronic health records recognized across national healthcare gateways, public health bodies, and insurance providers.",
+    bullets: [
+      "100% manual State Council registration validation (BAMS, BHMS, BSMS, BUMS, BNYS).",
+      "Seamless integration with Ayushman Bharat Digital Mission (ABDM-HPR registry).",
+      "No pay-to-play rankings, commercial advertising bias, or synthetic score inflation.",
+      "Tamper-proof digital prescription signatures verified by statutory standards.",
+    ],
+    metricValue: "100%",
+    metricLabel: "Council-Verified Registry",
     icon: ShieldCheck,
-    title: "Verified Practitioner Network",
-    description:
-      "Every physician on Meyveda is manually verified against State AYUSH Council registries (BAMS, BSMS, BNYS, BHMS, BUMS). We implement no commercial scoring, ranking algorithms, or referral commissions.",
+    highlightColor: "#E67230",
+    accentBg: "rgba(230, 114, 48, 0.08)",
   },
   {
+    id: "supply-chain",
+    number: "02",
+    title: "Authenticating the Herbal Supply Chain",
+    tagline: "Doctor-Supervised, Zero-Inventory Direct Formulation Fulfillment",
+    summary:
+      "We replace risky direct-to-consumer self-medication with an authentic, doctor-guided distribution model. Every prescribed classical medicine reaches the patient under clinical supervision, backed by authenticated batch monographs and heavy-metal testing.",
+    bullets: [
+      "Direct clinic-to-patient fulfillment: zero inventory burden or expired stock risk.",
+      "Strict compliance with Pharmacopoeia Laboratory for Indian Medicines (PLIM) norms.",
+      "Mandatory Certificate of Analysis (CoA) and heavy-metal assays for every listed batch.",
+      "Traceable classical formulation lineages directly referenced to authoritative texts.",
+    ],
+    metricValue: "0%",
+    metricLabel: "Clinic Inventory Burden",
+    icon: Boxes,
+    highlightColor: "#D86423",
+    accentBg: "rgba(216, 100, 35, 0.08)",
+  },
+  {
+    id: "real-world-evidence",
+    number: "03",
+    title: "Building Global Real-World Evidence (RWE)",
+    tagline: "Longitudinal Outcomes & Classical Root-Cause Clinical Research",
+    summary:
+      "By standardizing clinical intake, constitutional (Prakriti) assessment, and longitudinal outcomes, we aggregate structured clinical evidence that bridges millennia of classical healing with modern peer-reviewed integrative medical science.",
+    bullets: [
+      "Standardized digital clinical intake matching classical Ayurvedic pathology (Samprapti).",
+      "Longitudinal patient recovery tracking across chronic, lifestyle, and autoimmune care.",
+      "Anonymized clinical data sets contributing to peer-reviewed AYUSH research registries.",
+      "Structured documentation for ADR (Adverse Drug Reaction) pharmacovigilance reporting.",
+    ],
+    metricValue: "Global",
+    metricLabel: "Integrative Medical Reach",
+    icon: LineChart,
+    highlightColor: "#BE561A",
+    accentBg: "rgba(190, 86, 26, 0.08)",
+  },
+  {
+    id: "career-empowerment",
+    number: "04",
+    title: "Economic & Career Empowerment",
+    tagline: "Enterprise Software & Compliant Practice Scale for Independent Doctors",
+    summary:
+      "We provide independent practitioners and physical clinics with enterprise-grade clinical software, multi-center scheduling, and transparent practice revenue models — removing commercial marketing burdens and middleman exploitation.",
+    bullets: [
+      "Zero referral commissions: doctors maintain 100% clinical and financial independence.",
+      "Integrated Virtual Clinic with teleconsultation, e-prescriptions, and AI clinical support.",
+      "Cluster co-working clinic network and district territory fulfillment infrastructure.",
+      "Multi-center calendar coordination, automated patient follow-ups, and billing.",
+    ],
+    metricValue: "100%",
+    metricLabel: "Clinical Autonomy",
     icon: Building2,
-    title: "Integrated Practice Infrastructure",
-    description:
-      "From clinical case continuity and electronic prescriptions to shared clinic co-working spaces and cluster supply chains, we provide Management Service Organization (MSO) support so doctors can focus purely on care delivery.",
+    highlightColor: "#AE4E18",
+    accentBg: "rgba(174, 78, 24, 0.08)",
   },
 ];
 
-const PLATFORM_HIGHLIGHTS = [
+const PRACTICE_METRICS = [
   {
-    metric: "5 Systems",
-    label: "Classical Systems Supported",
-    detail: "Ayurveda, Siddha, Naturopathy, Homeopathy, and Unani.",
+    metric: "100%",
+    label: "Statutory Council Verification",
+    subtext: "Manual lookup against official State Medical Council registries.",
   },
   {
-    metric: "100% Vetted",
-    label: "Statutory Council Verification",
-    detail: "Manual State Council registry lookup with no automated score manipulation.",
+    metric: "5 Systems",
+    label: "Sovereign Systems Supported",
+    subtext: "Ayurveda (BAMS), Siddha (BSMS), Homoeopathy, Unani & Naturopathy.",
+  },
+  {
+    metric: "ABDM Aligned",
+    label: "National Gateway Standards",
+    subtext: "Compliant with Healthcare Professional Registry (HPR) guidelines.",
   },
   {
     metric: "Chennai Hub",
-    label: "Operating Headquarters",
-    detail: "Central operational coordination hub for clinical networks across India.",
+    label: "Central Operating Headquarters",
+    subtext: "Unified operational, logistics, and partner coordination center.",
   },
 ];
 
 export function AboutUsPage() {
+  const [activePillarId, setActivePillarId] = useState<string>("credibility");
+
+  const activePillar =
+    IMPACT_PILLARS.find((p) => p.id === activePillarId) ?? IMPACT_PILLARS[0];
+  const ActiveIcon = activePillar.icon;
+
   return (
     <div className="min-h-screen bg-[#FAF9F6] text-[#111111] antialiased selection:bg-[#E67230] selection:text-white flex flex-col justify-between">
-      {/* 1. BRAND NAVIGATION HEADER */}
+      {/* -------------------------------------------------------------------- */}
+      {/* 1. BRAND NAVIGATION HEADER                                           */}
+      {/* -------------------------------------------------------------------- */}
       <header className="sticky top-0 z-50 border-b border-[#EBE7DF] bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex h-20 max-w-[1320px] items-center justify-between px-5 sm:h-22 sm:px-8 lg:px-12">
-          {/* LEFT: Meyveda Logo */}
+          {/* Brand Logo Link to Landing */}
           <Link
             to="/"
             aria-label="Meyveda — Return to Home"
@@ -77,7 +172,7 @@ export function AboutUsPage() {
             />
           </Link>
 
-          {/* CENTER: Navigation Links */}
+          {/* Center Navigation Links */}
           <nav aria-label="Main Navigation" className="hidden items-center gap-6 lg:flex xl:gap-8">
             <Link
               to="/"
@@ -113,11 +208,11 @@ export function AboutUsPage() {
             </Link>
           </nav>
 
-          {/* RIGHT: CTAs */}
+          {/* Right Action CTAs */}
           <div className="flex items-center gap-3 sm:gap-4">
             <Link
               to="/login"
-              className="inline-flex items-center justify-center rounded-md px-4 py-2.5 text-sm sm:text-[15px] font-bold text-[#111111] transition-colors hover:text-[#E67230]"
+              className="inline-flex items-center justify-center rounded-md px-3.5 py-2 text-sm sm:text-[15px] font-bold text-[#111111] transition-colors hover:text-[#E67230]"
             >
               Sign In
             </Link>
@@ -140,135 +235,469 @@ export function AboutUsPage() {
         </div>
       </header>
 
-      {/* 2. HERO SECTION */}
+      {/* -------------------------------------------------------------------- */}
+      {/* MAIN CONTENT CONTAINER                                               */}
+      {/* -------------------------------------------------------------------- */}
       <main className="flex-1">
-        <section className="relative overflow-hidden py-14 sm:py-20 lg:py-24 border-b border-[#EBE7DF] bg-white">
-          <div className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(230,114,48,0.12)_0%,rgba(250,249,246,0)_70%)]" />
+        {/* ================================================================== */}
+        {/* 2. HERO SECTION — THE MODERN ERA OF AYUSH                           */}
+        {/* ================================================================== */}
+        <section className="relative overflow-hidden border-b border-[#EBE7DF] bg-white py-16 sm:py-22 lg:py-26">
+          {/* Subtle Ambient Radial Glow */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply"
+            style={{
+              background:
+                "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(230, 114, 48, 0.14) 0%, rgba(250, 249, 246, 0) 70%)",
+            }}
+          />
 
-          <div className="relative mx-auto max-w-[1080px] px-5 sm:px-8 lg:px-12 text-center">
-            <h1
-              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#111111] leading-[1.12]"
-              style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
-            >
-              Classical Wisdom. Modern Practice.
-            </h1>
-
-            <p className="mx-auto mt-6 max-w-3xl text-base sm:text-lg lg:text-[20px] leading-relaxed text-[#555555]">
-              Meyveda is building the foundational clinical and operational infrastructure for verified
-              AYUSH physicians — uniting traditional medical intelligence, authentic formulations, and
-              practice support across India.
-            </p>
-          </div>
-        </section>
-
-        {/* 3. CORE PILLARS SECTION */}
-        <section className="py-14 sm:py-20">
-          <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
-            <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-              <h2
-                className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#111111]"
-                style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
-              >
-                Our Foundational Pillars
-              </h2>
-              <p className="mt-3 text-base text-[#666666] leading-relaxed">
-                Guided by respect for classical principles and built with modern clinical rigour.
+          <div className="relative mx-auto max-w-[1180px] px-5 sm:px-8 lg:px-12 text-center">
+            {/* Eyebrow Pill */}
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#FBD9C3] bg-[#FFF3EB] px-4 py-1.5 mb-6 shadow-2xs">
+              <span className="flex size-4 items-center justify-center rounded-full bg-[#E67230] text-white">
+                <Sparkles className="size-2.5" />
+              </span>
+              <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230]">
+                THE MODERN ERA OF AYUSH
               </p>
             </div>
 
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-              {CORE_PILLARS.map((pillar) => {
-                const Icon = pillar.icon;
-                return (
-                  <div
-                    key={pillar.title}
-                    className="group rounded-3xl border border-[#EBE7DF] bg-white p-7 sm:p-8 shadow-xs transition-all duration-200 hover:border-[#E67230]/40 hover:shadow-md flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex size-13 items-center justify-center rounded-2xl bg-[#FFF3EB] text-[#E67230] mb-6 transition-transform group-hover:scale-105">
-                        <Icon className="size-6" />
+            {/* Main Hero Headline */}
+            <h1
+              className="text-4xl sm:text-5xl lg:text-6xl xl:text-[64px] font-extrabold tracking-tight text-[#111111] leading-[1.08]"
+              style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+            >
+              Operating System for <br className="hidden sm:inline" />
+              <span className="text-[#E67230]">AYUSH Practitioners</span>
+            </h1>
+
+            {/* Sub-headline */}
+            <p className="mx-auto mt-6 max-w-3xl text-lg sm:text-xl lg:text-[22px] leading-relaxed text-[#555555] font-medium">
+              21st-Century Modern Assistance for India’s Oldest Sovereign Medicine System.
+            </p>
+
+            <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-[#777777] leading-relaxed">
+              Equipping registered Vaidyas, Siddha practitioners, and traditional physicians with verified
+              digital identities, authenticated medicine fulfillment, and clinical practice infrastructure.
+            </p>
+
+            {/* Primary Action Buttons */}
+            <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
+              <Link
+                to="/"
+                className="inline-flex h-12 sm:h-13 items-center justify-center gap-2 rounded-xl bg-[#E67230] px-7 text-sm sm:text-base font-bold text-white shadow-[0_4px_16px_-4px_rgba(230,114,48,0.45)] transition-all hover:bg-[#D15F1F] hover:-translate-y-0.5 active:translate-y-0"
+              >
+                <span>Explore the Platform</span>
+                <ArrowRight className="size-4" />
+              </Link>
+
+              <a
+                href="#who-we-are"
+                className="inline-flex h-12 sm:h-13 items-center justify-center gap-2 rounded-xl border border-[#D5D0C6] bg-white px-7 text-sm sm:text-base font-bold text-[#111111] hover:border-[#E67230] hover:text-[#E67230] hover:bg-[#FAF9F6] transition-all shadow-2xs"
+              >
+                <span>Learn Our Story</span>
+                <ChevronRight className="size-4" />
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* ================================================================== */}
+        {/* 3. PRACTICE METRICS STRIP — OPERATIONS OPTIMIZED                   */}
+        {/* ================================================================== */}
+        <section className="border-b border-[#EBE7DF] bg-[#FAF9F6] py-10 sm:py-12">
+          <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+              {PRACTICE_METRICS.map((item, idx) => (
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-[#EBE7DF] bg-white p-5 sm:p-6 shadow-2xs flex flex-col justify-between transition-transform duration-200 hover:-translate-y-0.5"
+                >
+                  <div>
+                    <span className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#E67230] tracking-tight font-serif block">
+                      {item.metric}
+                    </span>
+                    <h3 className="mt-2 text-sm sm:text-base font-bold text-[#111111] leading-snug">
+                      {item.label}
+                    </h3>
+                  </div>
+                  <p className="mt-2 text-xs text-[#666666] leading-relaxed">
+                    {item.subtext}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ================================================================== */}
+        {/* 4. WHO WE ARE: YOUR CLINICIAN-FIRST PARTNER                        */}
+        {/* ================================================================== */}
+        <section id="who-we-are" className="py-16 sm:py-24 border-b border-[#EBE7DF] bg-white">
+          <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+              {/* Left Column: Mission Narrative */}
+              <div className="lg:col-span-7 space-y-6">
+                <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#E67230]">
+                  <HeartHandshake className="size-4" />
+                  <span>WHO WE ARE · CLINICIAN-FIRST ECOSYSTEM</span>
+                </div>
+
+                <h2
+                  className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold tracking-tight text-[#111111] leading-[1.12]"
+                  style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+                >
+                  Your Clinician-First Partner
+                </h2>
+
+                <p className="text-base sm:text-lg text-[#555555] leading-relaxed">
+                  <strong className="font-bold text-[#111111]">Meyveda Ayush Pvt Ltd</strong> is an
+                  AYUSH-focused practitioner enablement ecosystem and digital-and-physical practice toolkit.
+                  Rather than positioning as an abstract algorithm or commercial middleman, Meyveda serves as a
+                  grounded, clinician-first partner designed to help registered AYUSH practitioners (Vaidyas)
+                  launch, operate, and scale their careers with absolute professional dignity.
+                </p>
+
+                {/* The Clean Division of Responsibility Charter Callout */}
+                <div className="rounded-2xl border-l-4 border-[#E67230] bg-gradient-to-r from-[#FFF7F0] to-[#FAF9F6] p-6 sm:p-7 border-y border-r border-[#EBE7DF] shadow-2xs space-y-3">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#E67230] flex items-center gap-1.5">
+                    <Scale className="size-3.5" />
+                    <span>The Meyveda Practice Charter</span>
+                  </p>
+                  <blockquote className="text-base sm:text-lg italic font-medium text-[#111111] leading-relaxed">
+                    &ldquo;We establish a clean division of responsibility: every non-medical, operational,
+                    administrative, and logistical task stays with us, leaving all clinical decisions and patient
+                    care entirely in your hands.&rdquo;
+                  </blockquote>
+                  <p className="text-xs text-[#777777] font-semibold">
+                    — Meyveda Clinician Enablement Commitment
+                  </p>
+                </div>
+
+                {/* Division Breakdown Matrix */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                  <div className="rounded-xl border border-[#EBE7DF] bg-[#FAF9F6] p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#E67230] uppercase">
+                      <CheckCircle2 className="size-4 shrink-0" />
+                      <span>What Stays With Meyveda</span>
+                    </div>
+                    <ul className="text-xs text-[#666666] space-y-1.5">
+                      <li>• E-Prescriptions &amp; Digital Case Records (HPR)</li>
+                      <li>• Zero-inventory pharmacy supply &amp; patient dispatch</li>
+                      <li>• Multi-center calendar scheduling &amp; billing</li>
+                      <li>• Classical formulation monograph vetting</li>
+                    </ul>
+                  </div>
+
+                  <div className="rounded-xl border border-[#EBE7DF] bg-[#FAF9F6] p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#111111] uppercase">
+                      <Stethoscope className="size-4 text-[#E67230] shrink-0" />
+                      <span>What Stays 100% With You</span>
+                    </div>
+                    <ul className="text-xs text-[#666666] space-y-1.5">
+                      <li>• Diagnostic evaluation &amp; constitutional analysis</li>
+                      <li>• Independent clinical decision making</li>
+                      <li>• Formulation choice &amp; dosage protocols</li>
+                      <li>• Ongoing patient relationship &amp; care stewardship</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Visual Trust & Operational Credentials */}
+              <div className="lg:col-span-5 space-y-6">
+                <div className="rounded-3xl border border-[#EBE7DF] bg-[#FAF9F6] p-7 sm:p-9 shadow-sm space-y-6">
+                  <div className="flex items-center justify-between pb-4 border-b border-[#EBE7DF]">
+                    <div className="flex items-center gap-2.5">
+                      <span className="flex size-3 rounded-full bg-[#E67230]" />
+                      <span className="text-xs font-bold uppercase tracking-wider text-[#111111]">
+                        Corporate Governance
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-semibold text-[#E67230] bg-[#E67230]/10 px-2.5 py-0.5 rounded-full border border-[#E67230]/20">
+                      Registered AYUSH Entity
+                    </span>
+                  </div>
+
+                  <div className="space-y-4 text-xs sm:text-sm text-[#555555]">
+                    <div className="flex items-start gap-3">
+                      <Building2 className="size-4.5 text-[#E67230] shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="text-[#111111] block">Meyveda Ayush Pvt Ltd</strong>
+                        <span>Incorporated to build sovereign healthcare operating infrastructure.</span>
                       </div>
-                      <h3 className="text-xl font-bold text-[#111111] tracking-tight">
-                        {pillar.title}
-                      </h3>
-                      <p className="mt-3 text-sm leading-relaxed text-[#555555]">
-                        {pillar.description}
-                      </p>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <ShieldCheck className="size-4.5 text-[#E67230] shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="text-[#111111] block">No Referral Commissions</strong>
+                        <span>Zero pay-to-play listings. Practitioners are never ranked by revenue.</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <MapPin className="size-4.5 text-[#E67230] shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="text-[#111111] block">Operating Headquarters</strong>
+                        <span>{MEYVEDA_CONTACT.address}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <FileCheck2 className="size-4.5 text-[#E67230] shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="text-[#111111] block">ABDM-HPR Protocol Readiness</strong>
+                        <span>Unified digital architecture recognized by national health gateways.</span>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Connect link */}
+                  <div className="pt-4 border-t border-[#EBE7DF]">
+                    <Link
+                      to="/contact"
+                      className="inline-flex items-center gap-2 text-xs font-bold text-[#E67230] hover:text-[#D15F1F] transition-colors"
+                    >
+                      <span>Connect with our leadership team</span>
+                      <ArrowRight className="size-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ================================================================== */}
+        {/* 5. OUR VISION & MISSION: DUAL FOUNDATIONAL PILLARS                 */}
+        {/* ================================================================== */}
+        <section className="py-16 sm:py-24 border-b border-[#EBE7DF] bg-[#FAF9F6]">
+          <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
+            <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#E67230] mb-2">
+                STRATEGIC NORTH STAR
+              </p>
+              <h2
+                className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold tracking-tight text-[#111111]"
+                style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+              >
+                Our Vision &amp; Mission
+              </h2>
+              <p className="mt-3 text-base text-[#666666]">
+                Rooted in authentic classical texts, elevated by enterprise clinical engineering.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
+              {/* Vision Card */}
+              <div className="rounded-3xl border border-[#EBE7DF] bg-white p-8 sm:p-10 shadow-xs hover:border-[#E67230]/40 transition-all flex flex-col justify-between">
+                <div>
+                  <div className="flex size-14 items-center justify-center rounded-2xl bg-[#FFF3EB] text-[#E67230] mb-6">
+                    <Compass className="size-7" />
+                  </div>
+
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#E67230] block mb-2">
+                    Long-Term Aspiration
+                  </span>
+
+                  <h3
+                    className="text-2xl sm:text-3xl font-extrabold text-[#111111] tracking-tight mb-4"
+                    style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+                  >
+                    Our Vision
+                  </h3>
+
+                  <p className="text-base sm:text-lg leading-relaxed text-[#555555]">
+                    To build the sovereign operational infrastructure for global AYUSH, establishing
+                    personalized, preventive, and root-cause traditional healing as an accessible primary
+                    pillar of healthcare worldwide.
+                  </p>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-[#EBE7DF] flex items-center gap-2 text-xs font-bold text-[#111111]">
+                  <Globe2 className="size-4 text-[#E67230]" />
+                  <span>Universal Access · Root-Cause Healing · Classical Lineage</span>
+                </div>
+              </div>
+
+              {/* Mission Card */}
+              <div className="rounded-3xl border border-[#EBE7DF] bg-white p-8 sm:p-10 shadow-xs hover:border-[#E67230]/40 transition-all flex flex-col justify-between">
+                <div>
+                  <div className="flex size-14 items-center justify-center rounded-2xl bg-[#FFF3EB] text-[#E67230] mb-6">
+                    <Award className="size-7" />
+                  </div>
+
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#E67230] block mb-2">
+                    Actionable Mandate
+                  </span>
+
+                  <h3
+                    className="text-2xl sm:text-3xl font-extrabold text-[#111111] tracking-tight mb-4"
+                    style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+                  >
+                    Our Mission
+                  </h3>
+
+                  <p className="text-base sm:text-lg leading-relaxed text-[#555555]">
+                    To empower qualified AYUSH practitioners with modern, accessible clinical tools, connect
+                    patients with transparent, protocol-based care, and ensure that every formulation
+                    prescribed traces its lineage back to authenticated classical texts and strict laboratory
+                    quality standards.
+                  </p>
+                </div>
+
+                <div className="mt-8 pt-6 border-t border-[#EBE7DF] flex items-center gap-2 text-xs font-bold text-[#111111]">
+                  <CheckCircle2 className="size-4 text-[#E67230]" />
+                  <span>Modern Clinical Software · Verified Formulations · Transparent Care</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ================================================================== */}
+        {/* 6. THE IMPACT WE DELIVER: 4 CORE PILLARS (INTERACTIVE SHOWCASE)   */}
+        {/* ================================================================== */}
+        <section id="impact" className="py-16 sm:py-24 border-b border-[#EBE7DF] bg-white">
+          <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
+            <div className="max-w-3xl mb-12 sm:mb-16">
+              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#E67230] mb-2">
+                <Activity className="size-4" />
+                <span>MEASURABLE TRANSFORMATION</span>
+              </div>
+              <h2
+                className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold tracking-tight text-[#111111] leading-[1.12]"
+                style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+              >
+                The Impact We Deliver
+              </h2>
+              <p className="mt-4 text-base sm:text-lg text-[#555555] leading-relaxed">
+                Traditional medicine touches over a billion lives, yet qualified Vaidyas often shoulder
+                operational friction that distracts from patient healing. Meyveda delivers measurable
+                transformation across four core pillars.
+              </p>
+            </div>
+
+            {/* Interactive Pillar Selector Tabs */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+              {IMPACT_PILLARS.map((pillar) => {
+                const isSelected = activePillarId === pillar.id;
+                const IconComponent = pillar.icon;
+                return (
+                  <button
+                    key={pillar.id}
+                    type="button"
+                    onClick={() => setActivePillarId(pillar.id)}
+                    aria-pressed={isSelected}
+                    className={`rounded-2xl border p-4 sm:p-5 text-left transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#E67230] ${
+                      isSelected
+                        ? "border-[#E67230] bg-[#FFF8F2] shadow-sm ring-1 ring-[#E67230]"
+                        : "border-[#EBE7DF] bg-[#FAF9F6] hover:bg-white hover:border-[#D5D0C6]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span
+                        className={`flex size-8 items-center justify-center rounded-lg text-xs font-bold ${
+                          isSelected
+                            ? "bg-[#E67230] text-white"
+                            : "bg-[#EBE7DF] text-[#666666]"
+                        }`}
+                      >
+                        {pillar.number}
+                      </span>
+                      <IconComponent
+                        className={`size-4.5 ${
+                          isSelected ? "text-[#E67230]" : "text-[#777777]"
+                        }`}
+                      />
+                    </div>
+                    <p
+                      className={`text-sm sm:text-base font-bold leading-snug ${
+                        isSelected ? "text-[#111111]" : "text-[#444444]"
+                      }`}
+                    >
+                      {pillar.title}
+                    </p>
+                  </button>
                 );
               })}
             </div>
-          </div>
-        </section>
 
-        {/* 4. OUR STORY & PHILOSOPHY (EDITORIAL SPLIT) */}
-        <section className="border-y border-[#EBE7DF] bg-white py-16 sm:py-24">
-          <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
-            <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16 items-center">
-              {/* Left Column: Purpose Narrative */}
-              <div className="lg:col-span-7 space-y-6">
-                <h2
-                  className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold tracking-tight text-[#111111] leading-tight"
-                  style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
-                >
-                  Why Meyveda Exists
-                </h2>
-                <p className="text-base sm:text-lg text-[#555555] leading-relaxed">
-                  Traditional AYUSH medicine represents centuries of empirical observation, holistic
-                  diagnostics, and deep therapeutic wisdom. Yet in daily practice, practitioners frequently
-                  face fragmented medicine sourcing, lack of standardized case records, and minimal
-                  practice management support.
-                </p>
-                <p className="text-base text-[#555555] leading-relaxed">
-                  Meyveda was founded to bridge this gap. We operate as a dedicated Management Service
-                  Organization (MSO) built specifically for classical doctors. We handle administrative
-                  coordination, digital record continuity, and authenticated medicine distribution —
-                  empowering practitioners to focus entirely on patient diagnosis, healing, and continuous
-                  clinical mastery.
-                </p>
-                <div className="pt-2">
-                  <div className="flex flex-wrap items-center gap-6 text-sm text-[#111111] font-semibold">
-                    <span className="flex items-center gap-2">
-                      <CheckCircle2 className="size-4.5 text-[#E67230]" />
-                      No referral commissions
+            {/* Selected Pillar Detailed Interactive Display Card */}
+            <div className="rounded-3xl border border-[#EBE7DF] bg-[#FAF9F6] p-7 sm:p-10 lg:p-12 shadow-xs transition-all duration-300">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+                {/* Left side: Detailed Content */}
+                <div className="lg:col-span-8 space-y-5">
+                  <div className="flex items-center gap-3">
+                    <span className="flex size-9 items-center justify-center rounded-xl bg-[#E67230] text-white text-sm font-bold">
+                      {activePillar.number}
                     </span>
-                    <span className="flex items-center gap-2">
-                      <CheckCircle2 className="size-4.5 text-[#E67230]" />
-                      Manual council verification
-                    </span>
-                    <span className="flex items-center gap-2">
-                      <CheckCircle2 className="size-4.5 text-[#E67230]" />
-                      Classical integrity first
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#E67230]">
+                      {activePillar.tagline}
                     </span>
                   </div>
-                </div>
-              </div>
 
-              {/* Right Column: Key Commitments Card */}
-              <div className="lg:col-span-5">
-                <div className="rounded-3xl border border-[#EBE7DF] bg-[#FAF9F6] p-7 sm:p-9 shadow-xs space-y-6">
-                  <h3 className="text-xl font-bold text-[#111111] tracking-tight">
-                    Meyveda at a Glance
+                  <h3
+                    className="text-2xl sm:text-3xl lg:text-[34px] font-bold text-[#111111] tracking-tight leading-snug"
+                    style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+                  >
+                    {activePillar.title}
                   </h3>
 
-                  <div className="space-y-5 divide-y divide-[#EBE7DF]">
-                    {PLATFORM_HIGHLIGHTS.map((item) => (
-                      <div key={item.label} className="pt-5 first:pt-0 space-y-1">
-                        <span className="text-2xl sm:text-3xl font-extrabold text-[#E67230] tracking-tight font-serif">
-                          {item.metric}
-                        </span>
-                        <p className="text-sm font-bold text-[#111111]">{item.label}</p>
-                        <p className="text-xs text-[#666666] leading-relaxed">{item.detail}</p>
-                      </div>
-                    ))}
+                  <p className="text-base sm:text-lg text-[#555555] leading-relaxed">
+                    {activePillar.summary}
+                  </p>
+
+                  <div className="pt-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#111111] mb-3">
+                      Key Deliverables &amp; Practice Standards:
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {activePillar.bullets.map((b) => (
+                        <div
+                          key={b}
+                          className="flex items-start gap-2.5 rounded-xl border border-[#EBE7DF] bg-white p-3.5 shadow-2xs"
+                        >
+                          <CheckCircle2 className="size-4 text-[#E67230] shrink-0 mt-0.5" />
+                          <span className="text-xs text-[#555555] leading-relaxed">
+                            {b}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right side: Highlight Badge & Metric Card */}
+                <div className="lg:col-span-4 flex flex-col justify-between h-full space-y-6">
+                  <div className="rounded-2xl border border-[#EBE7DF] bg-white p-6 shadow-2xs text-center space-y-2">
+                    <div className="flex size-12 items-center justify-center rounded-full bg-[#E67230]/10 text-[#E67230] mx-auto mb-2">
+                      <ActiveIcon className="size-6" />
+                    </div>
+                    <span className="text-3xl sm:text-4xl font-extrabold text-[#E67230] font-serif block">
+                      {activePillar.metricValue}
+                    </span>
+                    <p className="text-xs font-bold uppercase tracking-wider text-[#111111]">
+                      {activePillar.metricLabel}
+                    </p>
+                    <p className="text-xs text-[#777777] pt-1">
+                      Statutory assurance built into every layer of the Meyveda ecosystem.
+                    </p>
                   </div>
 
-                  <div className="pt-4 border-t border-[#EBE7DF] text-xs text-[#777777] flex items-start gap-2">
-                    <MapPin className="size-4 text-[#E67230] shrink-0 mt-0.5" />
-                    <span>
-                      Headquarters: <strong>{MEYVEDA_CONTACT.address}</strong>
-                    </span>
+                  <div className="rounded-2xl border border-[#FBD9C3] bg-[#FFF8F2] p-5 text-center space-y-3">
+                    <p className="text-xs font-bold text-[#111111]">
+                      Ready to experience modern AYUSH practice management?
+                    </p>
+                    <Link
+                      to="/register"
+                      className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-[#E67230] text-xs font-bold text-white shadow-xs hover:bg-[#D15F1F] transition-colors"
+                    >
+                      <span>Join as Practitioner</span>
+                      <ArrowRight className="size-3.5" />
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -276,31 +705,41 @@ export function AboutUsPage() {
           </div>
         </section>
 
-        {/* 5. CALL TO ACTION BANNER */}
-        <section className="py-16 sm:py-20 bg-[#FAF9F6]">
+        {/* ================================================================== */}
+        {/* 7. CALL TO ACTION BANNER                                           */}
+        {/* ================================================================== */}
+        <section className="py-16 sm:py-22 bg-[#FAF9F6]">
           <div className="mx-auto max-w-[1080px] px-5 sm:px-8 text-center">
-            <div className="rounded-3xl border border-[#EBE7DF] bg-white p-8 sm:p-12 lg:p-14 shadow-sm space-y-6">
+            <div className="rounded-3xl border border-[#EBE7DF] bg-white p-8 sm:p-12 lg:p-16 shadow-sm space-y-6">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#FBD9C3] bg-[#FFF3EB] px-3.5 py-1 text-xs font-bold text-[#E67230]">
+                <Sparkles className="size-3" />
+                <span>START YOUR CLINICAL JOURNEY</span>
+              </div>
+
               <h2
-                className="text-3xl sm:text-4xl font-extrabold text-[#111111] tracking-tight"
+                className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#111111] tracking-tight leading-tight"
                 style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
               >
-                Join the Verified AYUSH Network
+                Reinvent Your AYUSH Practice Today
               </h2>
-              <p className="mx-auto max-w-xl text-base text-[#555555] leading-relaxed">
-                Connect your practice with peer physicians, verified classical medicine suppliers, and
-                structured digital tools.
+
+              <p className="mx-auto max-w-xl text-base sm:text-lg text-[#555555] leading-relaxed">
+                Connect with verified colleagues, zero-inventory medicine supply, and ABDM-aligned digital tools.
+                All operational friction stays with us — your patients stay with you.
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+
+              <div className="flex flex-wrap items-center justify-center gap-4 pt-3">
                 <Link
                   to="/register"
-                  className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#E67230] px-7 text-sm sm:text-base font-bold text-white shadow-[0_4px_16px_-4px_rgba(230,114,48,0.4)] transition-all hover:bg-[#D15F1F]"
+                  className="inline-flex h-12 sm:h-13 items-center justify-center gap-2 rounded-xl bg-[#E67230] px-7 sm:px-8 text-sm sm:text-base font-bold text-white shadow-[0_4px_16px_-4px_rgba(230,114,48,0.4)] transition-all hover:bg-[#D15F1F] hover:-translate-y-0.5 active:translate-y-0"
                 >
                   <span>Register as Doctor</span>
                   <ArrowRight className="size-4" />
                 </Link>
+
                 <Link
                   to="/contact"
-                  className="inline-flex h-12 items-center justify-center rounded-xl border border-[#EBE7DF] bg-white px-7 text-sm sm:text-base font-bold text-[#111111] hover:border-[#E67230] hover:text-[#E67230] transition-colors"
+                  className="inline-flex h-12 sm:h-13 items-center justify-center rounded-xl border border-[#D5D0C6] bg-white px-7 sm:px-8 text-sm sm:text-base font-bold text-[#111111] hover:border-[#E67230] hover:text-[#E67230] transition-colors shadow-2xs"
                 >
                   Contact Our Team
                 </Link>
@@ -310,7 +749,9 @@ export function AboutUsPage() {
         </section>
       </main>
 
-      {/* 6. MEYVEDA COMMON FOOTER */}
+      {/* -------------------------------------------------------------------- */}
+      {/* 8. MEYVEDA COMMON FOOTER                                             */}
+      {/* -------------------------------------------------------------------- */}
       <footer className="border-t border-[#EBE7DF] bg-white py-12 text-[#111111] sm:py-16">
         <div className="mx-auto max-w-[1216px] px-5 sm:px-8 lg:px-12">
           <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-4 lg:gap-8">
@@ -322,8 +763,8 @@ export function AboutUsPage() {
                 className="h-9 w-auto object-contain"
               />
               <p className="text-xs sm:text-sm leading-relaxed text-[#555555]">
-                Classical wisdom. A stronger practice. Platform support for verified AYUSH
-                practitioners across India.
+                The Operating System for AYUSH Practitioners. Platform enablement, verified supply chain,
+                and digital clinical infrastructure across India.
               </p>
               <div className="pt-2 text-xs text-[#555555] space-y-1.5">
                 <p className="flex items-center gap-2">
@@ -398,65 +839,60 @@ export function AboutUsPage() {
                 </li>
                 <li>
                   <Link to="/login" className="hover:text-[#E67230] transition-colors">
-                    Doctor Workspace Sign In
+                    Doctor Portal Sign In
                   </Link>
                 </li>
                 <li>
                   <Link to="/register" className="hover:text-[#E67230] transition-colors">
-                    Practitioner Registration
+                    Register as Practitioner
                   </Link>
                 </li>
                 <li>
-                  <Link to="/terms" className="hover:text-[#E67230] transition-colors">
-                    Terms &amp; Conditions
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/privacy" className="hover:text-[#E67230] transition-colors">
-                    Privacy Policy
-                  </Link>
+                  <a href="#impact" className="hover:text-[#E67230] transition-colors">
+                    Clinical Impact Pillars
+                  </a>
                 </li>
               </ul>
             </div>
 
-            {/* Col 4: Operational Hours */}
+            {/* Col 4: Statutory & Governance */}
             <div>
               <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#111111]">
-                Support Hours
+                Governance
               </p>
-              <div className="mt-4 space-y-2 text-xs sm:text-sm text-[#555555]">
-                <p>
-                  <strong>{MEYVEDA_CONTACT.hours}</strong>
-                </p>
-                <p>Closed on National &amp; State Gazetted Holidays.</p>
-                <div className="pt-3">
-                  <a
-                    href={MEYVEDA_CONTACT.whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl border border-[#EBE7DF] bg-[#FAF9F6] px-3.5 py-2 text-xs font-bold text-[#111111] hover:border-[#25D366] hover:text-[#25D366] transition-colors"
-                  >
-                    <span>WhatsApp Support</span>
-                  </a>
-                </div>
-              </div>
+              <ul className="mt-4 space-y-2 text-xs sm:text-sm text-[#555555]">
+                <li className="flex items-center gap-1.5 text-xs text-[#666666]">
+                  <ShieldCheck className="size-3.5 text-[#E67230]" />
+                  <span>State AYUSH Council Lookup</span>
+                </li>
+                <li className="flex items-center gap-1.5 text-xs text-[#666666]">
+                  <CheckCircle2 className="size-3.5 text-[#E67230]" />
+                  <span>Zero Commission Guarantee</span>
+                </li>
+                <li className="flex items-center gap-1.5 text-xs text-[#666666]">
+                  <Award className="size-3.5 text-[#E67230]" />
+                  <span>ABDM-HPR Standards Ready</span>
+                </li>
+                <li className="flex items-center gap-1.5 text-xs text-[#666666]">
+                  <Building2 className="size-3.5 text-[#E67230]" />
+                  <span>Meyveda Ayush Pvt Ltd</span>
+                </li>
+              </ul>
             </div>
           </div>
 
-          {/* Bottom Copyright */}
-          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[#EBE7DF] pt-6 text-xs text-[#666666] sm:flex-row">
-            <p>© {new Date().getFullYear()} Meyveda Health Technologies. All rights reserved.</p>
-            <div className="flex items-center gap-4">
-              <Link to="/terms" className="hover:text-[#E67230] underline">
-                Terms
+          {/* Bottom Copyright & Legal Links */}
+          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-[#EBE7DF] pt-8 text-xs text-[#777777] sm:flex-row">
+            <p>© {new Date().getFullYear()} Meyveda Ayush Pvt Ltd. All rights reserved.</p>
+            <div className="flex gap-6">
+              <Link to="/privacy" className="hover:text-[#E67230] transition-colors">
+                Privacy Policy
               </Link>
-              <span>•</span>
-              <Link to="/privacy" className="hover:text-[#E67230] underline">
-                Privacy
+              <Link to="/terms" className="hover:text-[#E67230] transition-colors">
+                Terms of Service
               </Link>
-              <span>•</span>
-              <Link to="/contact" className="hover:text-[#E67230] underline">
-                Contact
+              <Link to="/contact" className="hover:text-[#E67230] transition-colors">
+                Support &amp; Grievance Desk
               </Link>
             </div>
           </div>
@@ -465,5 +901,3 @@ export function AboutUsPage() {
     </div>
   );
 }
-export default AboutUsPage;
-
