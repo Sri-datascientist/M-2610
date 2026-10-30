@@ -299,7 +299,7 @@ export function buildTerritoryData(
     distEntry.manufacturers.push({
       id: mfr.id,
       company: mfr.company,
-      contact_person: (mfr as any).contactPerson || mfr.contact,
+      contact_person: mfr.contact || (mfr as any).contactPerson,
       email: mfr.email,
       status: mfr.status,
       pincode: mfr.pincode,

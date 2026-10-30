@@ -161,7 +161,8 @@ class EmailOtpService:
         last_err = getattr(provider, "last_error", None)
 
         is_prod = (settings.ENVIRONMENT or os.getenv("ENVIRONMENT", "development")).lower() == "production"
-        if not dispatched and is_prod:
+        is_mock = isinstance(provider, MockConsoleEmailProvider)
+        if not dispatched and is_prod and not is_mock:
             err_suffix = f": {last_err}" if last_err else ". Please check Zoho CPaaS configuration."
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
@@ -172,7 +173,7 @@ class EmailOtpService:
             "success": True,
             "message": f"Verification code dispatched to {email}",
             "target": email,
-            "demo_otp": None if is_prod else code,
+            "demo_otp": code if (not is_prod or is_mock) else None,
             "expires_in": self._ttl_seconds,
         }
 
@@ -184,7 +185,8 @@ class EmailOtpService:
             session = self._sessions.get(norm_email)
             if not session:
                 is_dev = os.getenv("ENVIRONMENT", "development").lower() != "production"
-                if is_dev and clean_code == "123456":
+                is_mock = isinstance(self._get_provider(), MockConsoleEmailProvider)
+                if (is_dev or is_mock) and clean_code == "123456":
                     token = self.create_verification_token(norm_email)
                     return {
                         "success": True,

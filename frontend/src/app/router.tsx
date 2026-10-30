@@ -189,12 +189,18 @@ export const registerRoute = createRoute({
 export const forgotPasswordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/forgot-password",
+  beforeLoad: () => {
+    throw redirect({ to: "/login", search: { mode: "forgot" }, replace: true });
+  },
   component: ForgotPasswordPage,
 });
 
 export const resetPasswordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/reset-password",
+  beforeLoad: () => {
+    throw redirect({ to: "/login", search: { mode: "forgot" }, replace: true });
+  },
   component: ResetPasswordPage,
 });
 

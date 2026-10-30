@@ -1,6 +1,18 @@
 import { useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, ShieldCheck, ArrowLeft, Home } from "lucide-react";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import {
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  ArrowRight,
+  ShieldCheck,
+  ArrowLeft,
+  Home,
+  KeyRound,
+  CheckCircle2,
+  RotateCcw,
+} from "lucide-react";
 import meyvedaLogo from "@/assets/meyvedalogo.png";
 import { Mascot } from "@/components/ui/mascot";
 import { toast } from "sonner";
@@ -25,15 +37,139 @@ export const Route = createFileRoute("/login")({
   component: Login,
 });
 
-export function Login() {
+export function Login({ initialMode }: { initialMode?: "signin" | "forgot" | "reset" } = {}) {
   const navigate = useNavigate();
+  const search = useSearch({ strict: false }) as { mode?: string; portal?: string } | undefined;
 
+  const [viewMode, setViewMode] = useState<"signin" | "forgot" | "reset">(
+    initialMode || (search?.mode === "forgot" ? "forgot" : "signin"),
+  );
+
+  // Sign In States
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Password Recovery States
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotOtp, setForgotOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+
+  // Handle Request Password Reset Code
+  const handleSendResetOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const clean = forgotEmail.trim().toLowerCase();
+    if (!clean.includes("@")) {
+      setErrorMessage("Please enter a valid registered email address.");
+      return;
+    }
+    setIsSendingOtp(true);
+    setErrorMessage("");
+
+    try {
+      const res = await apiClient.post<{
+        success: boolean;
+        message: string;
+        email: string;
+        demo_otp?: string;
+      }>("/auth/forgot-password", { email: clean });
+
+      toast.success(res?.message || "Verification code sent to your email.");
+      if (res?.demo_otp) {
+        setForgotOtp(res.demo_otp);
+      }
+      setViewMode("reset");
+    } catch (err: any) {
+      const msg = err?.message || "Failed to dispatch recovery code. Please verify your email.";
+      setErrorMessage(msg);
+      toast.error(msg);
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  // Handle Complete Password Reset
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage("");
+    const clean = forgotEmail.trim().toLowerCase();
+    const cleanOtp = forgotOtp.trim();
+
+    if (!cleanOtp) {
+      setErrorMessage("Please enter the 6-digit verification code.");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setErrorMessage("New password must be at least 6 characters long.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setErrorMessage("Passwords do not match. Please re-enter.");
+      return;
+    }
+
+    setIsResettingPassword(true);
+    try {
+      const res = await apiClient.post<{ success: boolean; message: string }>("/auth/reset-password", {
+        email: clean,
+        otp: cleanOtp,
+        new_password: newPassword,
+      });
+
+      toast.success(res?.message || "Password updated successfully!");
+
+      // Attempt immediate login with new credentials
+      try {
+        const loginRes = await apiClient.post<{
+          access_token?: string;
+          role?: string;
+          user_id?: string;
+        }>("/auth/login", {
+          email: clean,
+          password: newPassword,
+        });
+
+        const role = (loginRes?.role || "doctor").toLowerCase();
+        if (loginRes?.access_token) {
+          localStorage.setItem("meyveda_auth_token", loginRes.access_token);
+          localStorage.setItem("meyveda_user_role", role);
+          localStorage.setItem("meyveda_user_email", clean);
+          setStoredToken(loginRes.access_token);
+        }
+
+        if (role === "admin") {
+          window.location.href = "/admin/home";
+          return;
+        }
+        if (role === "manufacturer") {
+          window.location.href = "/manufacturer/overview";
+          return;
+        }
+
+        setState(() => ({ signedIn: true }));
+        navigate({ to: "/workspace" });
+      } catch {
+        // Fallback to signin screen with credentials prefilled
+        setEmail(clean);
+        setPassword(newPassword);
+        setViewMode("signin");
+        toast.info("Password updated. You can now sign in.");
+      }
+    } catch (err: any) {
+      const msg = err?.message || "Invalid or expired verification code. Please request a new code.";
+      setErrorMessage(msg);
+      toast.error(msg);
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -238,21 +374,9 @@ export function Login() {
             </div>
           </div>
 
-          {/* RIGHT SIDE: Unified Intelligent Sign In Form */}
+          {/* RIGHT SIDE: Unified Intelligent Sign In Form & Password Recovery */}
           <div className="lg:col-span-7 p-6 sm:p-10 lg:p-12 flex flex-col justify-center">
             <div className="max-w-md w-full mx-auto">
-              <div className="mb-6 sm:mb-8">
-                <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230] mb-1">
-                  MEYVEDA · SIGN IN
-                </p>
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
-                  Welcome back
-                </h1>
-                <p className="mt-2 text-xs sm:text-sm text-[#666666] leading-relaxed">
-                  Sign in to access your Doctor Workspace, Administrator console, or Manufacturer portal.
-                </p>
-              </div>
-
               {/* Error Message if any */}
               {errorMessage && (
                 <div
@@ -264,122 +388,336 @@ export function Login() {
                 </div>
               )}
 
-              <form
-                onSubmit={handleSubmit}
-                data-testid="doctor-login-form"
-                className="space-y-4 sm:space-y-5"
-              >
-                {/* Email Field */}
-                <div>
-                  <label
-                    htmlFor="login-email"
-                    className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5"
-                  >
-                    Email
-                  </label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
-                      <Mail className="size-4" />
-                    </div>
-                    <input
-                      id="login-email"
-                      name="email"
-                      type="email"
-                      autoComplete="username"
-                      aria-label="Doctor Email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="name@practice.com"
-                      className="w-full rounded-md border border-[#EBE7DF] bg-[#FAF9F6]/40 pl-10 pr-4 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:bg-white focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-all duration-200"
-                    />
+              {/* MODE 1: Standard Sign In */}
+              {viewMode === "signin" && (
+                <>
+                  <div className="mb-6 sm:mb-8">
+                    <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230] mb-1">
+                      MEYVEDA · SIGN IN
+                    </p>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
+                      Welcome back
+                    </h1>
+                    <p className="mt-2 text-xs sm:text-sm text-[#666666] leading-relaxed">
+                      Sign in to access your Doctor Workspace, Administrator console, or Manufacturer portal.
+                    </p>
                   </div>
-                </div>
 
-                {/* Password Field with Visibility Toggle */}
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label
-                      htmlFor="login-password"
-                      className="block text-xs sm:text-sm font-bold text-[#111111]"
-                    >
-                      Password
-                    </label>
-                    <Link
-                      to="/forgot-password"
-                      className="text-xs font-semibold text-[#E67230] hover:underline focus:outline-none"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
-                      <Lock className="size-4" />
+                  <form
+                    onSubmit={handleSubmit}
+                    data-testid="doctor-login-form"
+                    className="space-y-4 sm:space-y-5"
+                  >
+                    {/* Email Field */}
+                    <div>
+                      <label
+                        htmlFor="login-email"
+                        className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5"
+                      >
+                        Email
+                      </label>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                          <Mail className="size-4" />
+                        </div>
+                        <input
+                          id="login-email"
+                          name="email"
+                          type="email"
+                          autoComplete="username"
+                          aria-label="Doctor Email"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="name@practice.com"
+                          className="w-full rounded-md border border-[#EBE7DF] bg-[#FAF9F6]/40 pl-10 pr-4 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:bg-white focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-all duration-200"
+                        />
+                      </div>
                     </div>
-                    <input
-                      id="login-password"
-                      name="password"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="current-password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••••••"
-                      className="w-full rounded-md border border-[#EBE7DF] bg-[#FAF9F6]/40 pl-10 pr-11 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:bg-white focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-all duration-200"
-                    />
+
+                    {/* Password Field with Visibility Toggle */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label
+                          htmlFor="login-password"
+                          className="block text-xs sm:text-sm font-bold text-[#111111]"
+                        >
+                          Password
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setForgotEmail(email || "");
+                            setErrorMessage("");
+                            setViewMode("forgot");
+                          }}
+                          className="text-xs font-semibold text-[#E67230] hover:underline focus:outline-none cursor-pointer"
+                        >
+                          Forgot password?
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                          <Lock className="size-4" />
+                        </div>
+                        <input
+                          id="login-password"
+                          name="password"
+                          type={showPassword ? "text" : "password"}
+                          autoComplete="current-password"
+                          required
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="••••••••••••"
+                          className="w-full rounded-md border border-[#EBE7DF] bg-[#FAF9F6]/40 pl-10 pr-11 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:bg-white focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-all duration-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                          className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-[#888888] hover:text-[#111111] transition-colors focus:outline-none cursor-pointer"
+                        >
+                          {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Keep me signed in */}
+                    <div className="flex items-center justify-between pt-1">
+                      <label className="flex items-center gap-2 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                          className="size-4 rounded border-[#EBE7DF] text-[#E67230] focus:ring-[#E67230] accent-[#E67230]"
+                        />
+                        <span className="text-xs sm:text-sm text-[#555555]">Keep me signed in</span>
+                      </label>
+                    </div>
+
+                    {/* Single Primary Sign In Button */}
                     <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      aria-label={showPassword ? "Hide password" : "Show password"}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-[#888888] hover:text-[#111111] transition-colors focus:outline-none cursor-pointer"
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full h-12 sm:h-13 rounded-md bg-[#E67230] hover:bg-[#D15F1F] text-white font-bold text-base flex items-center justify-center gap-2 shadow-[0_4px_16px_-4px_rgba(230,114,48,0.4)] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#E67230] focus-visible:ring-offset-2 cursor-pointer"
                     >
-                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      {isSubmitting ? (
+                        <span>Authenticating with Backend...</span>
+                      ) : (
+                        <>
+                          <span>Sign In</span>
+                          <ArrowRight className="size-4" />
+                        </>
+                      )}
                     </button>
+                  </form>
+
+                  {/* Registration Link Footer */}
+                  <div className="mt-8 pt-6 border-t border-[#EBE7DF] text-center">
+                    <p className="text-xs sm:text-sm text-[#555555]">
+                      Don't have a doctor account yet?{" "}
+                      <Link
+                        to="/register"
+                        className="font-bold text-[#E67230] hover:underline"
+                      >
+                        Register as Doctor
+                      </Link>
+                    </p>
                   </div>
-                </div>
+                </>
+              )}
 
-                {/* Keep me signed in */}
-                <div className="flex items-center justify-between pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="size-4 rounded border-[#EBE7DF] text-[#E67230] focus:ring-[#E67230] accent-[#E67230]"
-                    />
-                    <span className="text-xs sm:text-sm text-[#555555]">Keep me signed in</span>
-                  </label>
-                </div>
+              {/* MODE 2: Request Password Recovery Code */}
+              {viewMode === "forgot" && (
+                <>
+                  <div className="mb-6 sm:mb-8">
+                    <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230] mb-1">
+                      MEYVEDA · ACCOUNT RECOVERY
+                    </p>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
+                      Reset your password
+                    </h1>
+                    <p className="mt-2 text-xs sm:text-sm text-[#666666] leading-relaxed">
+                      Enter your registered email address and we'll dispatch a 6-digit verification code to reset your password.
+                    </p>
+                  </div>
 
-                {/* Single Primary Sign In Button */}
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full h-12 sm:h-13 rounded-md bg-[#E67230] hover:bg-[#D15F1F] text-white font-bold text-base flex items-center justify-center gap-2 shadow-[0_4px_16px_-4px_rgba(230,114,48,0.4)] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#E67230] focus-visible:ring-offset-2 cursor-pointer"
-                >
-                  {isSubmitting ? (
-                    <span>Authenticating with Backend...</span>
-                  ) : (
-                    <>
-                      <span>Sign In</span>
-                      <ArrowRight className="size-4" />
-                    </>
-                  )}
-                </button>
-              </form>
+                  <form onSubmit={handleSendResetOtp} className="space-y-4 sm:space-y-5">
+                    <div>
+                      <label htmlFor="forgot-email" className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                        Registered Email Address *
+                      </label>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                          <Mail className="size-4" />
+                        </div>
+                        <input
+                          id="forgot-email"
+                          type="email"
+                          required
+                          value={forgotEmail}
+                          onChange={(e) => setForgotEmail(e.target.value)}
+                          placeholder="name@practice.com"
+                          className="w-full rounded-md border border-[#EBE7DF] bg-[#FAF9F6]/40 pl-10 pr-4 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:bg-white focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-all duration-200"
+                        />
+                      </div>
+                    </div>
 
-              {/* Registration Link Footer */}
-              <div className="mt-8 pt-6 border-t border-[#EBE7DF] text-center">
-                <p className="text-xs sm:text-sm text-[#555555]">
-                  Don't have a doctor account yet?{" "}
-                  <Link
-                    to="/register"
-                    className="font-bold text-[#E67230] hover:underline"
-                  >
-                    Register as Doctor
-                  </Link>
-                </p>
-              </div>
+                    <button
+                      type="submit"
+                      disabled={isSendingOtp}
+                      className="w-full h-12 sm:h-13 rounded-md bg-[#E67230] hover:bg-[#D15F1F] text-white font-bold text-base flex items-center justify-center gap-2 shadow-[0_4px_16px_-4px_rgba(230,114,48,0.4)] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#E67230] focus-visible:ring-offset-2 cursor-pointer"
+                    >
+                      {isSendingOtp ? (
+                        <span>Sending Verification Code...</span>
+                      ) : (
+                        <>
+                          <span>Send Verification Code</span>
+                          <ArrowRight className="size-4" />
+                        </>
+                      )}
+                    </button>
+
+                    <div className="pt-2 text-center">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setErrorMessage("");
+                          setViewMode("signin");
+                        }}
+                        className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#555555] hover:text-[#E67230] transition-colors cursor-pointer"
+                      >
+                        <ArrowLeft className="size-3.5" />
+                        Back to Sign In
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
+
+              {/* MODE 3: Set New Password */}
+              {viewMode === "reset" && (
+                <>
+                  <div className="mb-6 sm:mb-8">
+                    <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230] mb-1">
+                      MEYVEDA · SET NEW PASSWORD
+                    </p>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
+                      Choose new password
+                    </h1>
+                    <p className="mt-2 text-xs sm:text-sm text-[#666666] leading-relaxed">
+                      Enter the 6-digit code sent to <strong className="text-[#111111]">{forgotEmail}</strong> and choose a secure password.
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleResetPassword} className="space-y-4 sm:space-y-5">
+                    <div>
+                      <label htmlFor="reset-otp" className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                        6-Digit Verification Code *
+                      </label>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                          <KeyRound className="size-4" />
+                        </div>
+                        <input
+                          id="reset-otp"
+                          type="text"
+                          maxLength={6}
+                          required
+                          value={forgotOtp}
+                          onChange={(e) => setForgotOtp(e.target.value.replace(/\D/g, ""))}
+                          placeholder="123456"
+                          className="w-full rounded-md border border-[#EBE7DF] bg-[#FAF9F6]/40 pl-10 pr-4 py-2.5 sm:py-3 text-sm font-mono tracking-widest text-[#111111] placeholder:text-[#999999] focus:bg-white focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-all duration-200"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="new-password" className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                        New Password *
+                      </label>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                          <Lock className="size-4" />
+                        </div>
+                        <input
+                          id="new-password"
+                          type={showNewPassword ? "text" : "password"}
+                          required
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="At least 6 characters"
+                          className="w-full rounded-md border border-[#EBE7DF] bg-[#FAF9F6]/40 pl-10 pr-11 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:bg-white focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-all duration-200"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-[#888888] hover:text-[#111111] transition-colors focus:outline-none cursor-pointer"
+                        >
+                          {showNewPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="confirm-password" className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                        Confirm New Password *
+                      </label>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                          <Lock className="size-4" />
+                        </div>
+                        <input
+                          id="confirm-password"
+                          type={showNewPassword ? "text" : "password"}
+                          required
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Re-enter new password"
+                          className="w-full rounded-md border border-[#EBE7DF] bg-[#FAF9F6]/40 pl-10 pr-4 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:bg-white focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-all duration-200"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isResettingPassword}
+                      className="w-full h-12 sm:h-13 rounded-md bg-[#E67230] hover:bg-[#D15F1F] text-white font-bold text-base flex items-center justify-center gap-2 shadow-[0_4px_16px_-4px_rgba(230,114,48,0.4)] transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#E67230] focus-visible:ring-offset-2 cursor-pointer"
+                    >
+                      {isResettingPassword ? (
+                        <span>Updating Password...</span>
+                      ) : (
+                        <>
+                          <span>Update Password & Sign In</span>
+                          <CheckCircle2 className="size-4" />
+                        </>
+                      )}
+                    </button>
+
+                    <div className="flex items-center justify-between pt-2 text-xs sm:text-sm">
+                      <button
+                        type="button"
+                        onClick={() => handleSendResetOtp({ preventDefault: () => {} } as any)}
+                        disabled={isSendingOtp}
+                        className="text-[#E67230] hover:underline font-semibold cursor-pointer"
+                      >
+                        Resend code
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setErrorMessage("");
+                          setViewMode("signin");
+                        }}
+                        className="inline-flex items-center gap-1 font-semibold text-[#555555] hover:text-[#E67230] transition-colors cursor-pointer"
+                      >
+                        <ArrowLeft className="size-3.5" />
+                        Back to Sign In
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
             </div>
           </div>
         </div>
