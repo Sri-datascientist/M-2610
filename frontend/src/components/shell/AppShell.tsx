@@ -2,6 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Home,
+  LayoutDashboard,
   Search,
   BookOpen,
   Factory,
@@ -37,7 +38,8 @@ export interface NavItem {
 }
 
 export const NAV: readonly NavItem[] = [
-  { to: "/workspace", label: "Home", icon: Home },
+  { to: "/", label: "Home", icon: Home },
+  { to: "/workspace", label: "Dashboard", icon: LayoutDashboard },
   { to: "/survey", label: "Survey", icon: ClipboardList },
   { to: "/referrals", label: "Referrals & Early Access", icon: UserPlus },
 ] as const;
@@ -48,16 +50,20 @@ const navItemClass = (active: boolean) =>
     active && "bg-sidebar-accent font-semibold",
   );
 
-function BrandPanel({ compact }: { compact?: boolean }) {
+function BrandPanel({ compact, onNavigate }: { compact?: boolean; onNavigate?: () => void }) {
   return (
-    <div
+    <Link
+      to="/"
+      onClick={onNavigate}
+      title="Return to Meyveda Home"
+      aria-label="Return to Meyveda Home"
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-2xl bg-white shadow-soft",
+        "group flex shrink-0 items-center justify-center rounded-2xl bg-white shadow-soft transition-all duration-200 hover:scale-[1.02] hover:shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white",
         compact ? "mx-auto h-14 w-14" : "w-full px-3 py-3",
       )}
     >
       <Logo compact={compact ?? false} />
-    </div>
+    </Link>
   );
 }
 
@@ -66,8 +72,10 @@ function NavList({ collapsed, onNavigate }: { collapsed: boolean; onNavigate?: (
 
   const item = (n: { to: string; label: string; icon: typeof Home }) => {
     const active =
-      n.to === "/workspace" || n.to === "/ws"
-        ? pathname === "/workspace" || pathname === "/ws"
+      n.to === "/"
+        ? pathname === "/"
+        : n.to === "/workspace" || n.to === "/ws"
+        ? pathname === "/workspace" || pathname === "/ws" || pathname === "/dashboard"
         : pathname.startsWith(n.to);
     const Icon = n.icon;
     return (
@@ -279,7 +287,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
               <div className="relative z-[1] mb-4 pr-12">
-                <BrandPanel />
+                <BrandPanel onNavigate={() => closeDrawer(false)} />
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto">
                 <NavList collapsed={false} onNavigate={() => closeDrawer(false)} />
@@ -306,7 +314,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span className="max-w-[200px] truncate text-xs font-semibold text-foreground">
             {doctor.name}
           </span>
-          <div className="w-9" />
+          <Link
+            to="/"
+            title="Return to Meyveda Home"
+            aria-label="Return to Meyveda Home"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-lg hover:bg-muted text-foreground transition-colors"
+          >
+            <Home className="h-4 w-4" />
+          </Link>
         </div>
 
         <main id="main" tabIndex={-1} className="flex-1 outline-none">

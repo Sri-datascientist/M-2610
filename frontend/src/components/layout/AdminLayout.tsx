@@ -164,12 +164,13 @@ export function AdminLayout() {
                           )}
                         >
                           <Link
-                            to="/admin/home"
+                            to="/"
                             className={cn(
-                              "mb-8 flex items-center px-2 md:max-lg:justify-center md:max-lg:px-0",
+                              "mb-8 flex items-center px-2 md:max-lg:justify-center md:max-lg:px-0 transition-opacity hover:opacity-90",
                               collapsed && "lg:justify-center lg:px-0",
                             )}
-                            aria-label="Meyveda Admin"
+                            aria-label="Return to Meyveda Home"
+                            title="Return to Meyveda Home"
                           >
                             <SidebarLogo className={cn(collapsed && "lg:w-[44px]")} />
                           </Link>
@@ -204,12 +205,21 @@ export function AdminLayout() {
                               >
                                 <PanelLeft className="h-5 w-5" />
                               </button>
-                              <Link to="/admin/home" className="md:hidden">
+                              <Link to="/" className="md:hidden" title="Return to Meyveda Home" aria-label="Return to Meyveda Home">
                                 <BrandMark className="[&_img]:h-7" />
                               </Link>
-                              <p className="ml-auto hidden text-sm text-muted-foreground sm:block">
-                                {admin?.role ?? "Meyveda administration"}
-                              </p>
+                              <div className="ml-auto hidden items-center gap-3 sm:flex">
+                                <Link
+                                  to="/"
+                                  className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-surface hover:text-foreground"
+                                  title="Return to Meyveda Home"
+                                >
+                                  <span>Meyveda Home</span>
+                                </Link>
+                                <p className="text-sm text-muted-foreground">
+                                  {admin?.role ?? "Meyveda administration"}
+                                </p>
+                              </div>
                               <div className="relative ml-auto sm:ml-0">
                                 <Link
                                   to="/admin/notifications"
@@ -297,7 +307,9 @@ export function AdminLayout() {
                             )}
                           >
                             <div className="mb-6 flex items-center justify-between">
-                              <BrandMark />
+                              <Link to="/" onClick={() => setOpen(false)} title="Return to Meyveda Home" aria-label="Return to Meyveda Home">
+                                <BrandMark />
+                              </Link>
                               <button
                                 type="button"
                                 onClick={() => setOpen(false)}
