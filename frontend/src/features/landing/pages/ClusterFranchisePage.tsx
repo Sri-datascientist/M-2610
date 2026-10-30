@@ -1271,12 +1271,12 @@ Timestamp: ${d.timestamp}`;
                 Contact Us
               </Link>
               <span>·</span>
-              <a href="mailto:meyveda@gmail.com" className="hover:text-[#E67230] transition-colors font-medium">
-                meyveda@gmail.com
+              <a href="mailto:meyvedalife@gmail.com" className="hover:text-[#E67230] transition-colors font-medium">
+                meyvedalife@gmail.com
               </a>
               <span>·</span>
               <a href="tel:+919986398332" className="hover:text-[#E67230] transition-colors font-medium">
-                +91 99863 98332
+                998-MEYVEDA
               </a>
             </div>
           </div>

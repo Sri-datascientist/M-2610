@@ -280,7 +280,7 @@ export function TermsPage() {
                   <strong>Confidentiality:</strong> You are responsible for safeguarding your login credentials. You must not disclose your password, OTPs, or share session tokens with third parties.
                 </li>
                 <li>
-                  <strong>Unauthorized Access:</strong> You agree to notify Meyveda immediately at <a href="mailto:meyveda@gmail.com" className="text-[#E67230] font-bold hover:underline">meyveda@gmail.com</a> (or call/WhatsApp <a href="tel:+919986398332" className="text-[#E67230] font-bold hover:underline">+91 99863 98332</a>) upon becoming aware of any breach of security, unauthorized access, or credential compromise.
+                  <strong>Unauthorized Access:</strong> You agree to notify Meyveda immediately at <a href="mailto:meyvedalife@gmail.com" className="text-[#E67230] font-bold hover:underline">meyvedalife@gmail.com</a> (or call/WhatsApp <a href="tel:+919986398332" className="text-[#E67230] font-bold hover:underline">998-MEYVEDA</a>) upon becoming aware of any breach of security, unauthorized access, or credential compromise.
                 </li>
                 <li>
                   <strong>Session Integrity:</strong> Meyveda utilizes 256-bit SSL encrypted transports and time-bound bearer tokens. Any attempt to bypass access controls, spoof identities, or scrape internal APIs will result in immediate session revocation.
@@ -427,8 +427,8 @@ export function TermsPage() {
               <div className="rounded-xl border border-[#EBE7DF] bg-[#FAF9F6] p-4.5 space-y-1 text-xs sm:text-sm">
                 <p><strong>Grievance &amp; Legal Officer:</strong> Meyveda Legal &amp; Compliance Cell</p>
                 <p><strong>Entity:</strong> Meyveda Health Technologies Private Limited</p>
-                <p><strong>Email:</strong> <a href="mailto:meyveda@gmail.com" className="text-[#E67230] font-bold hover:underline">meyveda@gmail.com</a></p>
-                <p><strong>Helpline &amp; WhatsApp:</strong> <a href="tel:+919986398332" className="text-[#E67230] font-bold hover:underline">+91 99863 98332</a></p>
+                <p><strong>Email:</strong> <a href="mailto:meyvedalife@gmail.com" className="text-[#E67230] font-bold hover:underline">meyvedalife@gmail.com</a></p>
+                <p><strong>Helpline &amp; WhatsApp:</strong> <a href="tel:+919986398332" className="text-[#E67230] font-bold hover:underline">998-MEYVEDA</a></p>
                 <p><strong>Corporate Location:</strong> Chennai, Tamil Nadu, India</p>
                 <p><strong>Response Turnaround:</strong> Within 24-36 business hours of receipt</p>
               </div>

@@ -181,10 +181,10 @@ export function Help() {
           <div className="rounded-lg border border-border bg-surface p-3 text-xs space-y-1">
             <p className="font-medium text-foreground">Direct Support Helpline:</p>
             <p className="text-muted-foreground">
-              Email: <a href="mailto:meyveda@gmail.com" className="font-semibold text-primary hover:underline">meyveda@gmail.com</a>
+              Email: <a href="mailto:meyvedalife@gmail.com" className="font-semibold text-primary hover:underline">meyvedalife@gmail.com</a>
             </p>
             <p className="text-muted-foreground">
-              Phone / WhatsApp: <a href="tel:+919986398332" className="font-semibold text-primary hover:underline">+91 99863 98332</a>
+              Phone / WhatsApp: <a href="tel:+919986398332" className="font-semibold text-primary hover:underline">998-MEYVEDA</a>
             </p>
           </div>
           <Field label="Category">

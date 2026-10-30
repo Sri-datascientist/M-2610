@@ -46,7 +46,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can I contact you directly on WhatsApp?",
-    a: "Yes! You can reach our team directly at +91 99863 98332 or click the 'Open in WhatsApp' button to start an instant conversation with our team.",
+    a: "Yes! You can reach our team directly at 998-MEYVEDA or click the 'Open in WhatsApp' button to start an instant conversation with our team.",
   },
   {
     q: "Where is Meyveda headquartered?",

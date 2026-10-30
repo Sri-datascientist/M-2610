@@ -5880,15 +5880,15 @@ export function MeyvedaDoctorsPage() {
                 <li className="pt-2.5 border-t border-[#EBE7DF] text-xs text-[#555555] space-y-1.5">
                   <p className="font-bold text-[#111111]">Direct Contact</p>
                   <p>
-                    <a href="mailto:meyveda@gmail.com" className="hover:text-[#E67230] transition-colors flex items-center gap-1.5 font-medium">
+                    <a href="mailto:meyvedalife@gmail.com" className="hover:text-[#E67230] transition-colors flex items-center gap-1.5 font-medium">
                       <Mail className="size-3.5 text-[#E67230]" />
-                      meyveda@gmail.com
+                      meyvedalife@gmail.com
                     </a>
                   </p>
                   <p>
                     <a href="tel:+919986398332" className="hover:text-[#E67230] transition-colors flex items-center gap-1.5 font-medium">
                       <Phone className="size-3.5 text-[#E67230]" />
-                      +91 99863 98332
+                      998-MEYVEDA
                     </a>
                   </p>
                 </li>
