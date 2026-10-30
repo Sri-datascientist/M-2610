@@ -49,10 +49,25 @@ export function Register() {
   const navigate = useNavigate();
 
   // 1. Full Name
-  const [fullName, setFullName] = useState("");
+  const [fullName, setFullName] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("name") || "";
+    }
+    return "";
+  });
 
   // 2. Qualification
-  const [qualification, setQualification] = useState("BAMS");
+  const [qualification, setQualification] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get("qualification");
+      if (q && ["BAMS", "BSMS", "BNYS", "BHMS", "BUMS"].includes(q.toUpperCase())) {
+        return q.toUpperCase();
+      }
+    }
+    return "BAMS";
+  });
 
   // 3. City
   const [city, setCity] = useState("");
@@ -64,7 +79,13 @@ export function Register() {
   const [doctorRegNumber, setDoctorRegNumber] = useState("");
 
   // 6. Email + OTP Verification
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("email") || "";
+    }
+    return "";
+  });
   const [emailOtpSent, setEmailOtpSent] = useState(false);
   const [emailOtpInput, setEmailOtpInput] = useState("");
   const [emailVerified, setEmailVerified] = useState(false);
@@ -74,7 +95,13 @@ export function Register() {
   const [emailToken, setEmailToken] = useState<string | null>(null);
 
   // 7. Mobile + OTP Verification
-  const [mobile, setMobile] = useState("");
+  const [mobile, setMobile] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("mobile") || params.get("phone") || "";
+    }
+    return "";
+  });
   const [mobileOtpSent, setMobileOtpSent] = useState(false);
   const [mobileOtpInput, setMobileOtpInput] = useState("");
   const [mobileVerified, setMobileVerified] = useState(false);

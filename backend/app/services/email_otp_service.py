@@ -43,6 +43,9 @@ class BaseEmailProvider:
     def send_email(self, email: str, otp_code: str) -> bool:
         raise NotImplementedError
 
+    def send_custom_email(self, email: str, subject: str, html_body: str, to_name: str = "Doctor") -> bool:
+        raise NotImplementedError
+
 
 class MockConsoleEmailProvider(BaseEmailProvider):
     """
@@ -53,6 +56,12 @@ class MockConsoleEmailProvider(BaseEmailProvider):
         parts = email.split("@")
         masked = parts[0][:2] + "***@" + parts[1] if len(parts) == 2 else "***"
         logger.info("Mock Provider: Email OTP dispatched to %s", masked)
+        return True
+
+    def send_custom_email(self, email: str, subject: str, html_body: str, to_name: str = "Doctor") -> bool:
+        parts = email.split("@")
+        masked = parts[0][:2] + "***@" + parts[1] if len(parts) == 2 else "***"
+        logger.info("Mock Provider: Email '%s' dispatched to %s (%s)", subject, masked, to_name)
         return True
 
 
@@ -92,10 +101,18 @@ class ZohoCpaasEmailProvider(BaseEmailProvider):
             f"<p style='color: #94a3b8; font-size: 11px; text-align: center; margin: 0;'>© 2026 Meyveda. All rights reserved.</p>"
             f"</div>"
         )
+        return self.send_custom_email(
+            email=email,
+            subject=f"Your Meyveda Verification Code: {otp_code}",
+            html_body=html_body,
+            to_name="Doctor",
+        )
+
+    def send_custom_email(self, email: str, subject: str, html_body: str, to_name: str = "Doctor") -> bool:
         payload = {
             "from": {"address": self.from_address, "name": self.from_name},
-            "to": [{"email_address": {"address": email.strip().lower(), "name": "Doctor"}}],
-            "subject": f"Your Meyveda Verification Code: {otp_code}",
+            "to": [{"email_address": {"address": email.strip().lower(), "name": to_name}}],
+            "subject": subject,
             "htmlbody": html_body,
         }
         headers = {
@@ -108,7 +125,7 @@ class ZohoCpaasEmailProvider(BaseEmailProvider):
                 resp = client.post(self.endpoint, json=payload, headers=headers)
             if resp.status_code in (200, 201):
                 self.last_error = None
-                logger.info("Zoho CPaaS email dispatched successfully to %s.", email)
+                logger.info("Zoho CPaaS email '%s' dispatched successfully to %s.", subject, email)
                 return True
             self.last_error = f"{resp.text} (status: {resp.status_code})"
             logger.error("Zoho CPaaS email dispatch failed with status %s: %s", resp.status_code, resp.text)
@@ -247,6 +264,196 @@ class EmailOtpService:
             return payload.get("sub") == email.strip().lower() and payload.get("purpose") == "registration_verification"
         except Exception:
             return False
+
+    def send_colleague_invitation(
+        self,
+        colleague_name: str,
+        colleague_email: str,
+        colleague_mobile: str,
+        colleague_qualification: str,
+        inviter_name: str,
+        inviter_qualification: str,
+        invite_code: str,
+        app_url: str = "http://localhost:3000",
+    ) -> dict[str, any]:
+        import urllib.parse
+        clean_email = colleague_email.strip().lower()
+        clean_name = colleague_name.strip()
+        clean_mobile = colleague_mobile.strip()
+        clean_qual = colleague_qualification.strip() or "BAMS"
+        clean_inviter = inviter_name.strip()
+        clean_inviter_qual = inviter_qualification.strip() or "Vaidya"
+
+        # Build direct registration link prefilled with all 4 parameters + invite code
+        query_params = urllib.parse.urlencode({
+            "ref": invite_code,
+            "name": clean_name,
+            "email": clean_email,
+            "mobile": clean_mobile,
+            "qualification": clean_qual,
+        })
+        base_clean = app_url.rstrip("/")
+        registration_url = f"{base_clean}/register?{query_params}"
+
+        subject = f"Dr. {clean_inviter} has invited you to join Meyveda — AYUSH Early Access"
+
+        html_body = f"""<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{subject}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #FAF9F6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #111111;">
+  <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #FAF9F6; padding: 32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" border="0" cellpadding="0" cellspacing="0" style="max-width: 580px; background-color: #ffffff; border-radius: 16px; border: 1px solid #EBE7DF; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); overflow: hidden;">
+          
+          <!-- Header Banner -->
+          <tr>
+            <td style="background-color: #FAF7F2; padding: 28px 32px; border-bottom: 2px solid #E67230; text-align: center;">
+              <h1 style="margin: 0; font-size: 26px; font-weight: 800; color: #111111; letter-spacing: -0.5px;">
+                mey<span style="color: #E67230;">veda</span>
+              </h1>
+              <p style="margin: 6px 0 0 0; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #777777; font-weight: 600;">
+                Ancient Wisdom · Modern Practice · Clinical Intelligence
+              </p>
+            </td>
+          </tr>
+
+          <!-- Body Content -->
+          <tr>
+            <td style="padding: 32px 32px 24px 32px;">
+              <div style="background-color: #FFF7ED; border-left: 4px solid #E67230; padding: 14px 18px; border-radius: 4px; margin-bottom: 24px;">
+                <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #9A3412; font-weight: 600;">
+                  Personal Invitation from Dr. {clean_inviter} ({clean_inviter_qual})
+                </p>
+              </div>
+
+              <p style="font-size: 16px; font-weight: 700; color: #111111; margin: 0 0 16px 0;">
+                Dear Dr. {clean_name},
+              </p>
+
+              <p style="font-size: 14px; line-height: 1.6; color: #444444; margin: 0 0 16px 0;">
+                Your friend and esteemed colleague, <strong>Dr. {clean_inviter}</strong>, has personally nominated you for early access to <strong>Meyveda</strong> — India's premier digital platform and clinical desk dedicated to verified AYUSH medical practitioners.
+              </p>
+
+              <p style="font-size: 14px; line-height: 1.6; color: #444444; margin: 0 0 20px 0;">
+                As a recognized <strong>{clean_qual}</strong> practitioner, you are invited to join an exclusive, peer-vetted community advancing clinical excellence, research integrity, and modern AYUSH governance.
+              </p>
+
+              <!-- Features Box -->
+              <div style="background-color: #FAF9F6; border: 1px solid #EBE7DF; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 14px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #555555; font-weight: 700;">
+                  What Awaits You Inside Meyveda:
+                </h3>
+
+                <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="padding-bottom: 12px; vertical-align: top; width: 24px; font-size: 16px;">🌿</td>
+                    <td style="padding-bottom: 12px; font-size: 13px; line-height: 1.5; color: #333333; padding-left: 8px;">
+                      <strong>Classical Grantha &amp; Shloka Intelligence:</strong> Search authentic samhita citations across Charaka, Sushruta, and Ashtanga Hridaya with clinical commentary.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom: 12px; vertical-align: top; width: 24px; font-size: 16px;">📋</td>
+                    <td style="padding-bottom: 12px; font-size: 13px; line-height: 1.5; color: #333333; padding-left: 8px;">
+                      <strong>AYUSH Medicine Intelligence &amp; Pharmacovigilance:</strong> Access verified Form 25D formulations, batch standards, and report ADRs with complete clinical privacy.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding-bottom: 12px; vertical-align: top; width: 24px; font-size: 16px;">🏛</td>
+                    <td style="padding-bottom: 12px; font-size: 13px; line-height: 1.5; color: #333333; padding-left: 8px;">
+                      <strong>Seamless Statutory Council Lookup:</strong> Automatic territory mapping across all 28 Indian States and 8 Union Territories aligned with NCISM &amp; State Councils.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="vertical-align: top; width: 24px; font-size: 16px;">🤝</td>
+                    <td style="font-size: 13px; line-height: 1.5; color: #333333; padding-left: 8px;">
+                      <strong>Closed Peer Network:</strong> 100% closed, non-commercial clinical peer exchange — no spam, ads, or retail distractions.
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <!-- Invite Code Highlight -->
+              <div style="text-align: center; background: #FAF7F2; border: 2px dashed #E67230; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <p style="margin: 0 0 6px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #777777; font-weight: 700;">
+                  Your Exclusive Colleague Invite Code
+                </p>
+                <div style="font-size: 28px; font-weight: 800; letter-spacing: 4px; color: #E67230; font-family: monospace; margin: 4px 0 8px 0;">
+                  {invite_code}
+                </div>
+                <p style="margin: 0; font-size: 12px; color: #666666;">
+                  Registration is currently by invitation only. This code guarantees verified entry.
+                </p>
+              </div>
+
+              <!-- CTA Button -->
+              <div style="text-align: center; margin-bottom: 24px;">
+                <a href="{registration_url}" target="_blank" style="display: inline-block; background-color: #E67230; color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; padding: 14px 32px; border-radius: 8px; box-shadow: 0 4px 14px rgba(230, 114, 48, 0.35); text-transform: none;">
+                  Accept Invitation &amp; Register Account →
+                </a>
+                <p style="margin: 10px 0 0 0; font-size: 11px; color: #888888;">
+                  ✨ Clicking above automatically applies your code and pre-fills your details.
+                </p>
+              </div>
+
+              <!-- Plain link fallback -->
+              <div style="border-top: 1px solid #EBE7DF; padding-top: 16px; margin-bottom: 16px;">
+                <p style="margin: 0 0 6px 0; font-size: 11px; color: #888888;">
+                  Button not working? Copy and paste this URL into your browser:
+                </p>
+                <p style="margin: 0; font-size: 11px; word-break: break-all; color: #E67230; font-family: monospace;">
+                  {registration_url}
+                </p>
+              </div>
+
+              <!-- Sign-off -->
+              <p style="font-size: 13px; line-height: 1.5; color: #555555; margin: 20px 0 0 0;">
+                Warm regards,<br>
+                <strong>Dr. {clean_inviter}</strong> &amp; The Meyveda Clinical Onboarding Team
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #FAF9F6; padding: 20px 32px; border-top: 1px solid #EBE7DF; text-align: center;">
+              <p style="margin: 0 0 6px 0; font-size: 11px; color: #888888;">
+                © 2026 Meyveda. Reinvent You · All rights reserved.
+              </p>
+              <p style="margin: 0; font-size: 11px; color: #999999;">
+                Need assistance? Reach out to our verification desk at <a href="mailto:support@meyveda.com" style="color: #E67230; text-decoration: none;">support@meyveda.com</a>
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>"""
+
+        provider = self._get_provider()
+        dispatched = provider.send_custom_email(
+            email=clean_email,
+            subject=subject,
+            html_body=html_body,
+            to_name=f"Dr. {clean_name}",
+        )
+
+        return {
+            "success": True,
+            "dispatched": dispatched,
+            "email": clean_email,
+            "invite_code": invite_code,
+            "registration_url": registration_url,
+            "subject": subject,
+        }
+
 
 
 email_otp_service = EmailOtpService()

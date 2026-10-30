@@ -105,20 +105,28 @@ export function ReferralsPage() {
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // Invitation Form State
-  const [inviteEmail, setInviteEmail] = useState("");
+  // Invitation Form State (4 Questions: Name, Email, Mobile, Qualification)
   const [inviteName, setInviteName] = useState("");
-  const [inviteSpecialty, setInviteSpecialty] = useState("");
-  const [inviteCouncil, setInviteCouncil] = useState("");
-  const [inviteNotes, setInviteNotes] = useState("");
-  const [acknowledgedEligibility, setAcknowledgedEligibility] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteMobile, setInviteMobile] = useState("");
+  const [inviteQualification, setInviteQualification] = useState("BAMS");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [inviteSuccessId, setInviteSuccessId] = useState<string | null>(null);
+  const [inviteSuccessInfo, setInviteSuccessInfo] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    mobile: string;
+    qualification: string;
+    inviteCode: string;
+    registrationUrl: string;
+  } | null>(null);
 
   // Form errors
   const [formErrors, setFormErrors] = useState<{
-    email?: string | undefined;
-    eligibility?: string | undefined;
+    name?: string;
+    email?: string;
+    mobile?: string;
+    qualification?: string;
   }>({});
 
   // Sync state with search params
@@ -255,15 +263,28 @@ export function ReferralsPage() {
   const validateInviteForm = (): boolean => {
     const errors: typeof formErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneDigits = inviteMobile.replace(/\D/g, "");
+
+    if (!inviteName.trim()) {
+      errors.name = "Colleague's full name is required.";
+    } else if (inviteName.trim().length < 2) {
+      errors.name = "Please enter a valid full name (e.g. Dr. Rajesh K. Varma).";
+    }
 
     if (!inviteEmail.trim()) {
       errors.email = "Colleague's email address is required.";
     } else if (!emailRegex.test(inviteEmail.trim())) {
-      errors.email = "Please provide a valid medical email address.";
+      errors.email = "Please enter a valid email address (e.g. dr.rajesh@example.com).";
     }
 
-    if (!acknowledgedEligibility) {
-      errors.eligibility = "Please confirm that the invitee is a qualified medical practitioner.";
+    if (!inviteMobile.trim()) {
+      errors.mobile = "Colleague's mobile number is required.";
+    } else if (phoneDigits.length < 10) {
+      errors.mobile = "Please provide a valid 10-digit mobile number.";
+    }
+
+    if (!inviteQualification.trim()) {
+      errors.qualification = "Qualification is required.";
     }
 
     setFormErrors(errors);
@@ -280,44 +301,67 @@ export function ReferralsPage() {
     setIsSubmitting(true);
 
     apiClient
-      .post<{ id: string; referred_name: string; referred_contact: string; created_at: string }>(
-        "/referrals",
-        {
-          referred_name: inviteName.trim() || inviteEmail.split("@")[0],
-          referred_contact: inviteEmail.trim(),
-          reason: `Ayurvedic physician referral: ${inviteSpecialty || "General"} · ${inviteCouncil || "State Council"}`,
-        },
-      )
+      .post<{
+        id: string;
+        referred_name: string;
+        referred_contact: string;
+        reason: string;
+        created_at: string;
+        invite_code?: string;
+        registration_url?: string;
+        email_dispatched?: boolean;
+      }>("/referrals", {
+        name: inviteName.trim(),
+        email: inviteEmail.trim(),
+        mobile: inviteMobile.trim(),
+        qualification: inviteQualification.trim(),
+      })
       .then((res) => {
         setIsSubmitting(false);
+        const effectiveInviteCode = res.invite_code || targetCode;
+        const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
+        const queryParams = new URLSearchParams({
+          ref: effectiveInviteCode,
+          name: inviteName.trim(),
+          email: inviteEmail.trim(),
+          mobile: inviteMobile.trim(),
+          qualification: inviteQualification.trim(),
+        }).toString();
+        const effectiveRegistrationUrl = res.registration_url || `${origin}/register?${queryParams}`;
+
         const record: DoctorReferral = {
           id: res.id,
           invitedEmail: res.referred_contact,
           invitedName: res.referred_name,
-          invitedSpecialty: inviteSpecialty || undefined,
-          invitedCouncil: inviteCouncil || undefined,
-          notes: inviteNotes || undefined,
           dateInvited: res.created_at ? res.created_at.split("T")[0] : today(),
           statusUpdatedDate: res.created_at ? res.created_at.split("T")[0] : today(),
           status: "Invitation Sent",
           isDemoSample: false,
+          notes: res.reason,
         };
 
         setState((s) => ({
           referrals: [record, ...s.referrals.filter((r) => r.id !== res.id)],
         }));
-        setInviteSuccessId(record.id);
+
+        setInviteSuccessInfo({
+          id: record.id,
+          name: record.invitedName || inviteName.trim(),
+          email: record.invitedEmail,
+          mobile: inviteMobile.trim(),
+          qualification: inviteQualification.trim(),
+          inviteCode: effectiveInviteCode,
+          registrationUrl: effectiveRegistrationUrl,
+        });
 
         // Reset form
-        setInviteEmail("");
         setInviteName("");
-        setInviteSpecialty("");
-        setInviteCouncil("");
-        setInviteNotes("");
-        setAcknowledgedEligibility(false);
+        setInviteEmail("");
+        setInviteMobile("");
+        setInviteQualification("BAMS");
 
-        toast.success("Invitation dispatched successfully", {
-          description: `Referral ID: ${record.id} · Dispatched to ${record.invitedEmail}`,
+        toast.success("Invitation email dispatched successfully!", {
+          description: `Dispatched to ${record.invitedName} (${record.invitedEmail}) with code ${effectiveInviteCode}`,
         });
       })
       .catch((err: any) => {
@@ -562,179 +606,230 @@ export function ReferralsPage() {
         </div>
       )}
 
-      {/* Tab 2: Colleague Invitation Form */}
+      {/* Tab 2: Colleague Invitation Form (4 Questions) */}
       {activeTab === "invite" && (
         <div className="p-4 md:p-8 max-w-2xl mx-auto space-y-6">
           <div className="panel p-6 space-y-5">
             <div className="border-b pb-4 space-y-1">
               <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <UserPlus className="h-5 w-5 text-primary" />
-                Nominate an AYUSH Colleague for Early Access
+                Invite a Colleague to Meyveda
               </h2>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Submit your colleague's professional details to issue a peer early access
-                invitation. Our verification desk will review their AYUSH council affiliation.
+                Provide your colleague&apos;s details below. An official invitation email from you will be automatically dispatched to their inbox with your exclusive invite code and a 1-click registration link.
               </p>
             </div>
 
-            {inviteSuccessId && (
-              <div className="rounded-xl border border-primary/30 bg-primary-soft/50 p-4 space-y-2">
-                <div className="flex items-center gap-2 font-bold text-sm text-foreground">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  Invitation Recorded
+            {inviteSuccessInfo ? (
+              <div className="rounded-xl border border-emerald-300 bg-emerald-50/60 p-5 space-y-4">
+                <div className="flex items-center gap-2 font-bold text-base text-emerald-900">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                  Invitation Email Dispatched to Dr. {inviteSuccessInfo.name}!
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Colleague invitation reference <code>{inviteSuccessId}</code> has been dispatched
-                  and recorded in your local session. It is now listed under{" "}
-                  <strong>Referral Records</strong>.
+
+                <div className="space-y-1.5 text-xs text-emerald-800 leading-relaxed bg-white/70 rounded-lg p-3.5 border border-emerald-200">
+                  <div>
+                    <strong>Recipient:</strong> Dr. {inviteSuccessInfo.name} ({inviteSuccessInfo.qualification})
+                  </div>
+                  <div>
+                    <strong>Email Address:</strong> {inviteSuccessInfo.email}
+                  </div>
+                  <div>
+                    <strong>Mobile Number:</strong> {inviteSuccessInfo.mobile}
+                  </div>
+                  <div>
+                    <strong>Invite Code Sent:</strong>{" "}
+                    <span className="font-mono font-bold text-primary-deep">{inviteSuccessInfo.inviteCode}</span>
+                  </div>
+                </div>
+
+                <p className="text-xs text-emerald-800 leading-relaxed">
+                  We have dispatched a personalized invitation to <strong>{inviteSuccessInfo.email}</strong>. When your colleague clicks the link in the email, their registration form will be automatically pre-filled with this code for instant onboarding.
                 </p>
-                <div className="pt-2">
+
+                {/* Direct link box */}
+                <div className="space-y-1.5 pt-1">
+                  <label className="text-[11px] font-bold text-emerald-900">
+                    Direct Colleague Registration URL:
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      readOnly
+                      value={inviteSuccessInfo.registrationUrl}
+                      className={cn(inputCls, "font-mono text-xs bg-white truncate")}
+                      aria-label="Direct registration URL"
+                    />
+                    <Btn
+                      variant="outline"
+                      className="shrink-0 text-xs"
+                      onClick={async () => {
+                        const ok = await copyToClipboard(inviteSuccessInfo.registrationUrl);
+                        if (ok) {
+                          toast.success("Direct registration link copied to clipboard");
+                        } else {
+                          toast.error("Unable to copy to clipboard");
+                        }
+                      }}
+                    >
+                      <Copy className="h-3.5 w-3.5 mr-1" />
+                      Copy Link
+                    </Btn>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-emerald-200/80">
+                  <Btn
+                    variant="primary"
+                    className="text-xs"
+                    onClick={() => {
+                      setInviteSuccessInfo(null);
+                    }}
+                  >
+                    <UserPlus className="h-3.5 w-3.5 mr-1.5" />
+                    Invite Another Colleague
+                  </Btn>
                   <Btn
                     variant="outline"
+                    className="text-xs bg-white"
                     onClick={() => {
-                      setInviteSuccessId(null);
+                      setInviteSuccessInfo(null);
                       updateSearch({ tab: "history" });
                     }}
-                    className="text-xs"
                   >
-                    View in Referral Records
+                    <Clock className="h-3.5 w-3.5 mr-1.5" />
+                    View Referral History
                   </Btn>
                 </div>
               </div>
-            )}
-
-            <form onSubmit={handleSendInvite} className="space-y-4 text-xs">
-              <Field
-                label="Colleague's Professional Email Address *"
-                hint="Invitation and onboarding instructions will be addressed to this inbox"
-                error={formErrors.email}
-              >
-                <input
-                  type="email"
-                  className={cn(inputCls, formErrors.email && "border-destructive")}
-                  value={inviteEmail}
-                  onChange={(e) => {
-                    setInviteEmail(e.target.value);
-                    if (formErrors.email) setFormErrors((prev) => ({ ...prev, email: undefined }));
-                  }}
-                  placeholder="e.g. vaidya.sharma@ayurveda-institute.org"
-                  aria-label="Colleague's email"
-                />
-              </Field>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Field label="Colleague's Full Name (Optional)" hint="e.g. Dr. Rajesh K. Varma">
-                  <input
-                    className={inputCls}
-                    value={inviteName}
-                    onChange={(e) => setInviteName(e.target.value)}
-                    placeholder="Dr. Rajesh K. Varma"
-                    aria-label="Colleague's name"
-                  />
-                </Field>
-
+            ) : (
+              <form onSubmit={handleSendInvite} className="space-y-4 text-xs">
+                {/* Question 1: Name */}
                 <Field
-                  label="Primary Specialization / Branch (Optional)"
-                  hint="e.g. Kayachikitsa, Dravyaguna"
+                  label="1. Colleague's Full Name *"
+                  hint="Official practitioner name for the personalized invitation"
+                  error={formErrors.name}
                 >
                   <input
-                    className={inputCls}
-                    value={inviteSpecialty}
-                    onChange={(e) => setInviteSpecialty(e.target.value)}
-                    placeholder="e.g. Dravyaguna Vijnana"
-                    aria-label="Primary specialization"
+                    type="text"
+                    required
+                    className={cn(inputCls, formErrors.name && "border-destructive")}
+                    value={inviteName}
+                    onChange={(e) => {
+                      setInviteName(e.target.value);
+                      if (formErrors.name) setFormErrors((prev) => ({ ...prev, name: undefined }));
+                    }}
+                    placeholder="e.g. Dr. Rajesh K. Varma"
+                    aria-label="Colleague's full name"
                   />
                 </Field>
-              </div>
 
-              <Field
-                label="State AYUSH Council / Medical Board (Optional)"
-                hint="e.g. Maharashtra Council of Indian Medicine, Delhi Bharatiya Chikitsa Parishad"
-              >
-                <input
-                  className={inputCls}
-                  value={inviteCouncil}
-                  onChange={(e) => setInviteCouncil(e.target.value)}
-                  placeholder="e.g. Maharashtra Council of Indian Medicine"
-                  aria-label="State AYUSH Council"
-                />
-              </Field>
-
-              <Field
-                label="Clinical Context or Invitation Note (Optional)"
-                hint="Brief note regarding research collaboration or shared clinical interests"
-              >
-                <textarea
-                  rows={2}
-                  className={inputCls}
-                  value={inviteNotes}
-                  onChange={(e) => setInviteNotes(e.target.value)}
-                  placeholder="Collaborating on observational rasayana studies..."
-                  aria-label="Invitation notes"
-                />
-              </Field>
-
-              {/* Attributed Inviter Notice */}
-              <div className="rounded-xl border border-border bg-surface p-3 text-[11px] text-muted-foreground flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4 text-primary" />
-                  <span>
-                    Inviting Practitioner:{" "}
-                    <strong className="text-foreground">{doctor.name}</strong> (
-                    {doctor.qualification})
-                  </span>
-                </div>
-                <span className="font-mono text-[10px]">Session ID: doc-ak-1</span>
-              </div>
-
-              {/* Eligibility Checkbox */}
-              <div className="rounded-xl border border-amber-300 bg-amber-50/50 p-3.5 space-y-1.5">
-                <label className="flex items-start gap-2.5 cursor-pointer text-foreground font-medium">
-                  <input
-                    type="checkbox"
-                    checked={acknowledgedEligibility}
-                    onChange={(e) => {
-                      setAcknowledgedEligibility(e.target.checked);
-                      if (formErrors.eligibility) {
-                        setFormErrors((prev) => ({ ...prev, eligibility: undefined }));
-                      }
-                    }}
-                    className="mt-0.5 rounded border-gray-300 text-primary focus:ring-primary"
-                  />
-                  <span>
-                    I confirm that the nominee is a bona fide registered AYUSH practitioner
-                    holding valid qualifications from an accredited institution.
-                  </span>
-                </label>
-                {formErrors.eligibility && (
-                  <p className="text-destructive font-semibold text-xs pl-6">
-                    {formErrors.eligibility}
-                  </p>
-                )}
-              </div>
-
-              {/* Form Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t">
-                <Btn
-                  variant="ghost"
-                  type="button"
-                  onClick={() => {
-                    setInviteEmail("");
-                    setInviteName("");
-                    setInviteSpecialty("");
-                    setInviteCouncil("");
-                    setInviteNotes("");
-                    setAcknowledgedEligibility(false);
-                  }}
+                {/* Question 2: Email */}
+                <Field
+                  label="2. Colleague's Email Address *"
+                  hint="The official invitation with early access link will be dispatched to this inbox"
+                  error={formErrors.email}
                 >
-                  Clear Form
-                </Btn>
-                <Btn type="submit" disabled={isSubmitting} className="gap-2">
-                  <Send className="h-4 w-4" />
-                  {isSubmitting ? "Dispatching Invitation…" : "Send Early Access Invitation"}
-                </Btn>
-              </div>
-            </form>
+                  <input
+                    type="email"
+                    required
+                    className={cn(inputCls, formErrors.email && "border-destructive")}
+                    value={inviteEmail}
+                    onChange={(e) => {
+                      setInviteEmail(e.target.value);
+                      if (formErrors.email) setFormErrors((prev) => ({ ...prev, email: undefined }));
+                    }}
+                    placeholder="e.g. dr.rajesh@ayurveda-institute.org"
+                    aria-label="Colleague's email"
+                  />
+                </Field>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {/* Question 3: Mobile */}
+                  <Field
+                    label="3. Colleague's Mobile Number *"
+                    hint="For SMS delivery & registration pre-fill"
+                    error={formErrors.mobile}
+                  >
+                    <input
+                      type="tel"
+                      required
+                      className={cn(inputCls, formErrors.mobile && "border-destructive")}
+                      value={inviteMobile}
+                      onChange={(e) => {
+                        setInviteMobile(e.target.value);
+                        if (formErrors.mobile) setFormErrors((prev) => ({ ...prev, mobile: undefined }));
+                      }}
+                      placeholder="e.g. +91 98765 43210"
+                      aria-label="Colleague's mobile number"
+                    />
+                  </Field>
+
+                  {/* Question 4: Qualification */}
+                  <Field
+                    label="4. Medical Qualification *"
+                    hint="Practitioner degree or credential"
+                    error={formErrors.qualification}
+                  >
+                    <select
+                      className={inputCls}
+                      value={inviteQualification}
+                      onChange={(e) => {
+                        setInviteQualification(e.target.value);
+                        if (formErrors.qualification) {
+                          setFormErrors((prev) => ({ ...prev, qualification: undefined }));
+                        }
+                      }}
+                      aria-label="Medical qualification"
+                    >
+                      <option value="BAMS">BAMS — Ayurveda</option>
+                      <option value="MD (Ayurveda)">MD (Ayurveda) — Postgraduate</option>
+                      <option value="MS (Ayurveda)">MS (Ayurveda) — Shalya / Shalakya</option>
+                      <option value="BHMS">BHMS — Homoeopathy</option>
+                      <option value="BUMS">BUMS — Unani Medicine</option>
+                      <option value="BSMS">BSMS — Siddha Medicine</option>
+                      <option value="BNYS">BNYS — Naturopathy & Yoga</option>
+                      <option value="Ph.D (AYUSH)">Ph.D / Research Scholar (AYUSH)</option>
+                    </select>
+                  </Field>
+                </div>
+
+                {/* Attributed Inviter Notice */}
+                <div className="rounded-xl border border-border bg-surface p-3 text-[11px] text-muted-foreground flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-primary" />
+                    <span>
+                      Inviting Practitioner:{" "}
+                      <strong className="text-foreground">{doctor.name}</strong> (
+                      {doctor.qualification})
+                    </span>
+                  </div>
+                  <div className="font-mono text-[11px] font-semibold text-primary">
+                    Invite Code: <strong>{targetCode}</strong>
+                  </div>
+                </div>
+
+                {/* Form Buttons */}
+                <div className="flex items-center justify-end gap-3 pt-3 border-t">
+                  <Btn
+                    variant="ghost"
+                    type="button"
+                    onClick={() => {
+                      setInviteName("");
+                      setInviteEmail("");
+                      setInviteMobile("");
+                      setInviteQualification("BAMS");
+                      setFormErrors({});
+                    }}
+                  >
+                    Clear Form
+                  </Btn>
+                  <Btn type="submit" disabled={isSubmitting} className="gap-2">
+                    <Send className="h-4 w-4" />
+                    {isSubmitting ? "Dispatching Invitation Email…" : "Send Colleague Invitation"}
+                  </Btn>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

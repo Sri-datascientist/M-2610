@@ -1,6 +1,6 @@
 from datetime import datetime
-from typing import Literal
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from typing import Literal, Optional
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -16,6 +16,7 @@ from app.services.referral_scoring import (
     calculate_doctor_referral_score,
     get_referral_leaderboard_data,
 )
+from app.services.email_otp_service import email_otp_service
 
 router = APIRouter(tags=["referrals"])
 
@@ -23,18 +24,31 @@ router = APIRouter(tags=["referrals"])
 # --- Schemas ---
 
 class ReferralSubmission(BaseModel):
-    referred_name: str = Field(min_length=1, max_length=200)
-    referred_contact: str = Field(min_length=1, max_length=320)
-    reason: str = Field(min_length=1, max_length=2000)
+    # Backward compatible fields
+    referred_name: Optional[str] = Field(default=None, max_length=200)
+    referred_contact: Optional[str] = Field(default=None, max_length=320)
+    reason: Optional[str] = Field(default=None, max_length=2000)
+
+    # 4-question fields
+    name: Optional[str] = Field(default=None, max_length=200)
+    email: Optional[str] = Field(default=None, max_length=320)
+    mobile: Optional[str] = Field(default=None, max_length=30)
+    qualification: Optional[str] = Field(default=None, max_length=100)
 
 
-class ReferralRecord(ReferralSubmission):
+class ReferralRecord(BaseModel):
     id: str
     referring_doctor_id: str
+    referred_name: str
+    referred_contact: str
+    reason: str
     status: Literal["submitted", "accepted", "completed", "declined"]
     score_awarded: int = Field(default=0, ge=0)
     created_at: datetime
     updated_at: datetime
+    invite_code: Optional[str] = None
+    registration_url: Optional[str] = None
+    email_dispatched: Optional[bool] = None
 
 
 class ReferralList(BaseModel):
@@ -58,7 +72,12 @@ class ReferralLeaderboard(BaseModel):
     total: int
 
 
-def _build_referral_record(ref: DBReferral) -> ReferralRecord:
+def _build_referral_record(
+    ref: DBReferral,
+    invite_code: Optional[str] = None,
+    registration_url: Optional[str] = None,
+    email_dispatched: Optional[bool] = None,
+) -> ReferralRecord:
     return ReferralRecord(
         id=ref.id,
         referring_doctor_id=ref.referring_doctor_id,
@@ -69,6 +88,9 @@ def _build_referral_record(ref: DBReferral) -> ReferralRecord:
         score_awarded=ref.score_awarded,
         created_at=ref.created_at,
         updated_at=ref.updated_at,
+        invite_code=invite_code,
+        registration_url=registration_url,
+        email_dispatched=email_dispatched,
     )
 
 
@@ -81,6 +103,7 @@ def _build_referral_record(ref: DBReferral) -> ReferralRecord:
 )
 async def create_referral(
     payload: ReferralSubmission,
+    request: Request,
     user: UserClaims = Depends(require_role("doctor")),
     db: Session = Depends(get_db),
 ) -> ReferralRecord:
@@ -92,15 +115,40 @@ async def create_referral(
             detail="Doctor profile not found for authenticated user",
         )
 
+    # Resolve target name and contact from either 4-question format or legacy format
+    target_name = (payload.name or payload.referred_name or "").strip()
+    target_contact = (payload.email or payload.referred_contact or "").strip()
+    target_mobile = (payload.mobile or "").strip()
+    target_qual = (payload.qualification or "").strip()
+
+    if not target_name:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Colleague's name is required",
+        )
+    if not target_contact:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Colleague's email or contact is required",
+        )
+
+    target_reason = payload.reason
+    if not target_reason:
+        details_list = []
+        if target_qual:
+            details_list.append(f"Qualification: {target_qual}")
+        if target_mobile:
+            details_list.append(f"Mobile: {target_mobile}")
+        target_reason = " · ".join(details_list) if details_list else "Peer Colleague Invitation"
+
     # Resolve doctor's associated User record to inspect email for self-referral prevention
     user_record = db.query(User).filter(User.id == user["sub"]).first()
 
     # Normalize inputs
-    norm_contact = payload.referred_contact.strip().lower()
-    norm_name = payload.referred_name.strip()
+    norm_contact = target_contact.lower()
+    norm_name = target_name
 
     # Prevent self-referral:
-    # Check if contact matches doctor's account email or doctor's full name matches referred name exactly
     if user_record and user_record.email.strip().lower() == norm_contact:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -127,11 +175,24 @@ async def create_referral(
             detail="A referral for this contact has already been created by you",
         )
 
+    # Ensure doctor has an invite code
+    if not doctor.invite_code:
+        import random, string
+        clean = "".join([c for c in doctor.full_name.upper() if c in string.ascii_uppercase])
+        prefix = clean[:3] if len(clean) >= 3 else "".join(random.choices(string.ascii_uppercase, k=3))
+        while True:
+            candidate = f"{prefix}{random.randint(10, 99)}"
+            if not db.query(Doctor).filter(Doctor.invite_code == candidate).first():
+                doctor.invite_code = candidate
+                db.commit()
+                db.refresh(doctor)
+                break
+
     referral = DBReferral(
         referring_doctor_id=doctor.id,
         referred_name=norm_name,
         referred_contact=norm_contact,
-        reason=payload.reason.strip(),
+        reason=target_reason.strip(),
         status="submitted",
         score_awarded=0,
     )
@@ -147,13 +208,48 @@ async def create_referral(
         details={
             "referring_doctor_id": doctor.id,
             "referred_name": norm_name,
+            "qualification": target_qual,
+            "mobile": target_mobile,
         },
     )
     db.add(audit)
-
     db.commit()
     db.refresh(referral)
-    return _build_referral_record(referral)
+
+    # Automatically dispatch invitation email if contact is an email address
+    email_dispatched = False
+    reg_url = None
+    if "@" in norm_contact:
+        origin = request.headers.get("origin") or request.headers.get("referer")
+        base_url = "http://localhost:3000"
+        if origin:
+            import urllib.parse
+            parsed = urllib.parse.urlparse(origin)
+            base_url = f"{parsed.scheme}://{parsed.netloc}"
+
+        try:
+            inv_res = email_otp_service.send_colleague_invitation(
+                colleague_name=norm_name,
+                colleague_email=norm_contact,
+                colleague_mobile=target_mobile,
+                colleague_qualification=target_qual or "BAMS",
+                inviter_name=doctor.full_name,
+                inviter_qualification=doctor.qualification or "Vaidya",
+                invite_code=doctor.invite_code,
+                app_url=base_url,
+            )
+            email_dispatched = inv_res.get("dispatched", False)
+            reg_url = inv_res.get("registration_url")
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).warning("Failed to dispatch colleague invitation email: %s", exc)
+
+    return _build_referral_record(
+        referral,
+        invite_code=doctor.invite_code,
+        registration_url=reg_url,
+        email_dispatched=email_dispatched,
+    )
 
 
 @router.get("/api/v1/doctors/me/referrals", response_model=ReferralList)

@@ -330,3 +330,28 @@ def test_referral_authorization_restrictions(client, doctor_fixture, admin_fixtu
 
     resp = client.get("/api/v1/doctors/me/referral-score", headers=auth_header(admin))
     assert resp.status_code == 403
+
+
+def test_create_colleague_invitation_with_email_dispatch(client, doctor_fixture, db_session):
+    (doc1_user, doc1), _ = doctor_fixture
+    headers = auth_header(doc1_user)
+
+    payload = {
+        "name": "Dr. Aarav Varma",
+        "email": "aarav.varma@ayurveda-institute.org",
+        "mobile": "+91 98765 43210",
+        "qualification": "BAMS",
+    }
+
+    resp = client.post("/api/v1/referrals", json=payload, headers=headers)
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["id"] is not None
+    assert data["referred_name"] == "Dr. Aarav Varma"
+    assert data["referred_contact"] == "aarav.varma@ayurveda-institute.org"
+    assert "BAMS" in data["reason"]
+    assert "+91 98765 43210" in data["reason"]
+    assert data["invite_code"] is not None
+    assert "register?ref=" in (data["registration_url"] or "")
+    assert data["email_dispatched"] is True
+
