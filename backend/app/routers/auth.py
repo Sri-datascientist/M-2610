@@ -1,12 +1,21 @@
+from datetime import datetime, timezone
 from typing import Literal, Optional
 import random
 import string
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from databases.session import get_db
-from databases.schema.models import User, Doctor, Manufacturer, AuditHistory, Referral as DBReferral
+from databases.schema.models import (
+    User,
+    Doctor,
+    Manufacturer,
+    AuditHistory,
+    Referral as DBReferral,
+    ColleagueInvitation,
+)
 from app.auth import (
     hash_password,
     verify_password,
@@ -263,17 +272,54 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
         db.add(new_doctor)
         db.flush()
 
-        # If registered using a valid invite code, record the referral and award the reward to the referrer
+        # If registered using a valid invite code, record/update the referral and award the reward to the referrer
         if referrer_doc:
-            ref_entry = DBReferral(
-                referring_doctor_id=referrer_doc.id,
-                referred_name=full_name,
-                referred_contact=payload.email.lower(),
-                reason=f"Practitioner registration completed via invite code {validated_code}",
-                status="completed",
-                score_awarded=10,
+            clean_email = payload.email.strip().lower()
+
+            # 1. Check for an existing referral before inserting (to avoid UniqueViolation: uq_doctor_referred_contact)
+            existing_ref = (
+                db.query(DBReferral)
+                .filter(
+                    DBReferral.referring_doctor_id == referrer_doc.id,
+                    func.lower(func.trim(DBReferral.referred_contact)) == clean_email,
+                )
+                .first()
             )
-            db.add(ref_entry)
+
+            if existing_ref:
+                # 2. If it exists, update its status to completed instead of creating a duplicate
+                existing_ref.status = "completed"
+                existing_ref.referred_name = full_name
+                existing_ref.reason = f"Practitioner registration completed via invite code {validated_code}"
+                # 3. Ensure referral points are awarded only once
+                if existing_ref.score_awarded <= 0:
+                    existing_ref.score_awarded = 10
+                existing_ref.updated_at = datetime.now(timezone.utc)
+            else:
+                # 4. Create new referral record if this is the first time
+                ref_entry = DBReferral(
+                    referring_doctor_id=referrer_doc.id,
+                    referred_name=full_name,
+                    referred_contact=clean_email,
+                    reason=f"Practitioner registration completed via invite code {validated_code}",
+                    status="completed",
+                    score_awarded=10,
+                )
+                db.add(ref_entry)
+
+            # Sync colleague invitation record if present
+            colleague_inv = (
+                db.query(ColleagueInvitation)
+                .filter(
+                    ColleagueInvitation.referring_doctor_id == referrer_doc.id,
+                    func.lower(func.trim(ColleagueInvitation.colleague_email)) == clean_email,
+                )
+                .first()
+            )
+            if colleague_inv:
+                colleague_inv.status = "Registered"
+                colleague_inv.colleague_name = full_name
+                colleague_inv.updated_at = datetime.now(timezone.utc)
     elif payload.role == "manufacturer":
         new_mfg = Manufacturer(
             user_id=new_user.id,

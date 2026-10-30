@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from app.main import app
 from app.config import settings
 from databases.session import Base, get_db
-from databases.schema.models import User, Doctor, Manufacturer
+from databases.schema.models import User, Doctor, Manufacturer, Referral, ColleagueInvitation
 
 # Use SQLite in-memory for testing
 from sqlalchemy.pool import StaticPool
@@ -532,6 +532,290 @@ def test_dedicated_sms_otp_endpoints(client):
     assert verify_data["success"] is True
     assert verify_data["verified"] is True
     assert verify_data["verification_token"] is not None
+
+
+# ============================================================================
+# REFERRAL / INVITE CODE COMPLETION & IDEMPOTENCY TESTS
+# ============================================================================
+
+def test_registration_with_existing_referral_updates_status_and_awards_points(client, db_session):
+    """
+    Scenario: A doctor invites a colleague (creates a submitted referral record).
+    The colleague then registers using the doctor's invite code.
+    Verification:
+    - Existing referral is updated to status='completed' (NO duplicate inserted).
+    - Exactly 1 referral record exists in DB (preserves uq_doctor_referred_contact).
+    - Referral points (10 points) are awarded.
+    """
+    # 1. Setup referring doctor
+    ref_user = User(
+        email="referrer.one@meyveda.com",
+        hashed_password="HashedPassword123!",
+        role="doctor",
+        status="active",
+    )
+    db_session.add(ref_user)
+    db_session.flush()
+
+    referrer = Doctor(
+        user_id=ref_user.id,
+        full_name="Dr. Referrer One",
+        medical_license_number="AYUSH-REF-001",
+        qualification="BAMS",
+        specialty="Ayurveda",
+        invite_code="REF10",
+        verification_status="approved",
+    )
+    db_session.add(referrer)
+    db_session.flush()
+
+    # 2. Existing submitted referral previously created by referrer
+    invited_email = "colleague.one@meyveda.com"
+    existing_ref = Referral(
+        referring_doctor_id=referrer.id,
+        referred_name="Dr. Colleague Pre",
+        referred_contact=invited_email,
+        reason="Invited for Ayurvedic Clinical Exchange",
+        status="submitted",
+        score_awarded=0,
+    )
+    db_session.add(existing_ref)
+
+    # Also add a ColleagueInvitation record to verify it stays in sync
+    invitation = ColleagueInvitation(
+        referring_doctor_id=referrer.id,
+        inviting_doctor_name=referrer.full_name,
+        inviting_doctor_qualification=referrer.qualification,
+        invite_code=referrer.invite_code,
+        colleague_name="Dr. Colleague Pre",
+        colleague_email=invited_email,
+        colleague_mobile="+91 9988776655",
+        qualification="BAMS",
+        status="Invitation Sent",
+    )
+    db_session.add(invitation)
+    db_session.commit()
+
+    # 3. Colleague registers using referrer's invite code
+    register_payload = {
+        "email": invited_email,
+        "password": "SecurePassword123!",
+        "role": "doctor",
+        "full_name": "Dr. Colleague Final",
+        "doctor_register_number": "MED-COLLEAGUE-001",
+        "qualification": "BAMS",
+        "pincode": "600001",
+        "phone": "9988776655",
+        "invite_code": "REF10",
+    }
+    resp = client.post("/api/v1/auth/register", json=register_payload)
+    assert resp.status_code == 201
+
+    # 4. Verify in DB: Exactly ONE referral record exists (no duplicate)
+    refs = db_session.query(Referral).filter(
+        Referral.referring_doctor_id == referrer.id,
+        Referral.referred_contact == invited_email,
+    ).all()
+    assert len(refs) == 1, "Duplicate referral was inserted despite existing referral record!"
+
+    updated_ref = refs[0]
+    assert updated_ref.status == "completed"
+    assert updated_ref.score_awarded == 10
+    assert updated_ref.referred_name == "Dr. Colleague Final"
+    assert "completed via invite code REF10" in updated_ref.reason
+
+    # Verify ColleagueInvitation updated
+    db_session.refresh(invitation)
+    assert invitation.status == "Registered"
+
+
+def test_first_time_registration_without_prior_referral_creates_referral(client, db_session):
+    """
+    Scenario: A doctor shares their invite code verbally or via external channel.
+    The new doctor registers directly without a pre-existing referral row.
+    Verification:
+    - Referral is created with status='completed' and 10 points.
+    - Exactly 1 record in DB.
+    """
+    ref_user = User(
+        email="referrer.two@meyveda.com",
+        hashed_password="HashedPassword123!",
+        role="doctor",
+        status="active",
+    )
+    db_session.add(ref_user)
+    db_session.flush()
+
+    referrer = Doctor(
+        user_id=ref_user.id,
+        full_name="Dr. Referrer Two",
+        medical_license_number="AYUSH-REF-002",
+        qualification="BSMS",
+        specialty="Siddha",
+        invite_code="REF20",
+        verification_status="approved",
+    )
+    db_session.add(referrer)
+    db_session.commit()
+
+    direct_email = "direct.signup@meyveda.com"
+    register_payload = {
+        "email": direct_email,
+        "password": "SecurePassword123!",
+        "role": "doctor",
+        "full_name": "Dr. Direct Signup",
+        "doctor_register_number": "MED-DIRECT-002",
+        "qualification": "BSMS",
+        "pincode": "600002",
+        "phone": "9911223344",
+        "invite_code": "REF20",
+    }
+    resp = client.post("/api/v1/auth/register", json=register_payload)
+    assert resp.status_code == 201
+
+    refs = db_session.query(Referral).filter(
+        Referral.referring_doctor_id == referrer.id,
+        Referral.referred_contact == direct_email,
+    ).all()
+    assert len(refs) == 1
+    assert refs[0].status == "completed"
+    assert refs[0].score_awarded == 10
+
+
+def test_repeated_registration_is_idempotent_no_duplicate_referral(client, db_session):
+    """
+    Scenario: Repeated registration attempts for the same doctor with invite code.
+    Verification:
+    - First registration succeeds and creates/completes referral (score = 10).
+    - Repeated registration attempt returns 409 (duplicate account rejected).
+    - Referral table STILL contains exactly 1 referral record for this referring doctor and contact.
+    - Referral score is NOT awarded more than once (remains 10, not 20).
+    - No UniqueViolation or database error.
+    """
+    ref_user = User(
+        email="referrer.three@meyveda.com",
+        hashed_password="HashedPassword123!",
+        role="doctor",
+        status="active",
+    )
+    db_session.add(ref_user)
+    db_session.flush()
+
+    referrer = Doctor(
+        user_id=ref_user.id,
+        full_name="Dr. Referrer Three",
+        medical_license_number="AYUSH-REF-003",
+        qualification="BAMS",
+        specialty="Ayurveda",
+        invite_code="REF30",
+        verification_status="approved",
+    )
+    db_session.add(referrer)
+    db_session.commit()
+
+    repeat_email = "repeat.doc@meyveda.com"
+    payload = {
+        "email": repeat_email,
+        "password": "SecurePassword123!",
+        "role": "doctor",
+        "full_name": "Dr. Repeat Practitioner",
+        "doctor_register_number": "MED-REPEAT-003",
+        "qualification": "BAMS",
+        "pincode": "411001",
+        "phone": "9887766554",
+        "invite_code": "REF30",
+    }
+
+    # 1. First registration attempt
+    resp1 = client.post("/api/v1/auth/register", json=payload)
+    assert resp1.status_code == 201
+
+    refs1 = db_session.query(Referral).filter(
+        Referral.referring_doctor_id == referrer.id,
+        Referral.referred_contact == repeat_email,
+    ).all()
+    assert len(refs1) == 1
+    assert refs1[0].status == "completed"
+    assert refs1[0].score_awarded == 10
+
+    # 2. Repeated registration attempt with the same email and credentials
+    resp2 = client.post("/api/v1/auth/register", json=payload)
+    assert resp2.status_code == 409
+    assert "already exists" in resp2.json()["detail"]
+
+    # 3. Verify referrals table is completely unchanged and contains only 1 record
+    refs2 = db_session.query(Referral).filter(
+        Referral.referring_doctor_id == referrer.id,
+        Referral.referred_contact == repeat_email,
+    ).all()
+    assert len(refs2) == 1, "Duplicate referral created on repeated registration attempt!"
+    assert refs2[0].score_awarded == 10, "Referral points were awarded more than once!"
+
+
+def test_referral_points_awarded_only_once_even_if_already_completed(client, db_session):
+    """
+    Scenario: A referral already had score_awarded >= 10.
+    A registration matching that referral runs.
+    Verification:
+    - Points remain 10 (not added to 20).
+    - Status remains completed.
+    - No duplicate referral inserted.
+    """
+    ref_user = User(
+        email="referrer.four@meyveda.com",
+        hashed_password="HashedPassword123!",
+        role="doctor",
+        status="active",
+    )
+    db_session.add(ref_user)
+    db_session.flush()
+
+    referrer = Doctor(
+        user_id=ref_user.id,
+        full_name="Dr. Referrer Four",
+        medical_license_number="AYUSH-REF-004",
+        qualification="BAMS",
+        specialty="Ayurveda",
+        invite_code="REF40",
+        verification_status="approved",
+    )
+    db_session.add(referrer)
+    db_session.flush()
+
+    contact_email = "precompleted@meyveda.com"
+    pre_ref = Referral(
+        referring_doctor_id=referrer.id,
+        referred_name="Dr. Pre Completed",
+        referred_contact=contact_email,
+        reason="Pre-existing referral with points already awarded",
+        status="completed",
+        score_awarded=10,
+    )
+    db_session.add(pre_ref)
+    db_session.commit()
+
+    payload = {
+        "email": contact_email,
+        "password": "SecurePassword123!",
+        "role": "doctor",
+        "full_name": "Dr. Pre Completed Final",
+        "doctor_register_number": "MED-PRECOMP-004",
+        "qualification": "BAMS",
+        "pincode": "560001",
+        "phone": "9876543211",
+        "invite_code": "REF40",
+    }
+    resp = client.post("/api/v1/auth/register", json=payload)
+    assert resp.status_code == 201
+
+    refs = db_session.query(Referral).filter(
+        Referral.referring_doctor_id == referrer.id,
+        Referral.referred_contact == contact_email,
+    ).all()
+    assert len(refs) == 1
+    assert refs[0].score_awarded == 10, f"Expected 10 points, got {refs[0].score_awarded}"
+    assert refs[0].status == "completed"
+
 
 
 

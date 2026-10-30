@@ -236,6 +236,22 @@ async def create_referral(
             detail="Self-referrals are not permitted",
         )
 
+    # Check for duplicate submission when called via /api/v1/referrals
+    if request.url.path.endswith("/referrals"):
+        existing_dup = (
+            db.query(DBReferral)
+            .filter(
+                DBReferral.referring_doctor_id == doctor.id,
+                DBReferral.referred_contact == norm_contact,
+            )
+            .first()
+        )
+        if existing_dup:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A referral for this contact has already been created by you",
+            )
+
     # 3. Ensure doctor has an invite code
     if not doctor.invite_code:
         import random, string
@@ -345,13 +361,16 @@ async def create_referral(
         referral.referred_name = norm_name
         referral.reason = target_reason
 
+    db.flush()
+
     # Audit history
     actor_id = claims["sub"] if (claims and claims.get("sub")) else (doctor.user_id or "doc-local")
+    is_referral_endpoint = request.url.path.endswith("/referrals")
     audit = AuditHistory(
         actor_id=actor_id,
-        action="create_colleague_invitation",
-        target_entity="colleague_invitations",
-        target_id=colleague_inv.id,
+        action="create_referral" if is_referral_endpoint else "create_colleague_invitation",
+        target_entity="referrals" if is_referral_endpoint else "colleague_invitations",
+        target_id=referral.id if is_referral_endpoint else colleague_inv.id,
         details={
             "referring_doctor_id": doctor.id,
             "referred_name": norm_name,
@@ -360,6 +379,8 @@ async def create_referral(
             "mobile": norm_mobile,
             "invite_code": doctor.invite_code,
             "email_dispatched": email_dispatched,
+            "referral_id": referral.id,
+            "colleague_invitation_id": colleague_inv.id,
         },
     )
     db.add(audit)
@@ -385,14 +406,14 @@ async def list_own_referrals(
     claims: Optional[UserClaims] = Depends(_get_optional_claims),
     db: Session = Depends(get_db),
 ) -> ReferralList:
-    doctor = None
-    if claims and claims.get("sub"):
-        doctor = db.query(Doctor).filter(Doctor.user_id == claims["sub"]).first()
-    if not doctor:
-        doctor = db.query(Doctor).first()
+    if not claims or not claims.get("sub"):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    if claims.get("role") != "doctor":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden: Doctor role required")
 
+    doctor = db.query(Doctor).filter(Doctor.user_id == claims["sub"]).first()
     if not doctor:
-        return ReferralList(items=[], total=0)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Doctor profile not found")
 
     query = db.query(DBReferral).filter(DBReferral.referring_doctor_id == doctor.id)
     if referral_status:
@@ -412,14 +433,14 @@ async def get_own_referral_score(
     claims: Optional[UserClaims] = Depends(_get_optional_claims),
     db: Session = Depends(get_db),
 ) -> ReferralScore:
-    doctor = None
-    if claims and claims.get("sub"):
-        doctor = db.query(Doctor).filter(Doctor.user_id == claims["sub"]).first()
-    if not doctor:
-        doctor = db.query(Doctor).first()
+    if not claims or not claims.get("sub"):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    if claims.get("role") != "doctor":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden: Doctor role required")
 
+    doctor = db.query(Doctor).filter(Doctor.user_id == claims["sub"]).first()
     if not doctor:
-        return ReferralScore(doctor_id="doc-none", score=0, referral_count=0)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Doctor profile not found")
 
     score, count = calculate_doctor_referral_score(doctor.id, db)
     return ReferralScore(
@@ -681,6 +702,11 @@ async def list_referrals_for_admin(
     claims: Optional[UserClaims] = Depends(_get_optional_claims),
     db: Session = Depends(get_db),
 ) -> ReferralList:
+    if not claims or not claims.get("sub"):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    if claims.get("role") != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden: Admin role required")
+
     query = db.query(DBReferral)
     if referral_status:
         query = query.filter(DBReferral.status == referral_status)
@@ -703,6 +729,11 @@ async def get_referral_leaderboard(
     claims: Optional[UserClaims] = Depends(_get_optional_claims),
     db: Session = Depends(get_db),
 ) -> ReferralLeaderboard:
+    if not claims or not claims.get("sub"):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
+    if claims.get("role") != "admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden: Admin role required")
+
     items, total = get_referral_leaderboard_data(db, limit=limit, offset=offset)
     return ReferralLeaderboard(
         items=[
