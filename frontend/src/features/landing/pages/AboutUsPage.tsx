@@ -7,7 +7,6 @@ import {
   Building2,
   BookOpen,
   Award,
-  Sparkles,
   MapPin,
   Mail,
   Phone,
@@ -40,7 +39,6 @@ interface ImpactPillar {
   metricValue: string;
   icon: typeof ShieldCheck;
   highlightColor: string;
-  accentBg: string;
 }
 
 const IMPACT_PILLARS: ImpactPillar[] = [
@@ -61,7 +59,6 @@ const IMPACT_PILLARS: ImpactPillar[] = [
     metricLabel: "Council-Verified Registry",
     icon: ShieldCheck,
     highlightColor: "#E67230",
-    accentBg: "rgba(230, 114, 48, 0.08)",
   },
   {
     id: "supply-chain",
@@ -80,7 +77,6 @@ const IMPACT_PILLARS: ImpactPillar[] = [
     metricLabel: "Clinic Inventory Burden",
     icon: Boxes,
     highlightColor: "#D86423",
-    accentBg: "rgba(216, 100, 35, 0.08)",
   },
   {
     id: "real-world-evidence",
@@ -99,7 +95,6 @@ const IMPACT_PILLARS: ImpactPillar[] = [
     metricLabel: "Integrative Medical Reach",
     icon: LineChart,
     highlightColor: "#BE561A",
-    accentBg: "rgba(190, 86, 26, 0.08)",
   },
   {
     id: "career-empowerment",
@@ -118,7 +113,6 @@ const IMPACT_PILLARS: ImpactPillar[] = [
     metricLabel: "Clinical Autonomy",
     icon: Building2,
     highlightColor: "#AE4E18",
-    accentBg: "rgba(174, 78, 24, 0.08)",
   },
 ];
 
@@ -218,14 +212,14 @@ export function AboutUsPage() {
             </Link>
             <Link
               to="/register"
-              className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#E67230] px-5 text-sm sm:text-[15px] font-bold text-white shadow-[0_2px_8px_-2px_rgba(230,114,48,0.4)] transition-all hover:bg-[#D15F1F]"
+              className="group relative inline-flex h-11 items-center justify-center gap-2 rounded-md bg-[#E67230] px-5 text-sm sm:text-[15px] font-bold text-white shadow-[0_4px_16px_-4px_rgba(230,114,48,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#D15F1F] hover:shadow-[0_8px_24px_-4px_rgba(230,114,48,0.5)] active:translate-y-0 active:shadow-sm"
             >
               <span>Register as Doctor</span>
-              <ArrowRight className="size-4" />
+              <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
             <Link
               to="/"
-              className="inline-flex size-10 sm:size-11 items-center justify-center rounded-lg border border-[#EBE7DF] bg-[#FAF9F6] text-[#555555] hover:bg-white hover:text-[#E67230] hover:border-[#E67230]/40 transition-colors shadow-2xs"
+              className="inline-flex size-10 sm:size-11 items-center justify-center rounded-md border border-[#EBE7DF] bg-[#FAF9F6] text-[#555555] hover:bg-white hover:text-[#E67230] hover:border-[#E67230]/40 transition-colors shadow-2xs"
               title="Return to Meyveda Home"
               aria-label="Back to Home"
             >
@@ -242,30 +236,16 @@ export function AboutUsPage() {
         {/* ================================================================== */}
         {/* 2. HERO SECTION — THE MODERN ERA OF AYUSH                           */}
         {/* ================================================================== */}
-        <section className="relative overflow-hidden border-b border-[#EBE7DF] bg-white py-16 sm:py-22 lg:py-26">
-          {/* Subtle Ambient Radial Glow */}
-          <div
-            className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply"
-            style={{
-              background:
-                "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(230, 114, 48, 0.14) 0%, rgba(250, 249, 246, 0) 70%)",
-            }}
-          />
-
-          <div className="relative mx-auto max-w-[1180px] px-5 sm:px-8 lg:px-12 text-center">
-            {/* Eyebrow Pill */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#FBD9C3] bg-[#FFF3EB] px-4 py-1.5 mb-6 shadow-2xs">
-              <span className="flex size-4 items-center justify-center rounded-full bg-[#E67230] text-white">
-                <Sparkles className="size-2.5" />
-              </span>
-              <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230]">
-                THE MODERN ERA OF AYUSH
-              </p>
-            </div>
+        <section className="relative overflow-hidden border-b border-[#EBE7DF] bg-[#FAF9F6] py-16 sm:py-24 lg:py-28">
+          <div className="relative mx-auto max-w-[1216px] px-5 sm:px-8 lg:px-12 text-center">
+            {/* Clean Section Eyebrow matching Landing Page philosophy (no pill, no sparkles) */}
+            <p className="mb-3 text-xs sm:text-sm font-bold uppercase tracking-widest text-[#E67230]">
+              THE MODERN ERA OF AYUSH
+            </p>
 
             {/* Main Hero Headline */}
             <h1
-              className="text-4xl sm:text-5xl lg:text-6xl xl:text-[64px] font-extrabold tracking-tight text-[#111111] leading-[1.08]"
+              className="text-[38px] sm:text-[50px] lg:text-[60px] xl:text-[66px] font-bold tracking-tight text-[#111111] leading-[1.08] text-balance max-w-4xl mx-auto"
               style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
             >
               Operating System for <br className="hidden sm:inline" />
@@ -273,28 +253,28 @@ export function AboutUsPage() {
             </h1>
 
             {/* Sub-headline */}
-            <p className="mx-auto mt-6 max-w-3xl text-lg sm:text-xl lg:text-[22px] leading-relaxed text-[#555555] font-medium">
+            <p className="mx-auto mt-5 max-w-3xl text-lg sm:text-xl lg:text-[22px] leading-relaxed text-[#444444] font-medium">
               21st-Century Modern Assistance for India’s Oldest Sovereign Medicine System.
             </p>
 
-            <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-[#777777] leading-relaxed">
+            <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-[#666666] leading-relaxed">
               Equipping registered Vaidyas, Siddha practitioners, and traditional physicians with verified
-              digital identities, authenticated medicine fulfillment, and clinical practice infrastructure.
+              digital identities, authenticated zero-inventory medicine fulfillment, and clinical practice infrastructure.
             </p>
 
-            {/* Primary Action Buttons */}
-            <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-4">
+            {/* Primary Action Buttons styled with Landing Page button philosophy */}
+            <div className="mt-8 sm:mt-10 flex flex-wrap items-center justify-center gap-3.5">
               <Link
                 to="/"
-                className="inline-flex h-12 sm:h-13 items-center justify-center gap-2 rounded-xl bg-[#E67230] px-7 text-sm sm:text-base font-bold text-white shadow-[0_4px_16px_-4px_rgba(230,114,48,0.45)] transition-all hover:bg-[#D15F1F] hover:-translate-y-0.5 active:translate-y-0"
+                className="group relative inline-flex h-12 items-center justify-center gap-2 rounded-md bg-[#E67230] px-7 text-sm font-bold text-white shadow-[0_4px_16px_-4px_rgba(230,114,48,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#D15F1F] hover:shadow-[0_8px_24px_-4px_rgba(230,114,48,0.5)] active:translate-y-0 active:shadow-sm"
               >
                 <span>Explore the Platform</span>
-                <ArrowRight className="size-4" />
+                <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
               </Link>
 
               <a
                 href="#who-we-are"
-                className="inline-flex h-12 sm:h-13 items-center justify-center gap-2 rounded-xl border border-[#D5D0C6] bg-white px-7 text-sm sm:text-base font-bold text-[#111111] hover:border-[#E67230] hover:text-[#E67230] hover:bg-[#FAF9F6] transition-all shadow-2xs"
+                className="inline-flex h-12 items-center justify-center gap-2 rounded-md border border-[#EBE7DF] bg-white px-7 text-sm font-semibold text-[#111111] shadow-none transition-all duration-200 hover:border-[#E67230]/40 hover:bg-[#FAF9F6] hover:text-[#111111]"
               >
                 <span>Learn Our Story</span>
                 <ChevronRight className="size-4" />
@@ -306,16 +286,28 @@ export function AboutUsPage() {
         {/* ================================================================== */}
         {/* 3. PRACTICE METRICS STRIP — OPERATIONS OPTIMIZED                   */}
         {/* ================================================================== */}
-        <section className="border-b border-[#EBE7DF] bg-[#FAF9F6] py-10 sm:py-12">
+        <section className="border-b border-[#EBE7DF] bg-white py-12 sm:py-16">
           <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
-              {PRACTICE_METRICS.map((item, idx) => (
+            <div className="text-center max-w-2xl mx-auto mb-8 sm:mb-10">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#E67230] mb-2">
+                PRACTICE METRICS · OPERATIONS OPTIMIZED
+              </p>
+              <h2
+                className="text-2xl sm:text-3xl font-extrabold text-[#111111] tracking-tight"
+                style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+              >
+                Centered for Impact
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              {PRACTICE_METRICS.map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-2xl border border-[#EBE7DF] bg-white p-5 sm:p-6 shadow-2xs flex flex-col justify-between transition-transform duration-200 hover:-translate-y-0.5"
+                  className="rounded-xl border border-[#EBE7DF] bg-[#FAF9F6] p-5 sm:p-6 transition-all duration-200 hover:border-[#E67230]/40 flex flex-col justify-between"
                 >
                   <div>
-                    <span className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#E67230] tracking-tight font-serif block">
+                    <span className="text-3xl sm:text-4xl font-extrabold text-[#E67230] tracking-tight font-serif block">
                       {item.metric}
                     </span>
                     <h3 className="mt-2 text-sm sm:text-base font-bold text-[#111111] leading-snug">
@@ -334,22 +326,22 @@ export function AboutUsPage() {
         {/* ================================================================== */}
         {/* 4. WHO WE ARE: YOUR CLINICIAN-FIRST PARTNER                        */}
         {/* ================================================================== */}
-        <section id="who-we-are" className="py-16 sm:py-24 border-b border-[#EBE7DF] bg-white">
+        <section id="who-we-are" className="py-16 sm:py-24 border-b border-[#EBE7DF] bg-[#FAF9F6]">
           <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
               {/* Left Column: Mission Narrative */}
               <div className="lg:col-span-7 space-y-6">
-                <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#E67230]">
-                  <HeartHandshake className="size-4" />
-                  <span>WHO WE ARE · CLINICIAN-FIRST ECOSYSTEM</span>
+                <div>
+                  <p className="mb-2.5 text-xs font-bold uppercase tracking-wider text-[#E67230]">
+                    WHO WE ARE · YOUR CLINICIAN-FIRST PARTNER
+                  </p>
+                  <h2
+                    className="text-balance text-3xl font-extrabold leading-[1.14] tracking-tight text-[#111111] sm:text-4xl lg:text-[42px]"
+                    style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+                  >
+                    Your Clinician-First Partner
+                  </h2>
                 </div>
-
-                <h2
-                  className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold tracking-tight text-[#111111] leading-[1.12]"
-                  style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
-                >
-                  Your Clinician-First Partner
-                </h2>
 
                 <p className="text-base sm:text-lg text-[#555555] leading-relaxed">
                   <strong className="font-bold text-[#111111]">Meyveda Ayush Pvt Ltd</strong> is an
@@ -360,7 +352,7 @@ export function AboutUsPage() {
                 </p>
 
                 {/* The Clean Division of Responsibility Charter Callout */}
-                <div className="rounded-2xl border-l-4 border-[#E67230] bg-gradient-to-r from-[#FFF7F0] to-[#FAF9F6] p-6 sm:p-7 border-y border-r border-[#EBE7DF] shadow-2xs space-y-3">
+                <div className="rounded-xl border-l-4 border-[#E67230] border-y border-r border-[#EBE7DF] bg-white p-6 sm:p-7 space-y-3">
                   <p className="text-xs font-bold uppercase tracking-wider text-[#E67230] flex items-center gap-1.5">
                     <Scale className="size-3.5" />
                     <span>The Meyveda Practice Charter</span>
@@ -370,15 +362,15 @@ export function AboutUsPage() {
                     administrative, and logistical task stays with us, leaving all clinical decisions and patient
                     care entirely in your hands.&rdquo;
                   </blockquote>
-                  <p className="text-xs text-[#777777] font-semibold">
+                  <p className="text-xs font-medium text-[#777777]">
                     — Meyveda Clinician Enablement Commitment
                   </p>
                 </div>
 
                 {/* Division Breakdown Matrix */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="rounded-xl border border-[#EBE7DF] bg-[#FAF9F6] p-4 space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-bold text-[#E67230] uppercase">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                  <div className="rounded-xl border border-[#EBE7DF] bg-white p-4.5 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#E67230] uppercase tracking-wide">
                       <CheckCircle2 className="size-4 shrink-0" />
                       <span>What Stays With Meyveda</span>
                     </div>
@@ -390,8 +382,8 @@ export function AboutUsPage() {
                     </ul>
                   </div>
 
-                  <div className="rounded-xl border border-[#EBE7DF] bg-[#FAF9F6] p-4 space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-bold text-[#111111] uppercase">
+                  <div className="rounded-xl border border-[#EBE7DF] bg-white p-4.5 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-[#111111] uppercase tracking-wide">
                       <Stethoscope className="size-4 text-[#E67230] shrink-0" />
                       <span>What Stays 100% With You</span>
                     </div>
@@ -407,15 +399,12 @@ export function AboutUsPage() {
 
               {/* Right Column: Visual Trust & Operational Credentials */}
               <div className="lg:col-span-5 space-y-6">
-                <div className="rounded-3xl border border-[#EBE7DF] bg-[#FAF9F6] p-7 sm:p-9 shadow-sm space-y-6">
+                <div className="rounded-2xl border border-[#EBE7DF] bg-white p-7 sm:p-8 space-y-6">
                   <div className="flex items-center justify-between pb-4 border-b border-[#EBE7DF]">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex size-3 rounded-full bg-[#E67230]" />
-                      <span className="text-xs font-bold uppercase tracking-wider text-[#111111]">
-                        Corporate Governance
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-semibold text-[#E67230] bg-[#E67230]/10 px-2.5 py-0.5 rounded-full border border-[#E67230]/20">
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#111111]">
+                      Corporate Governance
+                    </span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#E67230] bg-[#FAF9F6] border border-[#EBE7DF] px-2.5 py-1 rounded-md">
                       Registered AYUSH Entity
                     </span>
                   </div>
@@ -473,29 +462,29 @@ export function AboutUsPage() {
         {/* ================================================================== */}
         {/* 5. OUR VISION & MISSION: DUAL FOUNDATIONAL PILLARS                 */}
         {/* ================================================================== */}
-        <section className="py-16 sm:py-24 border-b border-[#EBE7DF] bg-[#FAF9F6]">
+        <section className="py-16 sm:py-24 border-b border-[#EBE7DF] bg-white">
           <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
-            <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#E67230] mb-2">
+            <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-14">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#E67230] mb-2.5">
                 STRATEGIC NORTH STAR
               </p>
               <h2
-                className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold tracking-tight text-[#111111]"
+                className="text-balance text-3xl font-extrabold leading-[1.14] tracking-tight text-[#111111] sm:text-4xl lg:text-[42px]"
                 style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
               >
                 Our Vision &amp; Mission
               </h2>
-              <p className="mt-3 text-base text-[#666666]">
+              <p className="mt-3 text-base text-[#6B6B6B] leading-relaxed">
                 Rooted in authentic classical texts, elevated by enterprise clinical engineering.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-10">
               {/* Vision Card */}
-              <div className="rounded-3xl border border-[#EBE7DF] bg-white p-8 sm:p-10 shadow-xs hover:border-[#E67230]/40 transition-all flex flex-col justify-between">
+              <div className="rounded-2xl border border-[#EBE7DF] bg-[#FAF9F6] p-7 sm:p-9 transition-all duration-200 hover:border-[#E67230]/40 flex flex-col justify-between">
                 <div>
-                  <div className="flex size-14 items-center justify-center rounded-2xl bg-[#FFF3EB] text-[#E67230] mb-6">
-                    <Compass className="size-7" />
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-white border border-[#EBE7DF] text-[#E67230] mb-6">
+                    <Compass className="size-6" />
                   </div>
 
                   <span className="text-xs font-bold uppercase tracking-wider text-[#E67230] block mb-2">
@@ -503,7 +492,7 @@ export function AboutUsPage() {
                   </span>
 
                   <h3
-                    className="text-2xl sm:text-3xl font-extrabold text-[#111111] tracking-tight mb-4"
+                    className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight mb-4"
                     style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
                   >
                     Our Vision
@@ -516,17 +505,17 @@ export function AboutUsPage() {
                   </p>
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-[#EBE7DF] flex items-center gap-2 text-xs font-bold text-[#111111]">
-                  <Globe2 className="size-4 text-[#E67230]" />
+                <div className="mt-8 pt-5 border-t border-[#EBE7DF] flex items-center gap-2 text-xs font-semibold text-[#111111]">
+                  <Globe2 className="size-4 text-[#E67230] shrink-0" />
                   <span>Universal Access · Root-Cause Healing · Classical Lineage</span>
                 </div>
               </div>
 
               {/* Mission Card */}
-              <div className="rounded-3xl border border-[#EBE7DF] bg-white p-8 sm:p-10 shadow-xs hover:border-[#E67230]/40 transition-all flex flex-col justify-between">
+              <div className="rounded-2xl border border-[#EBE7DF] bg-[#FAF9F6] p-7 sm:p-9 transition-all duration-200 hover:border-[#E67230]/40 flex flex-col justify-between">
                 <div>
-                  <div className="flex size-14 items-center justify-center rounded-2xl bg-[#FFF3EB] text-[#E67230] mb-6">
-                    <Award className="size-7" />
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-white border border-[#EBE7DF] text-[#E67230] mb-6">
+                    <Award className="size-6" />
                   </div>
 
                   <span className="text-xs font-bold uppercase tracking-wider text-[#E67230] block mb-2">
@@ -534,7 +523,7 @@ export function AboutUsPage() {
                   </span>
 
                   <h3
-                    className="text-2xl sm:text-3xl font-extrabold text-[#111111] tracking-tight mb-4"
+                    className="text-2xl sm:text-3xl font-bold text-[#111111] tracking-tight mb-4"
                     style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
                   >
                     Our Mission
@@ -548,8 +537,8 @@ export function AboutUsPage() {
                   </p>
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-[#EBE7DF] flex items-center gap-2 text-xs font-bold text-[#111111]">
-                  <CheckCircle2 className="size-4 text-[#E67230]" />
+                <div className="mt-8 pt-5 border-t border-[#EBE7DF] flex items-center gap-2 text-xs font-semibold text-[#111111]">
+                  <CheckCircle2 className="size-4 text-[#E67230] shrink-0" />
                   <span>Modern Clinical Software · Verified Formulations · Transparent Care</span>
                 </div>
               </div>
@@ -560,20 +549,19 @@ export function AboutUsPage() {
         {/* ================================================================== */}
         {/* 6. THE IMPACT WE DELIVER: 4 CORE PILLARS (INTERACTIVE SHOWCASE)   */}
         {/* ================================================================== */}
-        <section id="impact" className="py-16 sm:py-24 border-b border-[#EBE7DF] bg-white">
+        <section id="impact" className="py-16 sm:py-24 border-b border-[#EBE7DF] bg-[#FAF9F6]">
           <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
-            <div className="max-w-3xl mb-12 sm:mb-16">
-              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#E67230] mb-2">
-                <Activity className="size-4" />
-                <span>MEASURABLE TRANSFORMATION</span>
-              </div>
+            <div className="max-w-3xl mb-10 sm:mb-12">
+              <p className="mb-2.5 text-xs font-bold uppercase tracking-wider text-[#E67230]">
+                MEASURABLE TRANSFORMATION · 4 CORE PILLARS
+              </p>
               <h2
-                className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold tracking-tight text-[#111111] leading-[1.12]"
+                className="text-balance text-3xl font-extrabold leading-[1.14] tracking-tight text-[#111111] sm:text-4xl lg:text-[42px]"
                 style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
               >
                 The Impact We Deliver
               </h2>
-              <p className="mt-4 text-base sm:text-lg text-[#555555] leading-relaxed">
+              <p className="mt-3 text-base sm:text-lg text-[#555555] leading-relaxed">
                 Traditional medicine touches over a billion lives, yet qualified Vaidyas often shoulder
                 operational friction that distracts from patient healing. Meyveda delivers measurable
                 transformation across four core pillars.
@@ -591,18 +579,16 @@ export function AboutUsPage() {
                     type="button"
                     onClick={() => setActivePillarId(pillar.id)}
                     aria-pressed={isSelected}
-                    className={`rounded-2xl border p-4 sm:p-5 text-left transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#E67230] ${
+                    className={`rounded-xl border p-4 sm:p-5 text-left transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#E67230] ${
                       isSelected
-                        ? "border-[#E67230] bg-[#FFF8F2] shadow-sm ring-1 ring-[#E67230]"
-                        : "border-[#EBE7DF] bg-[#FAF9F6] hover:bg-white hover:border-[#D5D0C6]"
+                        ? "border-[#E67230] bg-white ring-1 ring-[#E67230] shadow-xs"
+                        : "border-[#EBE7DF] bg-white hover:border-[#D5D0C6] hover:bg-[#FAF9F6]"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <span
-                        className={`flex size-8 items-center justify-center rounded-lg text-xs font-bold ${
-                          isSelected
-                            ? "bg-[#E67230] text-white"
-                            : "bg-[#EBE7DF] text-[#666666]"
+                        className={`font-mono text-xs font-bold ${
+                          isSelected ? "text-[#E67230]" : "text-[#888888]"
                         }`}
                       >
                         {pillar.number}
@@ -626,14 +612,15 @@ export function AboutUsPage() {
             </div>
 
             {/* Selected Pillar Detailed Interactive Display Card */}
-            <div className="rounded-3xl border border-[#EBE7DF] bg-[#FAF9F6] p-7 sm:p-10 lg:p-12 shadow-xs transition-all duration-300">
+            <div className="rounded-2xl border border-[#EBE7DF] bg-white p-7 sm:p-10 lg:p-12 transition-all duration-300">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
                 {/* Left side: Detailed Content */}
                 <div className="lg:col-span-8 space-y-5">
-                  <div className="flex items-center gap-3">
-                    <span className="flex size-9 items-center justify-center rounded-xl bg-[#E67230] text-white text-sm font-bold">
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-mono text-xs font-bold text-[#E67230]">
                       {activePillar.number}
                     </span>
+                    <span className="text-xs text-[#888888]">·</span>
                     <span className="text-xs font-bold uppercase tracking-wider text-[#E67230]">
                       {activePillar.tagline}
                     </span>
@@ -658,7 +645,7 @@ export function AboutUsPage() {
                       {activePillar.bullets.map((b) => (
                         <div
                           key={b}
-                          className="flex items-start gap-2.5 rounded-xl border border-[#EBE7DF] bg-white p-3.5 shadow-2xs"
+                          className="flex items-start gap-2.5 rounded-lg border border-[#EBE7DF] bg-[#FAF9F6] p-3.5"
                         >
                           <CheckCircle2 className="size-4 text-[#E67230] shrink-0 mt-0.5" />
                           <span className="text-xs text-[#555555] leading-relaxed">
@@ -670,11 +657,11 @@ export function AboutUsPage() {
                   </div>
                 </div>
 
-                {/* Right side: Highlight Badge & Metric Card */}
-                <div className="lg:col-span-4 flex flex-col justify-between h-full space-y-6">
-                  <div className="rounded-2xl border border-[#EBE7DF] bg-white p-6 shadow-2xs text-center space-y-2">
-                    <div className="flex size-12 items-center justify-center rounded-full bg-[#E67230]/10 text-[#E67230] mx-auto mb-2">
-                      <ActiveIcon className="size-6" />
+                {/* Right side: Highlight Metric Card */}
+                <div className="lg:col-span-4 flex flex-col justify-between h-full space-y-5">
+                  <div className="rounded-xl border border-[#EBE7DF] bg-[#FAF9F6] p-6 text-center space-y-2">
+                    <div className="flex size-11 items-center justify-center rounded-xl bg-white border border-[#EBE7DF] text-[#E67230] mx-auto mb-2">
+                      <ActiveIcon className="size-5.5" />
                     </div>
                     <span className="text-3xl sm:text-4xl font-extrabold text-[#E67230] font-serif block">
                       {activePillar.metricValue}
@@ -687,16 +674,16 @@ export function AboutUsPage() {
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-[#FBD9C3] bg-[#FFF8F2] p-5 text-center space-y-3">
+                  <div className="rounded-xl border border-[#EBE7DF] bg-[#FAF9F6] p-5 text-center space-y-3">
                     <p className="text-xs font-bold text-[#111111]">
                       Ready to experience modern AYUSH practice management?
                     </p>
                     <Link
                       to="/register"
-                      className="inline-flex h-10 w-full items-center justify-center gap-1.5 rounded-lg bg-[#E67230] text-xs font-bold text-white shadow-xs hover:bg-[#D15F1F] transition-colors"
+                      className="group relative inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[#E67230] text-xs font-bold text-white shadow-[0_4px_16px_-4px_rgba(230,114,48,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#D15F1F] active:translate-y-0"
                     >
                       <span>Join as Practitioner</span>
-                      <ArrowRight className="size-3.5" />
+                      <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1" />
                     </Link>
                   </div>
                 </div>
@@ -708,16 +695,15 @@ export function AboutUsPage() {
         {/* ================================================================== */}
         {/* 7. CALL TO ACTION BANNER                                           */}
         {/* ================================================================== */}
-        <section className="py-16 sm:py-22 bg-[#FAF9F6]">
+        <section className="border-t border-[#EBE7DF] bg-white py-16 sm:py-22">
           <div className="mx-auto max-w-[1080px] px-5 sm:px-8 text-center">
-            <div className="rounded-3xl border border-[#EBE7DF] bg-white p-8 sm:p-12 lg:p-16 shadow-sm space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#FBD9C3] bg-[#FFF3EB] px-3.5 py-1 text-xs font-bold text-[#E67230]">
-                <Sparkles className="size-3" />
-                <span>START YOUR CLINICAL JOURNEY</span>
-              </div>
+            <div className="rounded-2xl border border-[#EBE7DF] bg-[#FAF9F6] p-8 sm:p-12 lg:p-16 space-y-6">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#E67230]">
+                START YOUR CLINICAL JOURNEY
+              </p>
 
               <h2
-                className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#111111] tracking-tight leading-tight"
+                className="text-balance text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-[#111111] tracking-tight leading-tight"
                 style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
               >
                 Reinvent Your AYUSH Practice Today
@@ -728,18 +714,18 @@ export function AboutUsPage() {
                 All operational friction stays with us — your patients stay with you.
               </p>
 
-              <div className="flex flex-wrap items-center justify-center gap-4 pt-3">
+              <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
                 <Link
                   to="/register"
-                  className="inline-flex h-12 sm:h-13 items-center justify-center gap-2 rounded-xl bg-[#E67230] px-7 sm:px-8 text-sm sm:text-base font-bold text-white shadow-[0_4px_16px_-4px_rgba(230,114,48,0.4)] transition-all hover:bg-[#D15F1F] hover:-translate-y-0.5 active:translate-y-0"
+                  className="group relative inline-flex h-12 items-center justify-center gap-2 rounded-md bg-[#E67230] px-7 sm:px-8 text-sm sm:text-base font-bold text-white shadow-[0_4px_16px_-4px_rgba(230,114,48,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#D15F1F] hover:shadow-[0_8px_24px_-4px_rgba(230,114,48,0.5)] active:translate-y-0 active:shadow-sm"
                 >
                   <span>Register as Doctor</span>
-                  <ArrowRight className="size-4" />
+                  <ArrowRight className="size-4 transition-transform duration-200 group-hover:translate-x-1" />
                 </Link>
 
                 <Link
                   to="/contact"
-                  className="inline-flex h-12 sm:h-13 items-center justify-center rounded-xl border border-[#D5D0C6] bg-white px-7 sm:px-8 text-sm sm:text-base font-bold text-[#111111] hover:border-[#E67230] hover:text-[#E67230] transition-colors shadow-2xs"
+                  className="inline-flex h-12 items-center justify-center rounded-md border border-[#EBE7DF] bg-white px-7 sm:px-8 text-sm sm:text-base font-semibold text-[#111111] shadow-none transition-all duration-200 hover:border-[#E67230]/40 hover:bg-[#FAF9F6] hover:text-[#111111]"
                 >
                   Contact Our Team
                 </Link>
@@ -750,92 +736,85 @@ export function AboutUsPage() {
       </main>
 
       {/* -------------------------------------------------------------------- */}
-      {/* 8. MEYVEDA COMMON FOOTER                                             */}
+      {/* 8. FOOTER                                                            */}
       {/* -------------------------------------------------------------------- */}
-      <footer className="border-t border-[#EBE7DF] bg-white py-12 text-[#111111] sm:py-16">
-        <div className="mx-auto max-w-[1216px] px-5 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-4 lg:gap-8">
-            {/* Col 1: Brand & Contact Info */}
+      <footer className="border-t border-[#EBE7DF] bg-white py-12 text-xs sm:text-sm">
+        <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-4 lg:gap-12">
+            {/* Col 1: Brand Info */}
             <div className="space-y-4">
-              <img
-                src={meyvedaLogo}
-                alt="Meyveda Logo"
-                className="h-9 w-auto object-contain"
-              />
-              <p className="text-xs sm:text-sm leading-relaxed text-[#555555]">
-                The Operating System for AYUSH Practitioners. Platform enablement, verified supply chain,
-                and digital clinical infrastructure across India.
+              <Link to="/" className="inline-block">
+                <img src={meyvedaLogo} alt="Meyveda" className="h-10 w-auto" />
+              </Link>
+              <p className="text-xs leading-relaxed text-[#666666]">
+                Meyveda Ayush Pvt Ltd — The clinician-first operating system and clinical enablement
+                platform for registered AYUSH physicians across India.
               </p>
-              <div className="pt-2 text-xs text-[#555555] space-y-1.5">
+              <div className="space-y-1.5 pt-2 text-xs text-[#555555]">
                 <p className="flex items-center gap-2">
-                  <Mail className="size-3.5 text-[#E67230]" />
+                  <MapPin className="size-3.5 text-[#E67230] shrink-0" />
+                  <span>{MEYVEDA_CONTACT.address}</span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <Mail className="size-3.5 text-[#E67230] shrink-0" />
                   <a
                     href={`mailto:${MEYVEDA_CONTACT.email}`}
-                    className="hover:text-[#E67230] transition-colors font-semibold"
+                    className="hover:text-[#E67230] transition-colors underline"
                   >
                     {MEYVEDA_CONTACT.email}
                   </a>
                 </p>
                 <p className="flex items-center gap-2">
-                  <Phone className="size-3.5 text-[#E67230]" />
+                  <Phone className="size-3.5 text-[#E67230] shrink-0" />
                   <a
-                    href={`tel:${MEYVEDA_CONTACT.phone}`}
-                    className="hover:text-[#E67230] transition-colors font-semibold"
+                    href={`tel:${MEYVEDA_CONTACT.phoneRaw}`}
+                    className="hover:text-[#E67230] transition-colors"
                   >
-                    {MEYVEDA_CONTACT.phoneFormatted}
+                    {MEYVEDA_CONTACT.phone}
                   </a>
-                </p>
-                <p className="flex items-center gap-2">
-                  <MapPin className="size-3.5 text-[#E67230]" />
-                  <span>{MEYVEDA_CONTACT.address}</span>
                 </p>
               </div>
             </div>
 
-            {/* Col 2: Navigation */}
+            {/* Col 2: Navigation Links */}
             <div>
               <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#111111]">
-                Quick Links
+                Navigation
               </p>
               <ul className="mt-4 space-y-2 text-xs sm:text-sm text-[#555555]">
                 <li>
                   <Link to="/" className="hover:text-[#E67230] transition-colors">
-                    For Doctors
+                    Home (Doctor Suite)
                   </Link>
                 </li>
                 <li>
-                  <Link to="/about" className="text-[#E67230] font-bold">
-                    About us
+                  <Link to="/about" className="text-[#E67230] font-bold transition-colors">
+                    About Us
                   </Link>
                 </li>
                 <li>
-                  <Link to="/" hash="public-relation" className="hover:text-[#E67230] transition-colors">
-                    Public relation
+                  <Link to="/cluster-franchise" className="hover:text-[#E67230] transition-colors">
+                    District Cluster Franchise
                   </Link>
                 </li>
                 <li>
                   <Link to="/contact" className="hover:text-[#E67230] transition-colors">
-                    Contact us
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/" hash="blogs" className="hover:text-[#E67230] transition-colors">
-                    Blogs
+                    Contact Support &amp; Grievance
                   </Link>
                 </li>
               </ul>
             </div>
 
-            {/* Col 3: Programs & Partnerships */}
+            {/* Col 3: Clinical Platform */}
             <div>
               <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#111111]">
                 Platform
               </p>
               <ul className="mt-4 space-y-2 text-xs sm:text-sm text-[#555555]">
                 <li>
-                  <Link to="/cluster-franchise" className="hover:text-[#E67230] transition-colors">
-                    Cluster Franchise Partner
-                  </Link>
+                  <a href="#who-we-are" className="hover:text-[#E67230] transition-colors">
+                    Clinician-First Charter
+                  </a>
                 </li>
                 <li>
                   <Link to="/login" className="hover:text-[#E67230] transition-colors">
