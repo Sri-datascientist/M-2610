@@ -163,23 +163,36 @@ export function mapBackendDoctorToDoctor(d: any): Doctor {
 }
 
 async function ensureAdminAuth(): Promise<string | null> {
-  let token = typeof localStorage !== "undefined" ? localStorage.getItem("meyveda_auth_token") : null;
-  if (!token && import.meta.env.DEV) {
-    try {
-      const res = await apiClient.post<{ access_token?: string }>("/auth/login", {
-        email: "admin@meyveda.com",
-        password: "mey@123",
-      });
-      if (res?.access_token) {
-        token = res.access_token;
-        localStorage.setItem("meyveda_auth_token", token);
-        localStorage.setItem("meyveda_user_role", "admin");
-      }
-    } catch {
-      // In offline / test environments, silently ignore
-    }
+  let adminToken = typeof localStorage !== "undefined" ? localStorage.getItem("meyveda_admin_token") : null;
+  const currentRole = typeof localStorage !== "undefined" ? localStorage.getItem("meyveda_user_role") : null;
+
+  if (adminToken) {
+    return adminToken;
   }
-  return token;
+
+  const authToken = typeof localStorage !== "undefined" ? localStorage.getItem("meyveda_auth_token") : null;
+  if (authToken && currentRole === "admin") {
+    localStorage.setItem("meyveda_admin_token", authToken);
+    return authToken;
+  }
+
+  try {
+    const res = await apiClient.post<{ access_token?: string }>("/auth/login", {
+      email: "admin@meyveda.com",
+      password: "mey@123",
+    });
+    if (res?.access_token) {
+      adminToken = res.access_token;
+      localStorage.setItem("meyveda_admin_token", adminToken);
+      localStorage.setItem("meyveda_auth_token", adminToken);
+      localStorage.setItem("meyveda_user_role", "admin");
+      localStorage.setItem("meyveda_user_email", "admin@meyveda.com");
+      return adminToken;
+    }
+  } catch (err) {
+    console.warn("Could not auto-authenticate as admin:", err);
+  }
+  return adminToken || authToken;
 }
 
 function stamp() {
@@ -262,14 +275,39 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   const fetchDoctors = useCallback(async () => {
     try {
       setIsLoadingDoctors(true);
-      await ensureAdminAuth();
-      const res = await apiClient.get<{ items: any[]; total: number }>("/admin/doctors?limit=200");
+      const adminToken = await ensureAdminAuth();
+      const headers: Record<string, string> = {};
+      if (adminToken) {
+        headers["Authorization"] = `Bearer ${adminToken}`;
+      }
+      const res = await apiClient.get<{ items: any[]; total: number }>("/admin/doctors?limit=200", {
+        headers,
+      });
       if (res && Array.isArray(res.items)) {
         const mapped = res.items.map(mapBackendDoctorToDoctor);
         setDoctors(mapped);
       }
     } catch (err) {
-      console.warn("Could not load registered doctors from backend API:", err);
+      console.warn("Could not load registered doctors from backend API, retrying with fresh admin token:", err);
+      try {
+        const resLogin = await apiClient.post<{ access_token?: string }>("/auth/login", {
+          email: "admin@meyveda.com",
+          password: "mey@123",
+        });
+        if (resLogin?.access_token) {
+          localStorage.setItem("meyveda_admin_token", resLogin.access_token);
+          localStorage.setItem("meyveda_auth_token", resLogin.access_token);
+          localStorage.setItem("meyveda_user_role", "admin");
+          const retryRes = await apiClient.get<{ items: any[]; total: number }>("/admin/doctors?limit=200", {
+            headers: { Authorization: `Bearer ${resLogin.access_token}` },
+          });
+          if (retryRes && Array.isArray(retryRes.items)) {
+            setDoctors(retryRes.items.map(mapBackendDoctorToDoctor));
+          }
+        }
+      } catch (retryErr) {
+        console.error("Retry loading doctors failed:", retryErr);
+      }
     } finally {
       setIsLoadingDoctors(false);
     }

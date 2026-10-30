@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Link, Outlet } from "@tanstack/react-router";
 import { AppShell } from "@/components/shell/AppShell";
 import { useStore, setState } from "@/lib/store";
-import { Lock, ShieldAlert } from "lucide-react";
+import { Lock, ShieldAlert, Home } from "lucide-react";
 import { apiClient } from "@/services/apiClient";
 
 export const DoctorWorkspaceLayout: React.FC = () => {
@@ -90,7 +90,8 @@ export const DoctorWorkspaceLayout: React.FC = () => {
               to="/"
               className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-surface"
             >
-              Go to Meyveda Home
+              <Home className="mr-2 size-4 text-primary" />
+              <span>Go to Meyveda Home</span>
             </Link>
           </div>
         </section>
@@ -123,7 +124,8 @@ export const DoctorWorkspaceLayout: React.FC = () => {
               to="/"
               className="inline-flex items-center justify-center rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-surface"
             >
-              Go to Meyveda Home
+              <Home className="mr-2 size-4 text-primary" />
+              <span>Go to Meyveda Home</span>
             </Link>
           </div>
         </section>

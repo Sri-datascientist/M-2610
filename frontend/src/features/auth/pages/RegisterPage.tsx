@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   CheckCircle2,
+  Home,
   Mail,
   Phone,
   MapPin,
@@ -611,7 +612,7 @@ export function Register() {
       <header className="w-full border-b border-[#EBE7DF] bg-white/80 backdrop-blur-md sticky top-0 z-40">
         <div className="mx-auto flex h-16 sm:h-20 max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
           <Link
-            to="/doctor"
+            to="/"
             className="inline-flex items-center gap-2 group transition-opacity hover:opacity-90"
             aria-label="Back to Meyveda Home"
           >
@@ -624,13 +625,21 @@ export function Register() {
             />
           </Link>
 
-          <div className="flex items-center gap-4 sm:gap-6">
+          <div className="flex items-center gap-3 sm:gap-4">
             <Link
               to="/login"
               className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#E67230] hover:underline"
             >
               <span>Sign In</span>
               <ArrowRight className="size-3.5" />
+            </Link>
+            <Link
+              to="/"
+              className="inline-flex size-9 sm:size-10 items-center justify-center rounded-lg border border-[#EBE7DF] bg-[#FAF9F6] text-[#555555] hover:bg-white hover:text-[#E67230] hover:border-[#E67230]/40 transition-colors shadow-2xs"
+              title="Return to Meyveda Home"
+              aria-label="Back to Home"
+            >
+              <Home className="size-4 sm:size-4.5" />
             </Link>
           </div>
         </div>

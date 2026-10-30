@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
+  Home,
   ShieldCheck,
   Building2,
   BookOpen,
@@ -126,6 +127,14 @@ export function AboutUsPage() {
             >
               <span>Register as Doctor</span>
               <ArrowRight className="size-4" />
+            </Link>
+            <Link
+              to="/"
+              className="inline-flex size-10 sm:size-11 items-center justify-center rounded-lg border border-[#EBE7DF] bg-[#FAF9F6] text-[#555555] hover:bg-white hover:text-[#E67230] hover:border-[#E67230]/40 transition-colors shadow-2xs"
+              title="Return to Meyveda Home"
+              aria-label="Back to Home"
+            >
+              <Home className="size-4.5" />
             </Link>
           </div>
         </div>

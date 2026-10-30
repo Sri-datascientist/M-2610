@@ -324,6 +324,41 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
         </div>
 
+        {/* Desktop Top Header Bar with prominent Back to Home option */}
+        <header className="hidden h-14 items-center justify-between border-b border-border bg-white/80 px-6 backdrop-blur-md lg:flex">
+          <div className="flex items-center gap-3">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 rounded-lg border border-[#EBE7DF] bg-[#FAF9F6] px-3 py-1.5 text-xs font-bold text-[#555555] transition-colors hover:border-[#E67230]/40 hover:bg-white hover:text-[#E67230] shadow-2xs"
+              title="Return to Meyveda Landing Page"
+              aria-label="Back to Home"
+            >
+              <Home className="h-3.5 w-3.5 text-[#E67230]" />
+              <span>Back to Home</span>
+            </Link>
+            <span className="text-xs text-muted-foreground/60">•</span>
+            <span className="text-xs font-semibold text-muted-foreground capitalize">
+              {pathname === "/workspace" || pathname === "/ws"
+                ? "Doctor Workspace"
+                : pathname.replace("/", "").replace("-", " ")}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold text-foreground">
+              {doctor.name}
+            </span>
+            <Link
+              to="/"
+              className="inline-flex size-9 items-center justify-center rounded-lg border border-[#EBE7DF] bg-[#FAF9F6] text-[#555555] transition-colors hover:border-[#E67230]/40 hover:bg-white hover:text-[#E67230] shadow-2xs"
+              title="Return to Meyveda Home"
+              aria-label="Back to Home"
+            >
+              <Home className="h-4 w-4" />
+            </Link>
+          </div>
+        </header>
+
         <main id="main" tabIndex={-1} className="flex-1 outline-none">
           <motion.div
             key={section}

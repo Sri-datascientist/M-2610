@@ -48,11 +48,21 @@ export async function request<T = unknown>(
     headers.set("Content-Type", "application/json");
   }
 
-  // Inject session token if stored
-  const token =
-    localStorage.getItem("meyveda_auth_token") ||
-    localStorage.getItem("meyveda_access_token") ||
-    localStorage.getItem("meyveda_token");
+  // Inject session token if stored (prefer admin token for admin paths)
+  const isAdminRequest =
+    endpoint.includes("/admin") ||
+    (typeof window !== "undefined" && window.location.pathname.startsWith("/admin"));
+
+  const adminToken =
+    typeof localStorage !== "undefined" ? localStorage.getItem("meyveda_admin_token") : null;
+  const regularToken =
+    typeof localStorage !== "undefined"
+      ? localStorage.getItem("meyveda_auth_token") ||
+        localStorage.getItem("meyveda_access_token") ||
+        localStorage.getItem("meyveda_token")
+      : null;
+
+  const token = isAdminRequest ? (adminToken || regularToken) : regularToken;
   if (token && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
   }

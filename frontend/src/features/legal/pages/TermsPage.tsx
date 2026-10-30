@@ -93,6 +93,14 @@ export function TermsPage() {
             >
               Register as Doctor
             </Link>
+            <Link
+              to="/"
+              className="inline-flex size-9 sm:size-10 items-center justify-center rounded-md border border-[#EBE7DF] bg-[#FAF9F6] text-[#555555] hover:bg-white hover:text-[#E67230] hover:border-[#E67230]/40 transition-colors shadow-2xs"
+              title="Return to Meyveda Home"
+              aria-label="Back to Home"
+            >
+              <Home className="size-4 sm:size-4.5" />
+            </Link>
           </div>
         </div>
       </header>

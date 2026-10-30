@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-r
 import {
   Eye,
   EyeOff,
+  Home,
   Lock,
   Mail,
   ArrowRight,
@@ -298,7 +299,7 @@ export function Login({ initialMode }: { initialMode?: "signin" | "forgot" | "re
       <header className="w-full border-b border-[#EBE7DF] bg-white/80 backdrop-blur-md sticky top-0 z-40">
         <div className="mx-auto flex h-16 sm:h-20 max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
           <Link
-            to="/doctor"
+            to="/"
             className="inline-flex items-center gap-2 group transition-opacity hover:opacity-90"
             aria-label="Back to Meyveda Home"
           >
@@ -311,13 +312,23 @@ export function Login({ initialMode }: { initialMode?: "signin" | "forgot" | "re
             />
           </Link>
 
-          <Link
-            to="/register"
-            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#E67230] hover:underline"
-          >
-            <span>Register as Doctor</span>
-            <ArrowRight className="size-3.5" />
-          </Link>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Link
+              to="/register"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#E67230] hover:underline"
+            >
+              <span>Register as Doctor</span>
+              <ArrowRight className="size-3.5" />
+            </Link>
+            <Link
+              to="/"
+              className="inline-flex size-9 sm:size-10 items-center justify-center rounded-lg border border-[#EBE7DF] bg-[#FAF9F6] text-[#555555] hover:bg-white hover:text-[#E67230] hover:border-[#E67230]/40 transition-colors shadow-2xs"
+              title="Return to Meyveda Home"
+              aria-label="Back to Home"
+            >
+              <Home className="size-4 sm:size-4.5" />
+            </Link>
+          </div>
         </div>
       </header>
 

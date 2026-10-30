@@ -1,5 +1,5 @@
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { Bell, Menu, PanelLeft, X, Lock } from "lucide-react";
+import { Bell, Menu, PanelLeft, X, Lock, Home } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Avatar, BrandMark, SidebarLogo, focusRing } from "@/components/portal/brand";
 import { CatalogProvider } from "@/features/admin/catalog-state";
@@ -174,6 +174,18 @@ export function AdminLayout() {
                           >
                             <SidebarLogo className={cn(collapsed && "lg:w-[44px]")} />
                           </Link>
+                          <Link
+                            to="/"
+                            className={cn(
+                              "mb-4 flex items-center gap-3 rounded-xl border border-border/60 bg-surface/80 px-3 py-2 text-xs font-bold text-foreground transition-all hover:border-[#E67230]/40 hover:bg-white hover:text-[#E67230] shadow-2xs",
+                              collapsed && "justify-center px-0",
+                            )}
+                            title="Return to Meyveda Landing Page"
+                            aria-label="Back to Home"
+                          >
+                            <Home className="h-4 w-4 shrink-0 text-[#E67230]" />
+                            {!collapsed && <span>Back to Home</span>}
+                          </Link>
                           <nav className="flex flex-1 flex-col overflow-y-auto">
                             <NavGroups collapsed={collapsed} />
                           </nav>
@@ -208,15 +220,16 @@ export function AdminLayout() {
                               <Link to="/" className="md:hidden" title="Return to Meyveda Home" aria-label="Return to Meyveda Home">
                                 <BrandMark className="[&_img]:h-7" />
                               </Link>
-                              <div className="ml-auto hidden items-center gap-3 sm:flex">
+                              <div className="ml-auto flex items-center gap-2 sm:gap-3">
                                 <Link
                                   to="/"
-                                  className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-surface hover:text-foreground"
+                                  className="inline-flex size-9 sm:size-10 items-center justify-center rounded-lg border border-[#EBE7DF] bg-[#FAF9F6] text-[#555555] transition-colors hover:border-[#E67230]/40 hover:bg-white hover:text-[#E67230] shadow-2xs"
                                   title="Return to Meyveda Home"
+                                  aria-label="Back to Home"
                                 >
-                                  <span>Meyveda Home</span>
+                                  <Home className="size-4 sm:size-4.5" />
                                 </Link>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="hidden text-sm text-muted-foreground sm:block">
                                   {admin?.role ?? "Meyveda administration"}
                                 </p>
                               </div>
@@ -319,7 +332,17 @@ export function AdminLayout() {
                                 <X className="h-5 w-5" />
                               </button>
                             </div>
-                            <nav className="flex flex-1 flex-col overflow-y-auto">
+                            <Link
+                              to="/"
+                              onClick={() => setOpen(false)}
+                              className="mb-4 flex items-center gap-3 rounded-xl border border-border/60 bg-surface/80 px-3 py-2 text-xs font-bold text-foreground transition-all hover:border-[#E67230]/40 hover:bg-white hover:text-[#E67230] shadow-2xs"
+                              title="Return to Meyveda Landing Page"
+                              aria-label="Back to Home"
+                            >
+                              <Home className="h-4 w-4 shrink-0 text-[#E67230]" />
+                              <span>Back to Home</span>
+                            </Link>
+                          <nav className="flex flex-1 flex-col overflow-y-auto">
                               <NavGroups collapsed={false} onClick={() => setOpen(false)} />
                             </nav>
                           </div>
