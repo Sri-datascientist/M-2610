@@ -75,7 +75,7 @@ async def lookup_pincode_and_ayush_board(
     if not PINCODE_PATTERN.match(cleaned_pincode):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid PIN code format. Must be a valid 6-digit Indian postal code starting with digits 1-9.",
+            detail="PIN code incorrect.",
         )
 
     base_url = settings.POSTAL_API_BASE_URL.rstrip("/")
@@ -118,7 +118,7 @@ async def lookup_pincode_and_ayush_board(
     if not isinstance(data, list) or len(data) == 0:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No geographic records found for PIN code '{cleaned_pincode}'.",
+            detail="PIN code incorrect.",
         )
 
     first_record = data[0]
@@ -128,7 +128,7 @@ async def lookup_pincode_and_ayush_board(
     if record_status != "Success" or not post_offices:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"PIN code '{cleaned_pincode}' was not found in the national postal directory.",
+            detail="PIN code incorrect.",
         )
 
     # Extract primary post office details

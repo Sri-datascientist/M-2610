@@ -1,11 +1,12 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { PageHeader, StatusPill, focusRing } from "@/components/portal/brand";
 import { Button } from "@/components/ui/button";
 import { type DoctorStatus } from "@/features/admin/catalog-data";
 import { useCatalog } from "@/features/admin/catalog-state";
 import { DoctorPlatformUsage } from "@/features/admin/doctor-usage-panel";
+import { apiClient } from "@/services/apiClient";
 import {
   actionQueue,
   quickActions,
@@ -50,6 +51,46 @@ export function HomePage() {
   const { doctors, manufacturers, medicines } = useCatalog();
   const [showQueue, setShowQueue] = useState(false);
   const [greeting] = useState(() => getTimeGreeting());
+  const [invitationsCount, setInvitationsCount] = useState<number>(0);
+  const [franchiseCount, setFranchiseCount] = useState<number>(0);
+  const [recentFranchiseEnquiries, setRecentFranchiseEnquiries] = useState<any[]>([]);
+  const [contactCount, setContactCount] = useState<number>(0);
+  const [recentContactMessages, setRecentContactMessages] = useState<any[]>([]);
+
+  useEffect(() => {
+    apiClient
+      .get<{ total: number }>("/admin/invitations")
+      .then((res) => {
+        if (typeof res?.total === "number") {
+          setInvitationsCount(res.total);
+        }
+      })
+      .catch(() => {});
+
+    apiClient
+      .get<{ total: number; items: any[] }>("/franchise/admin/enquiries?limit=6")
+      .then((res) => {
+        if (typeof res?.total === "number") {
+          setFranchiseCount(res.total);
+        }
+        if (Array.isArray(res?.items)) {
+          setRecentFranchiseEnquiries(res.items);
+        }
+      })
+      .catch(() => {});
+
+    apiClient
+      .get<{ total: number; items: any[] }>("/contact/admin/messages?limit=6")
+      .then((res) => {
+        if (typeof res?.total === "number") {
+          setContactCount(res.total);
+        }
+        if (Array.isArray(res?.items)) {
+          setRecentContactMessages(res.items);
+        }
+      })
+      .catch(() => {});
+  }, []);
   const visibleActions = showQueue ? actionQueue : actionQueue.slice(0, visibleActionCount);
   const hiddenCount = actionQueue.length - visibleActionCount;
 
@@ -113,6 +154,33 @@ export function HomePage() {
       to: "/admin/medicines" as const,
       search: {},
     },
+    {
+      id: "doctor-invites",
+      label: "Doctor Invitations",
+      count: invitationsCount,
+      description: "Colleague nominations recorded in database",
+      trend: "Dispatched & tracked",
+      to: "/admin/referrals" as const,
+      search: {},
+    },
+    {
+      id: "franchise-enquiries",
+      label: "Franchise Enquiries",
+      count: franchiseCount,
+      description: "Cluster franchise applications in database",
+      trend: "Active applicants",
+      to: "/admin/territory" as const,
+      search: { tab: "enquiries" as any },
+    },
+    {
+      id: "contact-inquiries",
+      label: "Contact Inquiries",
+      count: contactCount,
+      description: "Live visitor & doctor messages in database",
+      trend: "Live database",
+      to: "/admin/queries" as const,
+      search: {},
+    },
   ];
 
   return (
@@ -164,6 +232,102 @@ export function HomePage() {
       </section>
 
       <DoctorPlatformUsage />
+
+      {/* Cluster Franchise Enquiries Column Panel */}
+      <Panel
+        id="franchise-enquiries-panel"
+        title="Cluster Franchise Enquiries (Expression of Interest)"
+        warm
+        action={
+          <Link
+            to="/admin/territory"
+            search={{ tab: "enquiries" as any }}
+            className={cn(
+              "rounded-lg text-sm font-semibold text-primary hover:underline",
+              focusRing,
+            )}
+          >
+            {`View all enquiries (${franchiseCount})`}
+          </Link>
+        }
+      >
+        <div className="overflow-x-auto">
+          <div className="hidden border-b border-border pb-2 text-xs font-semibold text-muted-foreground sm:grid sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_7rem_7rem_6rem] sm:gap-3">
+            <span>Applicant &amp; PIN</span>
+            <span>Contact Details</span>
+            <span>Interested Tier</span>
+            <span>Status</span>
+            <span>Received</span>
+            <span className="text-right">Action</span>
+          </div>
+          {recentFranchiseEnquiries.length === 0 ? (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              No franchise enquiries recorded yet.
+            </div>
+          ) : (
+            <ul>
+              {recentFranchiseEnquiries.map((enq) => {
+                const tone =
+                  enq.status === "Approved"
+                    ? "emerald"
+                    : enq.status === "Contacted"
+                      ? "blue"
+                      : enq.status === "Under Review"
+                        ? "warn"
+                        : "orange";
+                return (
+                  <li
+                    key={enq.id}
+                    className="border-b border-border py-3 last:border-b-0 sm:grid sm:grid-cols-[minmax(0,1.5fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_7rem_7rem_6rem] sm:items-center sm:gap-3"
+                  >
+                    <div>
+                      <p className="font-bold text-foreground leading-snug">{enq.full_name}</p>
+                      <p className="text-xs font-mono text-muted-foreground">
+                        PIN: <span className="font-bold text-primary">{enq.territory_pincode}</span>
+                      </p>
+                    </div>
+
+                    <div className="mt-1 text-xs sm:mt-0">
+                      <p className="font-mono text-foreground">{enq.mobile}</p>
+                      {enq.email && (
+                        <p className="text-muted-foreground truncate max-w-[180px]">{enq.email}</p>
+                      )}
+                    </div>
+
+                    <div className="mt-1 sm:mt-0">
+                      <span className="inline-block rounded-md bg-[#FAF9F6] border border-border px-2 py-0.5 text-xs font-semibold text-foreground">
+                        {enq.interested_tier}
+                      </span>
+                    </div>
+
+                    <div className="mt-2 sm:mt-0">
+                      <StatusPill tone={tone as any}>{enq.status}</StatusPill>
+                    </div>
+
+                    <time className="mt-1 block text-xs text-muted-foreground sm:mt-0">
+                      {new Date(enq.created_at).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </time>
+
+                    <div className="mt-2 sm:mt-0 text-right">
+                      <Link
+                        to="/admin/territory"
+                        search={{ tab: "enquiries" as any }}
+                        className={cn("text-xs font-bold text-primary hover:underline", focusRing)}
+                      >
+                        Review →
+                      </Link>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </Panel>
 
       <Panel
         id="action-required"
@@ -269,6 +433,114 @@ export function HomePage() {
           ))}
         </div>
       </Panel>
+
+
+      {/* Live Contact & Practitioner Inquiries Panel */}
+      <Panel
+        id="contact-inquiries-panel"
+        title="Contact & Practitioner Inquiries (Live Messages)"
+        warm
+        action={
+          <Link
+            to="/admin/queries"
+            className={cn(
+              "rounded-lg text-sm font-semibold text-primary hover:underline",
+              focusRing,
+            )}
+          >
+            {`View all inquiries (${contactCount})`}
+          </Link>
+        }
+      >
+        <div className="overflow-x-auto">
+          <div className="hidden border-b border-border pb-2 text-xs font-semibold text-muted-foreground sm:grid sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1.4fr)_minmax(0,1.4fr)_6rem_6rem] sm:gap-3">
+            <span>Ref &amp; Submitter</span>
+            <span>Contact Details</span>
+            <span>Category</span>
+            <span>Subject</span>
+            <span>Status</span>
+            <span className="text-right">Action</span>
+          </div>
+          {recentContactMessages.length === 0 ? (
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              No contact inquiries recorded yet.
+            </div>
+          ) : (
+            <ul>
+              {recentContactMessages.map((msg) => {
+                const tone: "brand" | "sage" | "muted" | "danger" | "warning" | "info" =
+                  msg.status === "Resolved"
+                    ? "sage"
+                    : msg.status === "Contacted"
+                      ? "warning"
+                      : msg.status === "In Progress"
+                        ? "info"
+                        : "brand";
+                return (
+                  <li
+                    key={msg.id}
+                    className="border-b border-border py-3 last:border-b-0 sm:grid sm:grid-cols-[minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1.4fr)_minmax(0,1.4fr)_6rem_6rem] sm:items-center sm:gap-3"
+                  >
+                    <div>
+                      <p className="font-semibold text-foreground text-sm line-clamp-1">
+                        {msg.full_name}
+                      </p>
+                      <span className="font-mono text-[11px] text-muted-foreground">
+                        {msg.reference_code || `MV-CT-${msg.id.slice(0, 8).toUpperCase()}`}
+                      </span>
+                    </div>
+
+                    <div className="text-xs space-y-0.5">
+                      <a
+                        href={`mailto:${msg.email}`}
+                        className="text-primary hover:underline block truncate"
+                        title={msg.email}
+                      >
+                        {msg.email}
+                      </a>
+                      <a
+                        href={`tel:${msg.phone}`}
+                        className="text-muted-foreground hover:text-foreground block truncate"
+                        title={msg.phone}
+                      >
+                        {msg.phone}
+                      </a>
+                    </div>
+
+                    <div>
+                      <span className="inline-flex rounded-md bg-surface px-2 py-0.5 text-xs font-medium text-foreground border border-border/80">
+                        {msg.category}
+                      </span>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-semibold text-foreground line-clamp-1" title={msg.subject}>
+                        {msg.subject}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground line-clamp-1">
+                        {msg.message}
+                      </p>
+                    </div>
+
+                    <div>
+                      <StatusPill tone={tone as any}>{msg.status}</StatusPill>
+                    </div>
+
+                    <div className="text-right">
+                      <Link
+                        to="/admin/queries"
+                        className="inline-flex h-8 items-center justify-center rounded-lg border border-border bg-surface px-3 text-xs font-semibold text-foreground hover:bg-surface-hover hover:text-primary transition-colors"
+                      >
+                        See Details
+                      </Link>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </Panel>
     </div>
   );
 }
@@ -278,24 +550,19 @@ function Panel({
   title,
   subtitle,
   action,
-  warm = false,
   children,
+  warm,
 }: {
   id: string;
   title: string;
   subtitle?: string;
   action?: ReactNode;
-  warm?: boolean;
   children: ReactNode;
+  warm?: boolean;
 }) {
   return (
-    <section aria-labelledby={id} className="card-surface">
-      <div
-        className={cn(
-          "flex flex-col gap-2 rounded-t-[1rem] border-b border-border px-5 py-4 sm:flex-row sm:items-start sm:justify-between",
-          warm ? "motif-corner bg-secondary" : "bg-card",
-        )}
-      >
+    <section aria-labelledby={id} className={cn("card-surface", warm && "border-primary/30")}>
+      <div className="flex flex-col gap-2 border-b border-border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
         <div className="relative z-[1] min-w-0">
           <h2 id={id} className="type-section">
             {title}

@@ -18,6 +18,9 @@ import { ManufacturerLayoutWrapper } from "@/components/layout/ManufacturerLayou
 // Landing Features
 import { LandingPage } from "@/features/landing";
 import { DoctorLandingPage } from "@/features/landing";
+import { ClusterFranchisePage } from "@/features/landing";
+import { ContactUsPage } from "@/features/landing";
+import { AboutUsPage } from "@/features/landing";
 
 // Auth Features
 import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage } from "@/features/auth";
@@ -171,6 +174,42 @@ export const doctorLandingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/doctor",
   component: DoctorLandingPage,
+});
+
+export const clusterFranchiseRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/cluster-franchise",
+  component: ClusterFranchisePage,
+});
+
+export const franchiseAliasRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/franchise",
+  component: ClusterFranchisePage,
+});
+
+export const contactRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/contact",
+  component: ContactUsPage,
+});
+
+export const contactAliasRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/contact-us",
+  component: ContactUsPage,
+});
+
+export const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/about",
+  component: AboutUsPage,
+});
+
+export const aboutAliasRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/about-us",
+  component: AboutUsPage,
 });
 
 // 2. Auth routes
@@ -576,6 +615,12 @@ export const manufacturerProfileRoute = createRoute({
 export const routeTree = rootRoute.addChildren([
   landingRoute,
   doctorLandingRoute,
+  clusterFranchiseRoute,
+  franchiseAliasRoute,
+  contactRoute,
+  contactAliasRoute,
+  aboutRoute,
+  aboutAliasRoute,
   loginRoute,
   registerRoute,
   forgotPasswordRoute,

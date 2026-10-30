@@ -509,7 +509,7 @@ async def lookup_territory_pincode(
     if not PINCODE_PATTERN.match(clean_pin):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid PIN code format. Must be a 6-digit Indian postal code starting with digits 1-9.",
+            detail="PIN code incorrect.",
         )
 
     # 1. Fetch geographic and statutory AYUSH authority via postal API

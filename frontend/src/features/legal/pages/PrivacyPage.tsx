@@ -360,7 +360,7 @@ export function PrivacyPage() {
                 We retain your practitioner account data for as long as your account remains active or as required to comply with statutory audit and licensing verification records.
               </p>
               <p>
-                You may request account closure and deletion of your profile data at any time by emailing <a href="mailto:privacy@meyveda.com" className="text-[#E67230] font-bold hover:underline">privacy@meyveda.com</a>. Upon receipt, your account will be deactivated, credentials purged, and private dossiers deleted within 30 calendar days, subject to statutory record-retention requirements under Indian law.
+                You may request account closure and deletion of your profile data at any time by emailing <a href="mailto:meyveda@gmail.com" className="text-[#E67230] font-bold hover:underline">meyveda@gmail.com</a>. Upon receipt, your account will be deactivated, credentials purged, and private dossiers deleted within 30 calendar days, subject to statutory record-retention requirements under Indian law.
               </p>
             </section>
 
@@ -424,8 +424,9 @@ export function PrivacyPage() {
               <div className="rounded-xl border border-[#EBE7DF] bg-[#FAF9F6] p-4.5 space-y-1 text-xs sm:text-sm">
                 <p><strong>Designated Grievance Officer:</strong> Data Protection &amp; Privacy Officer</p>
                 <p><strong>Entity:</strong> Meyveda Health Technologies Private Limited</p>
-                <p><strong>Email:</strong> <a href="mailto:privacy@meyveda.com" className="text-[#E67230] font-bold hover:underline">privacy@meyveda.com</a></p>
-                <p><strong>Postal Jurisdiction:</strong> Chennai, Tamil Nadu, India</p>
+                <p><strong>Official Email:</strong> <a href="mailto:meyveda@gmail.com" className="text-[#E67230] font-bold hover:underline">meyveda@gmail.com</a></p>
+                <p><strong>Helpline &amp; WhatsApp:</strong> <a href="tel:+919986398332" className="text-[#E67230] font-bold hover:underline">+91 99863 98332</a></p>
+                <p><strong>Operating Office:</strong> Chennai, Tamil Nadu, India</p>
                 <p><strong>Response Timelines:</strong> Inquiries acknowledged within 24 hours; resolved within statutory limits.</p>
               </div>
             </section>

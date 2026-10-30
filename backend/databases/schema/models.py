@@ -1,6 +1,6 @@
 import uuid
 from datetime import date, datetime, timezone
-from sqlalchemy import String, Integer, DateTime, Date, Enum, ForeignKey, Text, JSON, UniqueConstraint
+from sqlalchemy import String, Integer, DateTime, Date, Enum, ForeignKey, Text, JSON, UniqueConstraint, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from databases.session import Base
@@ -322,6 +322,36 @@ class Referral(Base):
     referring_doctor: Mapped["Doctor"] = relationship("Doctor")
 
 
+class ColleagueInvitation(Base):
+    __tablename__ = "colleague_invitations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    referring_doctor_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("doctors.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    inviting_doctor_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    inviting_doctor_qualification: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    invite_code: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+
+    colleague_name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    colleague_email: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
+    colleague_mobile: Mapped[str] = mapped_column(String(50), nullable=False)
+    qualification: Mapped[str] = mapped_column(String(100), nullable=False)
+
+    status: Mapped[str] = mapped_column(String(50), default="Invitation Sent", nullable=False, index=True)
+    email_dispatched: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    registration_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    notes: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )
+
+    # Relationships
+    referring_doctor: Mapped["Doctor | None"] = relationship("Doctor")
+
+
 class AuditHistory(Base):
     __tablename__ = "audit_history"
 
@@ -336,3 +366,43 @@ class AuditHistory(Base):
 
     # Relationships
     actor: Mapped["User | None"] = relationship("User", back_populates="audit_logs")
+
+
+class FranchiseEnquiry(Base):
+    __tablename__ = "franchise_enquiries"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    full_name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    mobile: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    email: Mapped[str | None] = mapped_column(String(320), nullable=True, index=True)
+    territory_pincode: Mapped[str] = mapped_column(String(10), nullable=False, index=True)
+    interested_tier: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    message: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    status: Mapped[str] = mapped_column(String(50), default="New", nullable=False, index=True)
+    admin_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )
+
+
+class ContactMessage(Base):
+    __tablename__ = "contact_messages"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    full_name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    email: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
+    phone: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    category: Mapped[str] = mapped_column(String(100), default="General Inquiry", nullable=False, index=True)
+    subject: Mapped[str] = mapped_column(String(250), nullable=False, index=True)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+
+    status: Mapped[str] = mapped_column(String(50), default="New", nullable=False, index=True)
+    admin_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False
+    )

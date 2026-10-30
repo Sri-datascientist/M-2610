@@ -49,7 +49,10 @@ export async function request<T = unknown>(
   }
 
   // Inject session token if stored
-  const token = localStorage.getItem("meyveda_auth_token");
+  const token =
+    localStorage.getItem("meyveda_auth_token") ||
+    localStorage.getItem("meyveda_access_token") ||
+    localStorage.getItem("meyveda_token");
   if (token && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
   }

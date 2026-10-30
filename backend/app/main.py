@@ -14,6 +14,8 @@ from databases.library import router as library_router
 from databases.manufacturers import router as manufacturers_router
 from databases.products import router as products_router
 from databases.referrals import router as referrals_router
+from databases.franchise import router as franchise_router
+from databases.contact import router as contact_router
 from databases.research_submissions import router as research_submissions_router
 from app.routers.auth import router as auth_router
 from app.api.v1.pincode import router as pincode_router
@@ -65,6 +67,12 @@ app.include_router(journal_ingestion_router)
 app.include_router(research_submissions_router)
 app.include_router(feedback_router)
 app.include_router(referrals_router)
+app.include_router(franchise_router, prefix="/api/v1/franchise")
+app.include_router(franchise_router, prefix="/api/franchise")
+app.include_router(franchise_router, prefix="/api/v1")
+app.include_router(franchise_router, prefix="/api")
+app.include_router(contact_router, prefix="/api/v1/contact")
+app.include_router(contact_router, prefix="/api/contact")
 
 @app.get("/health")
 async def health(response: Response):

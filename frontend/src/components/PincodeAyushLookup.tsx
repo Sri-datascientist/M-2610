@@ -86,10 +86,13 @@ export function PincodeAyushLookup({
         }
       } catch (err: any) {
         setResult(null);
-        const msg =
+        let msg =
           err?.response?.data?.detail ||
           err?.message ||
-          `Unable to resolve PIN code ${clean}. Please verify the 6-digit code.`;
+          "PIN code incorrect.";
+        if (typeof msg === "string" && msg.includes("national postal directory")) {
+          msg = "PIN code incorrect.";
+        }
         setError(msg);
       } finally {
         setIsLoading(false);
@@ -178,9 +181,9 @@ export function PincodeAyushLookup({
             {isLoading ? (
               <Loader2 className="size-4 animate-spin text-[#E67230]" />
             ) : pincode.length === 6 && result ? (
-              <CheckCircle2 className="size-4 text-emerald-600" />
+              <CheckCircle2 className="size-4 text-[#E67230]" />
             ) : pincode.length === 6 && error ? (
-              <AlertCircle className="size-4 text-red-500" />
+              <AlertCircle className="size-4 text-[#E67230]" />
             ) : (
               <span className="text-[11px] font-mono text-[#999999]">
                 {pincode.length}/6
@@ -206,10 +209,10 @@ export function PincodeAyushLookup({
 
       {/* Error State */}
       {error && !isLoading && (
-        <div className="mt-4 rounded-xl border border-red-200 bg-red-50/70 p-3.5 text-xs text-red-800 flex items-start gap-2.5 animate-in fade-in-50">
-          <AlertCircle className="size-4 shrink-0 text-red-600 mt-0.5" />
+        <div className="mt-4 rounded-xl border border-[#E67230]/35 bg-[#FFF3EB] p-3.5 text-xs text-[#111111] flex items-start gap-2.5 animate-in fade-in-50 shadow-2xs">
+          <AlertCircle className="size-4.5 shrink-0 text-[#E67230] mt-0.5" />
           <div className="flex-1">
-            <span className="font-bold">Lookup Notice:</span> {error}
+            <span className="font-bold text-[#111111]">Lookup Notice:</span> {error}
           </div>
         </div>
       )}
@@ -223,7 +226,7 @@ export function PincodeAyushLookup({
               <span className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wider text-[#555555]">
                 <MapPin className="size-3.5 text-[#E67230]" /> Postal Geography
               </span>
-              <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-500/20">
+              <span className="rounded-full bg-[#E67230]/10 px-2.5 py-0.5 text-[11px] font-bold text-[#E67230] border border-[#E67230]/25">
                 Verified PIN: {result.pincode}
               </span>
             </div>
@@ -278,13 +281,7 @@ export function PincodeAyushLookup({
                 <Scale className="size-3.5" />
                 {result.ayush_governance.board_type}
               </span>
-              <span
-                className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
-                  result.ayush_governance.jurisdiction === "State"
-                    ? "bg-blue-500/10 text-blue-700 border border-blue-500/20"
-                    : "bg-emerald-500/10 text-emerald-700 border border-emerald-500/20"
-                }`}
-              >
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-[#FAF7F2] text-[#111111] border border-[#EBE7DF]">
                 {result.ayush_governance.jurisdiction} Jurisdiction
               </span>
             </div>

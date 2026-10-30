@@ -18,9 +18,10 @@ import {
   Gift,
   ArrowRight,
   ArrowLeft,
-  Home,
+  Loader2,
 } from "lucide-react";
 import meyvedaLogo from "@/assets/meyvedalogo.png";
+import meyvedaMark from "@/assets/meyveda-favicon-source.png";
 import { Mascot } from "@/components/ui/mascot";
 import { setState } from "@/lib/store";
 import { seo } from "@/lib/seo";
@@ -71,9 +72,70 @@ export function Register() {
 
   // 3. City
   const [city, setCity] = useState("");
+  const [isDetectingCity, setIsDetectingCity] = useState(false);
+  const [cityDetectionStatus, setCityDetectionStatus] = useState<{
+    status: "idle" | "loading" | "success" | "error";
+    message?: string;
+  }>({ status: "idle" });
 
   // 4. PIN Code
   const [pincode, setPincode] = useState("");
+
+  // Auto-detect City from PIN Code
+  useEffect(() => {
+    const cleanPin = pincode.trim();
+    if (cleanPin.length === 6 && /^[1-9][0-9]{5}$/.test(cleanPin)) {
+      let isCancelled = false;
+      setIsDetectingCity(true);
+      setCityDetectionStatus({ status: "loading", message: "Detecting city from PIN..." });
+
+      apiClient
+        .get<any>(`/pincode/${cleanPin}`)
+        .then((res) => {
+          if (!isCancelled) {
+            const detectedCity =
+              res?.district ||
+              res?.division ||
+              res?.primary_post_office?.district ||
+              "";
+            if (detectedCity) {
+              setCity(detectedCity);
+              const stateInfo = res?.state ? `, ${res.state}` : "";
+              setCityDetectionStatus({
+                status: "success",
+                message: `Auto-detected: ${detectedCity}${stateInfo}`,
+              });
+            } else {
+              setCityDetectionStatus({
+                status: "error",
+                message: "City not found in postal records. Please enter manually.",
+              });
+            }
+          }
+        })
+        .catch((err: any) => {
+          if (!isCancelled) {
+            setCityDetectionStatus({
+              status: "error",
+              message:
+                err?.message ||
+                "Postal lookup service unavailable. Please enter your city manually.",
+            });
+          }
+        })
+        .finally(() => {
+          if (!isCancelled) {
+            setIsDetectingCity(false);
+          }
+        });
+
+      return () => {
+        isCancelled = true;
+      };
+    } else {
+      setCityDetectionStatus({ status: "idle" });
+    }
+  }, [pincode]);
 
   // 5. Doctor Registration Number
   const [doctorRegNumber, setDoctorRegNumber] = useState("");
@@ -547,7 +609,7 @@ export function Register() {
     <main className="min-h-screen w-full bg-[#FAF9F6] text-[#111111] flex flex-col justify-between selection:bg-[#E67230]/20 selection:text-[#111111]">
       {/* Top Bar / Simple Navigation */}
       <header className="w-full border-b border-[#EBE7DF] bg-white/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="mx-auto flex h-16 sm:h-20 max-w-[1320px] items-center justify-between px-5 sm:px-8 lg:px-12">
+        <div className="mx-auto flex h-16 sm:h-20 max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
           <Link
             to="/doctor"
             className="inline-flex items-center gap-2 group transition-opacity hover:opacity-90"
@@ -564,16 +626,8 @@ export function Register() {
 
           <div className="flex items-center gap-4 sm:gap-6">
             <Link
-              to="/doctor"
-              className="inline-flex items-center justify-center size-9 sm:size-10 rounded-full border border-[#EBE7DF] bg-white text-[#555555] hover:text-[#E67230] hover:border-[#E67230]/40 hover:bg-[#FAF9F6] transition-all shadow-2xs"
-              title="Back to Home"
-              aria-label="Back to Home"
-            >
-              <Home className="size-4 sm:size-5" />
-            </Link>
-            <Link
               to="/login"
-              className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-[#E67230] hover:underline"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#E67230] hover:underline"
             >
               <span>Sign In</span>
               <ArrowRight className="size-3.5" />
@@ -582,179 +636,222 @@ export function Register() {
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-10 my-4 sm:my-8">
-        <div className="w-full max-w-[1080px] bg-white rounded-3xl border border-[#EBE7DF] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden grid grid-cols-1 lg:grid-cols-12">
-          {/* LEFT SIDE: Interactive Doctor Mascot & Registration Presentation */}
-          <div className="lg:col-span-5 bg-gradient-to-b from-[#FFFBF8] to-[#FAF9F6] border-b lg:border-b-0 lg:border-r border-[#EBE7DF] p-6 sm:p-8 lg:p-10 flex flex-col items-center justify-between text-center relative overflow-hidden">
-            <div
-              className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply"
-              style={{
-                background:
-                  "radial-gradient(ellipse 70% 60% at 50% 40%, rgba(230, 114, 48, 0.12) 0%, rgba(250, 249, 246, 0) 70%)",
-              }}
-            />
+      {/* Full-Screen Main Content Area */}
+      <div className="flex-1 w-full grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100vh-64px)] sm:min-h-[calc(100vh-80px)]">
+        {/* LEFT SIDE: Interactive Doctor Mascot & Registration Presentation */}
+        <div className="lg:col-span-5 bg-gradient-to-b from-[#FFFBF8] via-[#FAF9F6] to-[#F5F2EB] border-b lg:border-b-0 lg:border-r border-[#EBE7DF] p-8 sm:p-12 lg:p-14 flex flex-col items-center justify-center text-center relative overflow-hidden">
+          <div
+            className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply"
+            style={{
+              background:
+                "radial-gradient(ellipse 70% 60% at 50% 40%, rgba(230, 114, 48, 0.12) 0%, rgba(250, 249, 246, 0) 70%)",
+            }}
+          />
 
-            <div className="relative z-10 w-full">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E67230]/10 text-xs font-bold text-[#E67230] mb-3">
-                <ShieldCheck className="size-3.5" />
-                <span>DOCTOR ONBOARDING</span>
-              </span>
-              <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#111111]">
-                Register as an Ayurveda Doctor
-              </h2>
-              <p className="mt-1 text-xs sm:text-sm text-[#666666] max-w-xs mx-auto leading-relaxed">
-                Join fellow Ayurvedic physicians. Access classical literature, commercial medicine
-                intelligence, batch quality evidence, and your private research library.
-              </p>
-            </div>
-
-            <div className="relative z-10 my-4 sm:my-6 flex flex-col items-center justify-center">
-              <div className="relative flex items-center justify-center p-2 rounded-full bg-white shadow-xs border border-[#EBE7DF]/80">
-                <Mascot
-                  directions="/mascots/meyveda-doctor-directions.webp"
-                  reactions="/mascots/meyveda-doctor-reactions.webp"
-                  size={160}
-                  label="Meyveda Ayurveda Doctor Mascot"
-                  className="select-none"
-                />
-              </div>
-              <p className="mt-2.5 font-mono text-[11px] text-[#888888]">
-                Hover around · Click mascot to interact
-              </p>
-            </div>
-
-            <div className="relative z-10 w-full pt-4 border-t border-[#EBE7DF]/60 flex items-center justify-center gap-4 text-xs text-[#555555]">
-              <span className="font-semibold text-[#111111]">Verified AYUSH Doctor Platform</span>
-              <span>·</span>
-              <span>256-bit SSL</span>
-            </div>
+          {/* Heading (Unwanted badge removed) */}
+          <div className="relative z-10 w-full mb-6">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
+              Register as an Ayurveda Doctor
+            </h2>
+            <p className="mt-2 text-xs sm:text-sm text-[#666666] max-w-xs mx-auto leading-relaxed">
+              Join fellow Ayurvedic physicians. Access classical literature, commercial medicine
+              intelligence, batch quality evidence, and your private research library.
+            </p>
           </div>
 
-          {/* RIGHT SIDE: Clean, Professional Registration Form */}
-          <div className="lg:col-span-7 p-6 sm:p-10 lg:p-12 flex flex-col justify-center">
-            <div className="max-w-md w-full mx-auto">
-              <div className="mb-6 sm:mb-8">
-                <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230] mb-1">
-                  MEYVEDA · REGISTRATION
-                </p>
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
-                  Register as a Doctor
-                </h1>
-                <p className="mt-2 text-xs sm:text-sm text-[#666666] leading-relaxed">
-                  Join the verified AYUSH doctor network and access your clinical research desk.
-                </p>
+          {/* Meyveda Symbol directly above the mascot (approx 1-2 cm, preserving original proportions & colours) */}
+          <div className="relative z-10 mb-3 sm:mb-4 flex items-center justify-center">
+            <img
+              src={meyvedaMark}
+              alt="Meyveda Symbol"
+              width={100}
+              height={80}
+              className="h-11 sm:h-12 w-auto object-contain select-none drop-shadow-2xs"
+            />
+          </div>
+
+          {/* Interactive Cursor-Tracking Mascot (Enlarged to 7-8 cm on screen) */}
+          <div className="relative z-10 flex flex-col items-center justify-center">
+            <div className="relative flex items-center justify-center p-3 rounded-full bg-white shadow-xs border border-[#EBE7DF]/80">
+              <Mascot
+                directions="/mascots/meyveda-doctor-directions.webp"
+                reactions="/mascots/meyveda-doctor-reactions.webp"
+                size={280}
+                label="Meyveda Ayurveda Doctor Mascot"
+                className="select-none"
+              />
+            </div>
+            <p className="mt-3 font-mono text-[11px] text-[#888888]">
+              Hover around · Click mascot to interact
+            </p>
+          </div>
+
+          {/* (Unwanted bottom trust/security text 'Verified AYUSH Doctor Platform · 256-bit SSL' removed) */}
+        </div>
+
+        {/* RIGHT SIDE: Clean, Professional Registration Form */}
+        <div className="lg:col-span-7 bg-white p-6 sm:p-10 lg:p-14 xl:p-16 flex flex-col justify-center items-center">
+          <div className="max-w-xl w-full mx-auto">
+            <div className="mb-6 sm:mb-8">
+              <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230] mb-1">
+                MEYVEDA · REGISTRATION
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
+                Register as a Doctor
+              </h1>
+              <p className="mt-2 text-xs sm:text-sm text-[#666666] leading-relaxed">
+                Join the verified AYUSH doctor network and access your clinical research desk.
+              </p>
+            </div>
+
+            {/* Error Message if any */}
+            {errorMessage && (
+              <div
+                role="alert"
+                className="mb-5 rounded-lg border border-[#E67230]/40 bg-[#FFFBF8] p-3.5 text-xs sm:text-sm text-[#111111] leading-relaxed"
+              >
+                <span className="font-bold text-[#E67230]">Notice: </span>
+                {errorMessage}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
+              {/* 1. Full Name */}
+              <div>
+                <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                  Full Name *
+                </label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                    <User className="size-4" />
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Dr. Ramesh Vaidya"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                  />
+                </div>
               </div>
 
-              {/* Error Message if any */}
-              {errorMessage && (
-                <div
-                  role="alert"
-                  className="mb-5 rounded-lg border border-[#E67230]/40 bg-[#FFFBF8] p-3.5 text-xs sm:text-sm text-[#111111] leading-relaxed"
-                >
-                  <span className="font-bold text-[#E67230]">Notice: </span>
-                  {errorMessage}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} autoComplete="off" className="space-y-4">
-                {/* 1. Full Name */}
+              {/* 2. Qualification & City */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
-                    Full Name *
+                    Qualification *
                   </label>
                   <div className="relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
-                      <User className="size-4" />
+                      <GraduationCap className="size-4" />
                     </div>
-                    <input
-                      type="text"
+                    <select
                       required
-                      placeholder="Dr. Ramesh Vaidya"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
-                    />
+                      value={qualification}
+                      onChange={(e) => setQualification(e.target.value)}
+                      className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm text-[#111111] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors cursor-pointer"
+                    >
+                      {AYUSH_QUALIFICATIONS.map((q) => (
+                        <option key={q.code} value={q.code}>
+                          {q.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
-                {/* 2. Qualification & City */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
-                      Qualification *
-                    </label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
-                        <GraduationCap className="size-4" />
-                      </div>
-                      <select
-                        required
-                        value={qualification}
-                        onChange={(e) => setQualification(e.target.value)}
-                        className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm text-[#111111] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors cursor-pointer"
-                      >
-                        {AYUSH_QUALIFICATIONS.map((q) => (
-                          <option key={q.code} value={q.code}>
-                            {q.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-[#111111]">
                       City
                     </label>
+                    {isDetectingCity && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#E67230]">
+                        <Loader2 className="size-3 animate-spin" />
+                        <span>Detecting…</span>
+                      </span>
+                    )}
+                    {!isDetectingCity && cityDetectionStatus.status === "success" && (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+                        <CheckCircle2 className="size-3" />
+                        <span>Auto-detected</span>
+                      </span>
+                    )}
+                  </div>
+                  <div className="relative">
                     <input
                       type="text"
                       placeholder="Pune / Mumbai"
                       value={city}
-                      onChange={(e) => setCity(e.target.value)}
+                      onChange={(e) => {
+                        setCity(e.target.value);
+                        if (cityDetectionStatus.status === "success") {
+                          setCityDetectionStatus({ status: "idle" });
+                        }
+                      }}
                       className="w-full rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
                     />
-                  </div>
-                </div>
-
-                {/* 3. PIN Code & Doctor Registration Number */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
-                      PIN Code *
-                    </label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
-                        <MapPin className="size-4" />
+                    {isDetectingCity && (
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
+                        <Loader2 className="size-3.5 animate-spin text-[#E67230]" />
                       </div>
-                      <input
-                        type="text"
-                        required
-                        maxLength={6}
-                        pattern="[0-9]{6}"
-                        inputMode="numeric"
-                        placeholder="411001"
-                        value={pincode}
-                        onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                        className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm font-mono text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
-                      />
-                    </div>
+                    )}
                   </div>
+                  {cityDetectionStatus.status === "success" && cityDetectionStatus.message && (
+                    <p className="mt-1 text-[11px] text-emerald-700">
+                      {cityDetectionStatus.message}
+                    </p>
+                  )}
+                  {cityDetectionStatus.status === "error" && cityDetectionStatus.message && (
+                    <p className="mt-1 text-[11px] text-[#888888]">
+                      {cityDetectionStatus.message}
+                    </p>
+                  )}
+                </div>
+              </div>
 
-                  <div>
-                    <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
-                      Registration Number *
-                    </label>
+              {/* 3. PIN Code & Doctor Registration Number */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                    PIN Code *
+                  </label>
+                  <div className="relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                      <MapPin className="size-4" />
+                    </div>
                     <input
                       type="text"
                       required
-                      placeholder="AYUSH-REG-12345"
-                      value={doctorRegNumber}
-                      onChange={(e) => setDoctorRegNumber(e.target.value)}
-                      className="w-full rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2.5 sm:py-3 text-sm uppercase font-mono text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                      maxLength={6}
+                      pattern="[0-9]{6}"
+                      inputMode="numeric"
+                      placeholder="411001"
+                      value={pincode}
+                      onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                      className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm font-mono text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
                     />
                   </div>
+                  <p className="mt-1 text-[11px] text-[#888888]">
+                    Enter 6-digit PIN to auto-populate City
+                  </p>
                 </div>
+
+                <div>
+                  <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                    Registration Number *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="AYUSH-REG-12345"
+                    value={doctorRegNumber}
+                    onChange={(e) => setDoctorRegNumber(e.target.value)}
+                    className="w-full rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2.5 sm:py-3 text-sm uppercase font-mono text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                  />
+                </div>
+              </div>
 
                 {/* 4. Email Address & OTP */}
                 <div>
@@ -1147,7 +1244,6 @@ export function Register() {
             </div>
           </div>
         </div>
-      </div>
 
       {/* Footer Copyright & Legal Links */}
       <footer className="w-full py-4 sm:py-6 text-xs text-[#888888] border-t border-[#EBE7DF] bg-white">

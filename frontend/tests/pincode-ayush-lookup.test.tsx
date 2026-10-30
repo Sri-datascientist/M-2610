@@ -72,7 +72,7 @@ describe("PincodeAyushLookup Component", () => {
   it("displays error notice when API call rejects", async () => {
     vi.spyOn(apiClient, "get").mockRejectedValue({
       response: {
-        data: { detail: "PIN code '999999' was not found in the national postal directory." },
+        data: { detail: "PIN code incorrect." },
       },
     });
 
@@ -83,7 +83,7 @@ describe("PincodeAyushLookup Component", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/PIN code '999999' was not found in the national postal directory/i)
+        screen.getByText(/PIN code incorrect/i)
       ).toBeInTheDocument();
     });
   });

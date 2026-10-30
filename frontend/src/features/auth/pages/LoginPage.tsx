@@ -8,12 +8,12 @@ import {
   ArrowRight,
   ShieldCheck,
   ArrowLeft,
-  Home,
   KeyRound,
   CheckCircle2,
   RotateCcw,
 } from "lucide-react";
 import meyvedaLogo from "@/assets/meyvedalogo.png";
+import meyvedaMark from "@/assets/meyveda-favicon-source.png";
 import { Mascot } from "@/components/ui/mascot";
 import { toast } from "sonner";
 import { setState } from "@/lib/store";
@@ -296,7 +296,7 @@ export function Login({ initialMode }: { initialMode?: "signin" | "forgot" | "re
     <main className="min-h-screen w-full bg-[#FAF9F6] text-[#111111] flex flex-col justify-between selection:bg-[#E67230]/20 selection:text-[#111111]">
       {/* Top Bar / Simple Navigation */}
       <header className="w-full border-b border-[#EBE7DF] bg-white/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="mx-auto flex h-16 sm:h-20 max-w-[1320px] items-center justify-between px-5 sm:px-8 lg:px-12">
+        <div className="mx-auto flex h-16 sm:h-20 max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12">
           <Link
             to="/doctor"
             className="inline-flex items-center gap-2 group transition-opacity hover:opacity-90"
@@ -312,71 +312,71 @@ export function Login({ initialMode }: { initialMode?: "signin" | "forgot" | "re
           </Link>
 
           <Link
-            to="/doctor"
-            className="inline-flex items-center justify-center size-9 sm:size-10 rounded-full border border-[#EBE7DF] bg-white text-[#555555] hover:text-[#E67230] hover:border-[#E67230]/40 hover:bg-[#FAF9F6] transition-all shadow-2xs"
-            title="Back to Home"
-            aria-label="Back to Home"
+            to="/register"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#E67230] hover:underline"
           >
-            <Home className="size-4 sm:size-5" />
+            <span>Register as Doctor</span>
+            <ArrowRight className="size-3.5" />
           </Link>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-10 my-4 sm:my-8">
-        <div className="w-full max-w-[1080px] bg-white rounded-3xl border border-[#EBE7DF] shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden grid grid-cols-1 lg:grid-cols-12">
-          {/* LEFT SIDE: Interactive Doctor Mascot & Welcoming Presentation */}
-          <div className="lg:col-span-5 bg-gradient-to-b from-[#FFFBF8] to-[#FAF9F6] border-b lg:border-b-0 lg:border-r border-[#EBE7DF] p-6 sm:p-8 lg:p-10 flex flex-col items-center justify-between text-center relative overflow-hidden">
-            {/* Ambient subtle glow */}
-            <div
-              className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply"
-              style={{
-                background:
-                  "radial-gradient(ellipse 70% 60% at 50% 40%, rgba(230, 114, 48, 0.12) 0%, rgba(250, 249, 246, 0) 70%)",
-              }}
-            />
+      {/* Full-Screen Main Content Area */}
+      <div className="flex-1 w-full grid grid-cols-1 lg:grid-cols-12 min-h-[calc(100vh-64px)] sm:min-h-[calc(100vh-80px)]">
+        {/* LEFT SIDE: Interactive Doctor Mascot & Welcoming Presentation */}
+        <div className="lg:col-span-5 bg-gradient-to-b from-[#FFFBF8] via-[#FAF9F6] to-[#F5F2EB] border-b lg:border-b-0 lg:border-r border-[#EBE7DF] p-8 sm:p-12 lg:p-14 flex flex-col items-center justify-center text-center relative overflow-hidden">
+          {/* Ambient subtle glow */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply"
+            style={{
+              background:
+                "radial-gradient(ellipse 70% 60% at 50% 40%, rgba(230, 114, 48, 0.12) 0%, rgba(250, 249, 246, 0) 70%)",
+            }}
+          />
 
-            {/* Mascot Heading & Eyebrow */}
-            <div className="relative z-10 w-full">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E67230]/10 text-xs font-bold text-[#E67230] mb-3">
-                <ShieldCheck className="size-3.5" />
-                <span>PRACTITIONER PORTAL</span>
-              </span>
-              <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#111111]">
-                Namaste, Vaidya
-              </h2>
-              <p className="mt-1 text-xs sm:text-sm text-[#666666] max-w-xs mx-auto leading-relaxed">
-                Your classical knowledge, formulary access, and clinical notes in one serene space.
-              </p>
-            </div>
-
-            {/* Interactive Cursor-Tracking Mascot */}
-            <div className="relative z-10 my-4 sm:my-6 flex flex-col items-center justify-center">
-              <div className="relative flex items-center justify-center p-2 rounded-full bg-white shadow-xs border border-[#EBE7DF]/80">
-                <Mascot
-                  directions="/mascots/meyveda-doctor-directions.webp"
-                  reactions="/mascots/meyveda-doctor-reactions.webp"
-                  size={160}
-                  label="Meyveda AYUSH Doctor Mascot"
-                  className="select-none"
-                />
-              </div>
-              <p className="mt-2.5 font-mono text-[11px] text-[#888888]">
-                Hover around · Click mascot to interact
-              </p>
-            </div>
-
-            {/* Subtle Credibility Badges */}
-            <div className="relative z-10 w-full pt-4 border-t border-[#EBE7DF]/60 flex items-center justify-center gap-4 text-xs text-[#555555]">
-              <span className="font-semibold text-[#111111]">Verified AYUSH Doctor Platform</span>
-              <span>·</span>
-              <span>256-bit SSL</span>
-            </div>
+          {/* Mascot Heading (Unwanted badge removed) */}
+          <div className="relative z-10 w-full mb-6">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111111]">
+              Namaste, Vaidya
+            </h2>
+            <p className="mt-2 text-xs sm:text-sm text-[#666666] max-w-xs mx-auto leading-relaxed">
+              Your classical knowledge, formulary access, and clinical notes in one serene space.
+            </p>
           </div>
 
-          {/* RIGHT SIDE: Unified Intelligent Sign In Form & Password Recovery */}
-          <div className="lg:col-span-7 p-6 sm:p-10 lg:p-12 flex flex-col justify-center">
-            <div className="max-w-md w-full mx-auto">
+          {/* Meyveda Symbol directly above the mascot (approx 1-2 cm, preserving original proportions & colours) */}
+          <div className="relative z-10 mb-3 sm:mb-4 flex items-center justify-center">
+            <img
+              src={meyvedaMark}
+              alt="Meyveda Symbol"
+              width={100}
+              height={80}
+              className="h-11 sm:h-12 w-auto object-contain select-none drop-shadow-2xs"
+            />
+          </div>
+
+          {/* Interactive Cursor-Tracking Mascot (Enlarged to 7-8 cm on screen) */}
+          <div className="relative z-10 flex flex-col items-center justify-center">
+            <div className="relative flex items-center justify-center p-3 rounded-full bg-white shadow-xs border border-[#EBE7DF]/80">
+              <Mascot
+                directions="/mascots/meyveda-doctor-directions.webp"
+                reactions="/mascots/meyveda-doctor-reactions.webp"
+                size={280}
+                label="Meyveda AYUSH Doctor Mascot"
+                className="select-none"
+              />
+            </div>
+            <p className="mt-3 font-mono text-[11px] text-[#888888]">
+              Hover around · Click mascot to interact
+            </p>
+          </div>
+
+          {/* (Unwanted bottom trust/security text 'Verified AYUSH Doctor Platform · 256-bit SSL' removed) */}
+        </div>
+
+        {/* RIGHT SIDE: Unified Intelligent Sign In Form & Password Recovery */}
+        <div className="lg:col-span-7 bg-white p-6 sm:p-10 lg:p-16 flex flex-col justify-center items-center">
+          <div className="max-w-md w-full mx-auto">
               {/* Error Message if any */}
               {errorMessage && (
                 <div
@@ -721,7 +721,6 @@ export function Login({ initialMode }: { initialMode?: "signin" | "forgot" | "re
             </div>
           </div>
         </div>
-      </div>
 
       {/* Footer Copyright */}
       <footer className="w-full py-4 sm:py-6 text-center text-xs text-[#888888] border-t border-[#EBE7DF] bg-white">

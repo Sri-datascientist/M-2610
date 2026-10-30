@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Award,
+  Mail,
   BarChart3,
   BookOpen,
   Building2,
@@ -107,9 +108,9 @@ export const adminModules: AdminModule[] = [
   },
   {
     to: "/admin/territory",
-    label: "Territory mapping",
-    title: "Territory mapping",
-    summary: "Geographical mapping and territorial distribution of doctors and manufacturers.",
+    label: "Territory & Franchise Enquiries",
+    title: "Territory & Franchise Enquiries",
+    summary: "Geographical mapping, statutory councils, and cluster franchise partner enquiries.",
     icon: MapPin,
     mobileLabel: "Territory",
   },
@@ -131,11 +132,19 @@ export const adminModules: AdminModule[] = [
   },
   {
     to: "/admin/referrals",
-    label: "Referral scores",
-    title: "Referral scores",
-    summary: "Practitioner referral metrics, scoring formula, and ranking leaderboard.",
+    label: "Colleague Invitations & Referrals",
+    title: "Colleague Invitations & Referrals",
+    summary: "Live database table of doctor colleague invitations, dispatched emails, and referral metrics.",
     icon: Award,
-    mobileLabel: "Referrals",
+    mobileLabel: "Invitations",
+  },
+  {
+    to: "/admin/queries",
+    label: "Contact & Inquiries",
+    title: "Contact & Inquiries Management",
+    summary: "Live database table of visitor messages, doctor support requests, and contact inquiries.",
+    icon: Mail,
+    mobileLabel: "Contact",
   },
 ];
 

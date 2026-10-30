@@ -45,7 +45,7 @@ import {
   Video,
   X,
 } from "lucide-react";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import { apiClient } from "@/services/apiClient";
@@ -71,15 +71,18 @@ import stage3Image from "@/assets/3.png";
 import stage4Image from "@/assets/4.png";
 import stage5Image from "@/assets/5.png";
 import treePng from "@/assets/tree.png";
+import { ClusterFranchiseePartnerSection } from "../components/ClusterFranchiseePartnerSection";
 
 /* -------------------------------------------------------------------------- */
 /*                                CONSTANTS & DATA                            */
 /* -------------------------------------------------------------------------- */
 
 const navigation = [
-  { label: "Home", href: "#top" },
-  { label: "About Us", href: "#why-meyveda" },
-  { label: "Contact Us", href: "#footer" },
+  { label: "For Doctors", href: "#top" },
+  { label: "About us", href: "/about" },
+  { label: "Public relation", href: "#public-relation" },
+  { label: "Contact us", href: "/contact" },
+  { label: "Blogs", href: "#blogs" },
 ];
 
 const AYUSH_SYSTEMS = [
@@ -3174,7 +3177,7 @@ function PracticeSuiteScrollSection({
                     <a
                       href={item.href}
                       onClick={(e) => handleNavClick(e, item.href)}
-                      className={`group relative flex h-full flex-col justify-between rounded-2xl border bg-white p-5 sm:p-6 transition-all duration-300 hover:border-[#E67230]/60 hover:bg-[#FFFBF8] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E67230] motion-reduce:transition-none ${
+                      className={`group relative flex h-full flex-col justify-start rounded-2xl border bg-white p-5 sm:p-6 transition-all duration-300 hover:border-[#E67230]/60 hover:bg-[#FFFBF8] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E67230] motion-reduce:transition-none ${
                         isActive
                           ? "border-[#E67230]/60 shadow-xs ring-1 ring-[#E67230]/25"
                           : "border-[#EBE7DF] shadow-2xs"
@@ -3205,17 +3208,6 @@ function PracticeSuiteScrollSection({
                           <span className="font-mono text-[11px] text-[#666666] truncate">
                             {item.referenceDetail}
                           </span>
-                        </div>
-                      </div>
-
-                      {/* Card Footer Action Label with subtle arrow feedback */}
-                      <div className="mt-5 flex items-center justify-between border-t border-[#EBE7DF]/70 pt-3.5 text-xs sm:text-sm font-bold text-[#111111] transition-colors group-hover:text-[#E67230]">
-                        <span>{item.ctaText}</span>
-                        <div className="flex size-7 items-center justify-center rounded-full bg-[#FAF9F6] transition-colors group-hover:bg-[#E67230] group-hover:text-white">
-                          <ArrowRight
-                            aria-hidden="true"
-                            className="size-3.5 text-current transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none"
-                          />
                         </div>
                       </div>
                     </a>
@@ -3272,7 +3264,7 @@ function PracticeSuiteScrollSection({
                   <a
                     href={item.href}
                     onClick={(e) => handleNavClick(e, item.href)}
-                    className="group relative flex h-full flex-col justify-between rounded-2xl border border-[#EBE7DF] bg-white p-5 shadow-2xs transition-all hover:border-[#E67230]/60 hover:bg-[#FFFBF8]"
+                    className="group relative flex h-full flex-col justify-start rounded-2xl border border-[#EBE7DF] bg-white p-5 shadow-2xs transition-all hover:border-[#E67230]/60 hover:bg-[#FFFBF8]"
                   >
                     <div>
                       {/* Top Dedicated Visual Preview Area */}
@@ -3299,14 +3291,6 @@ function PracticeSuiteScrollSection({
                         <span className="font-mono text-[11px] text-[#666666] truncate">
                           {item.referenceDetail}
                         </span>
-                      </div>
-                    </div>
-
-                    {/* Card Footer Action Label */}
-                    <div className="mt-5 flex items-center justify-between border-t border-[#EBE7DF]/70 pt-3 text-xs font-bold text-[#111111]">
-                      <span>{item.ctaText}</span>
-                      <div className="flex size-6 items-center justify-center rounded-full bg-[#FAF9F6] text-[#E67230]">
-                        <ArrowRight aria-hidden="true" className="size-3.5 text-current" />
                       </div>
                     </div>
                   </a>
@@ -4312,6 +4296,7 @@ export function ManagedServicesTreeSection() {
 
 export function MeyvedaDoctorsPage() {
   const router = useRouter();
+  const navigate = useNavigate();
   // Navigation & modals
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
@@ -4320,7 +4305,52 @@ export function MeyvedaDoctorsPage() {
   // Authentication Context Hook
   const { user, isAuthenticated, logout, login, register: authRegister } = useAuth();
 
-  // Safe navigation handler for anchor links
+  const handleExploreDoctorDashboard = () => {
+    const token =
+      localStorage.getItem("meyveda_access_token") ||
+      localStorage.getItem("meyveda_auth_token") ||
+      localStorage.getItem("meyveda_token");
+
+    let isStoreSignedIn = false;
+    try {
+      const rawState = localStorage.getItem("meyveda_state");
+      if (rawState) {
+        const parsed = JSON.parse(rawState);
+        if (parsed.signedIn) isStoreSignedIn = true;
+      }
+    } catch {
+      /* ignore */
+    }
+
+    const hasAdminSession =
+      Boolean(sessionStorage.getItem("meyveda-admin") || localStorage.getItem("meyveda-admin"));
+    const hasMfgSession =
+      Boolean(sessionStorage.getItem("mvg_mfg_session") || localStorage.getItem("mvg_mfg_session"));
+    const storedRole = (
+      localStorage.getItem("meyveda_user_role") ||
+      user?.role ||
+      ""
+    ).toLowerCase();
+
+    const isUserLoggedIn = Boolean(
+      isAuthenticated || user || token || isStoreSignedIn || hasAdminSession || hasMfgSession
+    );
+
+    if (!isUserLoggedIn) {
+      navigate({ to: "/register" });
+      return;
+    }
+
+    if (storedRole === "admin" || hasAdminSession) {
+      window.location.href = "/admin/home";
+    } else if (storedRole === "manufacturer" || hasMfgSession) {
+      window.location.href = "/manufacturer/overview";
+    } else {
+      navigate({ to: "/workspace" });
+    }
+  };
+
+  // Safe navigation handler for anchor links and routes
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (href.startsWith("#")) {
       const targetId = href.slice(1);
@@ -4329,6 +4359,9 @@ export function MeyvedaDoctorsPage() {
         e.preventDefault();
         targetElement.scrollIntoView({ behavior: "smooth" });
       }
+    } else if (href.startsWith("/")) {
+      e.preventDefault();
+      navigate({ to: href as any });
     }
   };
 
@@ -4913,7 +4946,7 @@ export function MeyvedaDoctorsPage() {
           </a>
 
           {/* CENTER: Navigation Links */}
-          <nav aria-label="Main Navigation" className="hidden items-center gap-8 lg:flex xl:gap-10">
+          <nav aria-label="Main Navigation" className="hidden items-center gap-6 lg:flex xl:gap-8">
             {navigation.map((item) => (
               <a
                 className="whitespace-nowrap py-2 text-[15px] font-semibold text-[#555555] transition-colors hover:text-[#111111]"
@@ -5190,13 +5223,7 @@ export function MeyvedaDoctorsPage() {
               <RegisterPrimaryButton
                 size="default"
                 className="h-11 sm:h-12 px-6 text-sm sm:text-[15px]"
-                onClick={() => {
-                  const target =
-                    document.getElementById("doctors") || document.getElementById("knowledge");
-                  if (target) {
-                    target.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
+                onClick={handleExploreDoctorDashboard}
               >
                 Explore Doctor Dashboard
               </RegisterPrimaryButton>
@@ -5415,6 +5442,8 @@ export function MeyvedaDoctorsPage() {
       {/* Direct vertical-scroll-driven right-to-left cards progression        */}
       {/* Pinned/Sticky viewport container matching HorizontalStorytellingSection */}
       {/* ==================================================================== */}
+      <div id="why-meyveda" className="scroll-mt-20" />
+      <div id="about-us" className="scroll-mt-20" />
       <PracticeSuiteScrollSection handleNavClick={handleNavClick} />
 
       {/* ==================================================================== */}
@@ -5437,6 +5466,8 @@ export function MeyvedaDoctorsPage() {
       {/* 11. MEYVEDA PRACTITIONER COMMUNITY SECTION (#community)              */}
       {/* Centered template immediately above footer with single WhatsApp CTA   */}
       {/* ==================================================================== */}
+      <div id="public-relation" className="scroll-mt-20" />
+      <div id="pr" className="scroll-mt-20" />
       <section
         id="community"
         aria-labelledby="community-heading"
@@ -5480,6 +5511,13 @@ export function MeyvedaDoctorsPage() {
           </div>
         </div>
       </section>
+
+      {/* ==================================================================== */}
+      {/* 12. CLUSTER FRANCHISEE PARTNER NETWORK                                */}
+      {/* Premium dark section immediately above footer with 3 opportunity cards */}
+      {/* ==================================================================== */}
+      <div id="blogs" className="scroll-mt-20" />
+      <ClusterFranchiseePartnerSection />
 
       {/* ==================================================================== */}
       {/* 13. FOOTER (#footer)                                                 */}
@@ -5676,31 +5714,22 @@ export function MeyvedaDoctorsPage() {
               </p>
               <ul className="mt-4 space-y-2.5 text-sm text-[#555555]">
                 <li>
-                  <a
-                    href="#footer"
-                    onClick={(e) => handleNavClick(e, "#footer")}
-                    className="hover:text-[#E67230] transition-colors"
+                  <Link
+                    to="/contact"
+                    className="hover:text-[#E67230] transition-colors font-bold text-[#E67230] inline-flex items-center gap-1"
                   >
-                    Contact Us
-                  </a>
+                    <span>Contact Us</span>
+                    <ArrowRight className="size-3.5" />
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#career"
-                    onClick={(e) => handleNavClick(e, "#career")}
-                    className="hover:text-[#E67230] transition-colors"
-                  >
-                    Career
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#doctors"
-                    onClick={(e) => handleNavClick(e, "#doctors")}
-                    className="hover:text-[#E67230] transition-colors"
+                  <button
+                    type="button"
+                    onClick={handleExploreDoctorDashboard}
+                    className="hover:text-[#E67230] transition-colors text-left cursor-pointer"
                   >
                     Explore Doctor Dashboard
-                  </a>
+                  </button>
                 </li>
                 <li>
                   <a
@@ -5710,6 +5739,14 @@ export function MeyvedaDoctorsPage() {
                   >
                     AYUSH Pharma Makers
                   </a>
+                </li>
+                <li>
+                  <Link
+                    to="/cluster-franchise"
+                    className="hover:text-[#E67230] transition-colors text-left"
+                  >
+                    Cluster Franchise Partner
+                  </Link>
                 </li>
                 <li>
                   <Link
@@ -5734,6 +5771,21 @@ export function MeyvedaDoctorsPage() {
                   >
                     Sign In
                   </Link>
+                </li>
+                <li className="pt-2.5 border-t border-[#EBE7DF] text-xs text-[#555555] space-y-1.5">
+                  <p className="font-bold text-[#111111]">Direct Contact</p>
+                  <p>
+                    <a href="mailto:meyveda@gmail.com" className="hover:text-[#E67230] transition-colors flex items-center gap-1.5 font-medium">
+                      <Mail className="size-3.5 text-[#E67230]" />
+                      meyveda@gmail.com
+                    </a>
+                  </p>
+                  <p>
+                    <a href="tel:+919986398332" className="hover:text-[#E67230] transition-colors flex items-center gap-1.5 font-medium">
+                      <Phone className="size-3.5 text-[#E67230]" />
+                      +91 99863 98332
+                    </a>
+                  </p>
                 </li>
               </ul>
             </div>

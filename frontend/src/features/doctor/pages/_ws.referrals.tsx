@@ -372,25 +372,11 @@ export function ReferralsPage() {
 
   return (
     <div>
-      <PageHeader
-        eyebrow="Practitioner Network"
-        title="Referrals & Early Access"
-        desc="Invite qualified AYUSH physicians to the Meyveda early access cohort. Help expand our peer-reviewed classical clinical network."
-      />
-
-      {/* Prototype Boundary & Status Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-primary/20 bg-primary-soft/60 px-4 py-2.5 text-xs text-foreground md:px-8">
-        <div className="flex items-center gap-2">
-          <Info className="h-4 w-4 text-primary shrink-0" />
-          <span className="font-semibold text-primary-deep">Phase 1 Pilot Program Notice:</span>
-          <span>
-            Early access invitations are currently vetted through manual State AYUSH Council
-            verification. No automated scoring, rankings, or referral commissions are implemented.
-          </span>
-        </div>
-        <Pill t="orange" className="text-[11px] font-semibold py-0.5 px-2">
-          {referralAccount.programStatus}
-        </Pill>
+      {/* Centered Page Header */}
+      <div className="border-b border-border px-4 py-6 md:px-8 text-center bg-card/20">
+        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+          Referrals &amp; Early Access
+        </h1>
       </div>
 
       {/* Main Tab Navigation */}
@@ -454,26 +440,36 @@ export function ReferralsPage() {
           {/* Key Metric Highlights */}
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="panel p-4 space-y-1">
-              <span className="text-xs text-muted-foreground font-medium">Invited Colleagues</span>
-              <div className="text-2xl font-bold text-foreground">{(referralAccount.totalInvited ?? 0) || referrals.length}</div>
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Invited Colleagues
+              </span>
+              <div className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">
+                {(referralAccount.totalInvited ?? 0) || referrals.length}
+              </div>
               <div className="text-[11px] text-muted-foreground">
                 Colleagues nominated or registered
               </div>
             </div>
 
             <div className="panel p-4 space-y-1">
-              <span className="text-xs text-muted-foreground font-medium">Completed Registrations</span>
-              <div className="text-2xl font-bold text-primary-deep">{verifiedCount}</div>
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                Completed Registrations
+              </span>
+              <div className="text-2xl sm:text-3xl font-extrabold text-[#E67230] font-mono">
+                {verifiedCount}
+              </div>
               <div className="text-[11px] text-muted-foreground">
                 AYUSH practitioners onboarded
               </div>
             </div>
 
             <div className="panel p-4 space-y-1">
-              <span className="text-xs text-muted-foreground font-medium">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Early Access Points
               </span>
-              <div className="text-2xl font-bold text-amber-700">{referralAccount.referralPoints ?? 0} pts</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-foreground font-mono">
+                {referralAccount.referralPoints ?? 0} pts
+              </div>
               <div className="text-[11px] text-muted-foreground">
                 10 reward points per verified colleague
               </div>
@@ -492,14 +488,14 @@ export function ReferralsPage() {
                   Share this verified invite code with fellow AYUSH doctors to unlock early access rewards.
                 </p>
               </div>
-              <Pill t="emerald">
+              <Pill t="orange">
                 Code Verified & Active
               </Pill>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Invite Code (3 Letters + 2 Digits)</label>
+                <label className="text-xs font-bold text-foreground">Invite Code (3 Letters + 2 Digits)</label>
                 <div className="flex items-center gap-2">
                   <input
                     readOnly
@@ -519,7 +515,7 @@ export function ReferralsPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">
+                <label className="text-xs font-bold text-foreground">
                   Direct Registration URL
                 </label>
                 <div className="flex items-center gap-2">
@@ -621,47 +617,85 @@ export function ReferralsPage() {
             </div>
 
             {inviteSuccessInfo ? (
-              <div className="rounded-xl border border-emerald-300 bg-emerald-50/60 p-5 space-y-4">
-                <div className="flex items-center gap-2 font-bold text-base text-emerald-900">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
-                  Invitation Email Dispatched to Dr. {inviteSuccessInfo.name}!
-                </div>
-
-                <div className="space-y-1.5 text-xs text-emerald-800 leading-relaxed bg-white/70 rounded-lg p-3.5 border border-emerald-200">
-                  <div>
-                    <strong>Recipient:</strong> Dr. {inviteSuccessInfo.name} ({inviteSuccessInfo.qualification})
+              <div className="rounded-2xl border border-[#EBE7DF] bg-[#FAF9F6] p-6 space-y-5 shadow-xs">
+                {/* Header with Meyveda brand icon */}
+                <div className="flex items-start gap-3">
+                  <div className="size-10 rounded-full bg-[#E67230]/10 text-[#E67230] flex items-center justify-center shrink-0 mt-0.5 border border-[#E67230]/20">
+                    <CheckCircle2 className="size-5 text-[#E67230]" />
                   </div>
                   <div>
-                    <strong>Email Address:</strong> {inviteSuccessInfo.email}
-                  </div>
-                  <div>
-                    <strong>Mobile Number:</strong> {inviteSuccessInfo.mobile}
-                  </div>
-                  <div>
-                    <strong>Invite Code Sent:</strong>{" "}
-                    <span className="font-mono font-bold text-primary-deep">{inviteSuccessInfo.inviteCode}</span>
+                    <h3 className="text-base font-bold text-[#111111] leading-snug">
+                      Invitation Email Dispatched to Dr. {inviteSuccessInfo.name}!
+                    </h3>
+                    <p className="text-xs text-[#555555] mt-0.5">
+                      An official personalized early access invitation has been dispatched to their inbox.
+                    </p>
                   </div>
                 </div>
 
-                <p className="text-xs text-emerald-800 leading-relaxed">
-                  We have dispatched a personalized invitation to <strong>{inviteSuccessInfo.email}</strong>. When your colleague clicks the link in the email, their registration form will be automatically pre-filled with this code for instant onboarding.
+                {/* Structured Recipient Details Card */}
+                <div className="rounded-xl border border-[#EBE7DF] bg-white p-4 space-y-3 shadow-2xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <span className="text-[11px] font-semibold text-[#777777] uppercase tracking-wider block">
+                        Recipient Colleague
+                      </span>
+                      <span className="font-bold text-[#111111] text-sm mt-0.5 block">
+                        Dr. {inviteSuccessInfo.name}
+                      </span>
+                      <span className="inline-block mt-1 text-[11px] font-semibold text-[#555555] px-2 py-0.5 bg-[#FAF9F6] rounded border border-[#EBE7DF]">
+                        {inviteSuccessInfo.qualification}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="text-[11px] font-semibold text-[#777777] uppercase tracking-wider block">
+                        Invite Code Sent
+                      </span>
+                      <span className="inline-block mt-1 font-mono font-extrabold text-sm text-[#E67230] bg-[#E67230]/10 px-2.5 py-0.5 rounded border border-[#E67230]/25">
+                        {inviteSuccessInfo.inviteCode}
+                      </span>
+                    </div>
+
+                    <div className="pt-1">
+                      <span className="text-[11px] font-semibold text-[#777777] uppercase tracking-wider block">
+                        Email Address
+                      </span>
+                      <span className="font-mono text-xs text-[#111111] block mt-0.5">
+                        {inviteSuccessInfo.email}
+                      </span>
+                    </div>
+
+                    <div className="pt-1">
+                      <span className="text-[11px] font-semibold text-[#777777] uppercase tracking-wider block">
+                        Mobile Number
+                      </span>
+                      <span className="font-mono text-xs text-[#111111] block mt-0.5">
+                        {inviteSuccessInfo.mobile}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-[#555555] leading-relaxed">
+                  We have dispatched a personalized invitation to <strong className="text-[#111111] font-semibold">{inviteSuccessInfo.email}</strong>. When your colleague clicks the link in the email, their registration form will be automatically pre-filled with this code for instant onboarding.
                 </p>
 
                 {/* Direct link box */}
                 <div className="space-y-1.5 pt-1">
-                  <label className="text-[11px] font-bold text-emerald-900">
+                  <label className="text-xs font-bold text-[#111111]">
                     Direct Colleague Registration URL:
                   </label>
                   <div className="flex items-center gap-2">
                     <input
                       readOnly
                       value={inviteSuccessInfo.registrationUrl}
-                      className={cn(inputCls, "font-mono text-xs bg-white truncate")}
+                      className={cn(inputCls, "font-mono text-xs bg-white text-[#333333] border-[#EBE7DF] focus:border-[#E67230] truncate")}
                       aria-label="Direct registration URL"
                     />
                     <Btn
                       variant="outline"
-                      className="shrink-0 text-xs"
+                      className="shrink-0 text-xs bg-white border-[#EBE7DF] hover:border-[#E67230] hover:text-[#E67230]"
                       onClick={async () => {
                         const ok = await copyToClipboard(inviteSuccessInfo.registrationUrl);
                         if (ok) {
@@ -677,10 +711,10 @@ export function ReferralsPage() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-emerald-200/80">
+                <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-[#EBE7DF]">
                   <Btn
                     variant="primary"
-                    className="text-xs"
+                    className="text-xs bg-[#E67230] hover:bg-[#D15F1F] text-white"
                     onClick={() => {
                       setInviteSuccessInfo(null);
                     }}
@@ -690,7 +724,7 @@ export function ReferralsPage() {
                   </Btn>
                   <Btn
                     variant="outline"
-                    className="text-xs bg-white"
+                    className="text-xs bg-white border-[#EBE7DF] hover:bg-[#FAF9F6] text-[#111111]"
                     onClick={() => {
                       setInviteSuccessInfo(null);
                       updateSearch({ tab: "history" });
@@ -951,7 +985,7 @@ export function ReferralsPage() {
                         </td>
 
                         <td className="px-4 py-3.5">
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#E67230] bg-[#E67230]/10 px-2 py-0.5 rounded border border-[#E67230]/25">
                             Recorded
                           </span>
                         </td>

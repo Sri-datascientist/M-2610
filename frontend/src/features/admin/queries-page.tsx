@@ -1,5 +1,6 @@
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog";
-import { AlertCircle, ArrowUpDown, CheckCircle2, Clock, CornerDownRight, FileText, Send, User } from "lucide-react";
+import { LiveContactInquiriesSection } from "@/features/admin/components/LiveContactInquiriesSection";
+import { Mail, AlertCircle, ArrowUpDown, CheckCircle2, Clock, CornerDownRight, FileText, Send, User } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { DataTable, EmptyState, type Column } from "@/components/admin/ui";
@@ -65,6 +66,7 @@ export function QueriesPage() {
     removeQuery,
   } = useQueries();
 
+  const [activeTab, setActiveTab] = useState<"contact" | "internal">("contact");
   const [filters, setFilters] = useState<QueryFilters>(defaultQueryFilters);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
@@ -262,11 +264,52 @@ export function QueriesPage() {
   ];
 
   return (
-    <div>
-      <PageHeader
-        title="Query Management"
-        subtitle="Manage user questions, complaints, and platform support requests."
-      />
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Contact &amp; Inquiries Management
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            View visitor inquiries, doctor support requests, and platform communications.
+          </p>
+        </div>
+
+        <div className="inline-flex rounded-xl border border-border bg-surface p-1 text-xs font-semibold">
+          <button
+            type="button"
+            onClick={() => setActiveTab("contact")}
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-3.5 py-1.5 transition-all cursor-pointer",
+              activeTab === "contact"
+                ? "bg-primary text-primary-foreground shadow-xs font-bold"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Mail className="size-3.5" />
+            <span>Contact Messages (Live DB)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("internal")}
+            className={cn(
+              "flex items-center gap-2 rounded-lg px-3.5 py-1.5 transition-all cursor-pointer",
+              activeTab === "internal"
+                ? "bg-primary text-primary-foreground shadow-xs font-bold"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Clock className="size-3.5" />
+            <span>Platform Internal Tickets</span>
+          </button>
+        </div>
+      </div>
+
+      {activeTab === "contact" ? (
+        <LiveContactInquiriesSection />
+      ) : (
+        <div>
+
 
       <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <SummaryCard
@@ -409,6 +452,8 @@ export function QueriesPage() {
         onCancel={() => setPendingDeleteId(null)}
         onConfirm={handleConfirmDelete}
       />
+        </div>
+      )}
     </div>
   );
 }
