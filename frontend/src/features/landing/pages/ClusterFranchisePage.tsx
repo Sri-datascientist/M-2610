@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import meyvedaLogo from "@/assets/meyvedalogo.png";
+import franchiseVideo from "@/assets/franchise.mp4";
 import { apiClient } from "@/services/apiClient";
 import { copyToClipboard } from "@/lib/clipboard";
 import { seo } from "@/lib/seo";
@@ -335,207 +336,87 @@ Timestamp: ${d.timestamp}`;
       </header>
 
       {/* -------------------------------------------------------------------- */}
-      {/* 1. HERO SECTION (Light, Luxury, Warm Meyveda Theme)                  */}
+      {/* 1. HERO SECTION — CINEMATIC VIDEO BACKGROUND WITH EDITORIAL OVERLAY  */}
       {/* -------------------------------------------------------------------- */}
       <section
         id="hero"
         aria-labelledby="franchise-hero-title"
-        className="relative overflow-hidden border-b border-[#E8E4DE] bg-gradient-to-b from-[#FBF9F5] via-[#F8F4EC] to-[#FAF9F6] text-[#111111] py-14 sm:py-18 lg:py-22"
+        className="relative flex min-h-[calc(100vh-4rem)] lg:min-h-[calc(100vh-4.5rem)] lg:h-[calc(100vh-4.5rem)] lg:max-h-[820px] items-center overflow-hidden bg-[#FAF9F6] border-b border-[#E8E4DE] py-12 sm:py-16 lg:py-0"
       >
-        {/* Subtle decorative warm ambient radial glows */}
-        <div
-          className="pointer-events-none absolute -top-24 right-0 size-[550px] rounded-full opacity-40 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, rgba(230, 114, 48, 0.15) 0%, rgba(250, 247, 242, 0) 70%)",
-          }}
-        />
-        <div
-          className="pointer-events-none absolute bottom-0 left-10 size-[400px] rounded-full opacity-30 blur-2xl"
-          style={{
-            background: "radial-gradient(circle, rgba(244, 124, 11, 0.12) 0%, rgba(250, 247, 242, 0) 70%)",
-          }}
-        />
+        {/* Full-Bleed Background Video Layer */}
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden select-none">
+          <div className="absolute inset-0 flex items-center justify-end">
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-hidden="true"
+              className="h-full w-full object-cover object-[75%_center] sm:object-[80%_center] md:object-[85%_center] lg:object-[88%_center] lg:w-[85%] lg:max-w-none xl:w-[82%]"
+            >
+              <source src={franchiseVideo} type="video/mp4" />
+            </video>
+          </div>
 
-        <div className="relative mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
-            {/* Left Column: Headlines & Pitch */}
-            <div className="lg:col-span-6 xl:col-span-6 z-10">
-              {/* Eyebrow Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#FBD9C3] bg-[#FFF3EB] px-3.5 py-1 mb-4 shadow-2xs">
-                <span className="flex size-4 items-center justify-center rounded-full bg-[#E67230] text-white">
-                  <Sparkles className="size-2.5" />
-                </span>
-                <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230]">
-                  BUSINESS OPPORTUNITY
-                </p>
-              </div>
+          {/* Subtle Localized Readability Gradient behind left-side text */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#FAF9F6]/92 via-[#FAF9F6]/60 to-transparent sm:from-[#FAF9F6]/88 sm:via-[#FAF9F6]/45 to-transparent lg:bg-gradient-to-r lg:from-[#FAF9F6]/95 lg:from-0% lg:via-[#FAF9F6]/90 lg:via-28% lg:via-[#FAF9F6]/60 lg:via-38% lg:via-[#FAF9F6]/15 lg:via-46% lg:to-transparent lg:to-55%"
+          />
+        </div>
 
-              {/* Headline */}
-              <h1
-                id="franchise-hero-title"
-                className="text-3xl sm:text-5xl lg:text-[50px] xl:text-[54px] font-bold tracking-tight text-[#111111] leading-[1.12]"
-                style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+        {/* Hero Content Layer (Structured Left Side) */}
+        <div className="relative z-10 mx-auto w-full max-w-[1320px] px-5 sm:px-8 lg:px-12">
+          <div className="max-w-[560px] lg:max-w-[520px] xl:max-w-[560px]">
+            {/* Section Eyebrow */}
+            <p className="mb-2.5 text-xs font-bold uppercase tracking-wider text-[#E67230]">
+              Exclusive Territory Partnerships · 1 District = 1 Hub
+            </p>
+
+            {/* Headline — Refined editorial display font */}
+            <h1
+              id="franchise-hero-title"
+              className="text-[34px] sm:text-[46px] lg:text-[50px] xl:text-[54px] font-bold leading-[1.08] tracking-tight text-[#111111]"
+              style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+            >
+              Become a Meyveda <br className="hidden sm:inline" />
+              <span className="text-[#E67230]">Cluster Franchisee</span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="mt-4 sm:mt-5 text-base sm:text-lg lg:text-[18px] leading-relaxed text-[#55524B]">
+              Build a lasting <strong className="font-bold text-[#E67230]">AYUSH</strong> healthcare business in your own district — supply, events and community care, backed by the Meyveda network.
+            </p>
+
+            {/* Action Buttons */}
+            <div className="mt-7 sm:mt-8 flex flex-wrap items-center gap-3.5 sm:gap-4">
+              <a
+                href="#check-availability"
+                className="inline-flex h-12 sm:h-13 items-center justify-center gap-2 rounded-lg bg-[#E67230] px-6 sm:px-7 text-sm sm:text-base font-bold text-white shadow-[0_4px_16px_-4px_rgba(230,114,48,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#D15F1F] active:translate-y-0"
               >
-                Become a Meyveda Cluster Franchisee
-              </h1>
+                <Search className="size-4 shrink-0" />
+                <span>Check District Availability</span>
+              </a>
 
-              {/* Subtitle */}
-              <p className="mt-4 sm:mt-5 text-base sm:text-lg lg:text-[19px] leading-relaxed text-[#55524B] max-w-xl">
-                Build a lasting <strong className="font-bold text-[#E67230]">AYUSH</strong> healthcare business in your own district — supply, events and community care, backed by the Meyveda network.
-              </p>
-
-              {/* Action Buttons */}
-              <div className="mt-7 sm:mt-9 flex flex-wrap items-center gap-3.5 sm:gap-4">
-                <a
-                  href="#check-availability"
-                  className="inline-flex h-12 sm:h-13 items-center justify-center gap-2 rounded-lg bg-[#E67230] px-6 sm:px-7 text-sm sm:text-base font-bold text-white shadow-[0_4px_16px_-4px_rgba(230,114,48,0.45)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#D15F1F] active:translate-y-0"
-                >
-                  <Search className="size-4 shrink-0" />
-                  <span>Check District Availability</span>
-                </a>
-
-                <a
-                  href="#partnership-tiers"
-                  className="inline-flex h-12 sm:h-13 items-center justify-center gap-2 rounded-lg border border-[#E0DBD1] bg-white px-6 sm:px-7 text-sm sm:text-base font-bold text-[#111111] shadow-2xs hover:bg-[#FAF7F2] hover:border-[#E67230]/50 transition-all duration-200"
-                >
-                  <span>View Partnership Tiers</span>
-                  <ArrowRight className="size-4 shrink-0" />
-                </a>
-              </div>
-
-              {/* Trust & Governance Badges */}
-              <div className="mt-8 pt-6 border-t border-[#EBE7DF] grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-[13px] text-[#66635D]">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="size-4 text-[#E67230] shrink-0" />
-                  <span>Statutory AYUSH Council Alignment</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="size-4 text-[#E67230] shrink-0" />
-                  <span>100% Refundable Caution Deposit</span>
-                </div>
-              </div>
+              <a
+                href="#partnership-tiers"
+                className="inline-flex h-12 sm:h-13 items-center justify-center gap-2 rounded-lg border border-[#E0DBD1] bg-white/95 px-6 sm:px-7 text-sm sm:text-base font-bold text-[#111111] shadow-2xs hover:bg-[#FAF7F2] hover:border-[#E67230]/50 transition-all duration-200"
+              >
+                <span>View Partnership Tiers</span>
+                <ArrowRight className="size-4 shrink-0" />
+              </a>
             </div>
 
-            {/* Right Column: Creative, Big, Premium Visual Representation of the Franchise Network */}
-            <div className="lg:col-span-6 xl:col-span-6 flex justify-center lg:justify-end z-10 w-full">
-              <div className="relative w-full max-w-[560px] xl:max-w-[600px]">
-                {/* Ambient glow behind card */}
-                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#E67230]/20 via-[#F47C0B]/10 to-[#E67230]/15 blur-xl opacity-75" />
-
-                {/* Main Console Container */}
-                <div className="relative rounded-3xl border border-[#E8E4DE] bg-white/95 p-5 sm:p-7 shadow-[0_20px_50px_-12px_rgba(230,114,48,0.18)] backdrop-blur-sm">
-                  {/* Console Header Bar */}
-                  <div className="flex items-center justify-between pb-3.5 mb-4 sm:mb-5 border-b border-[#EFECE6]">
-                    <div className="flex items-center gap-2.5">
-                      <span className="relative flex size-2.5">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#E67230] opacity-75" />
-                        <span className="relative inline-flex size-2.5 rounded-full bg-[#E67230]" />
-                      </span>
-                      <span className="text-xs font-bold uppercase tracking-wider text-[#111111]">
-                        Meyveda Cluster Ecosystem
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 rounded-full bg-[#FAF7F2] border border-[#EBE7DF] px-2.5 py-0.5 text-[11px] font-semibold text-[#666666]">
-                      <MapPin className="size-3 text-[#E67230]" />
-                      <span>District Territory Grid</span>
-                    </div>
-                  </div>
-
-                  {/* Visual Network Architecture Diagram */}
-                  <div className="relative rounded-2xl bg-gradient-to-br from-[#FAF9F6] via-[#F6F2EA] to-[#F1ECE0] border border-[#EAE6DE] p-4 sm:p-6 overflow-hidden">
-                    {/* SVG Connector Lines (Decorative circuitry / network web) */}
-                    <svg
-                      className="absolute inset-0 size-full pointer-events-none opacity-40"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <line x1="50%" y1="50%" x2="22%" y2="22%" stroke="#E67230" strokeWidth="2" strokeDasharray="4 4" />
-                      <line x1="50%" y1="50%" x2="78%" y2="22%" stroke="#E67230" strokeWidth="2" strokeDasharray="4 4" />
-                      <line x1="50%" y1="50%" x2="22%" y2="78%" stroke="#E67230" strokeWidth="2" strokeDasharray="4 4" />
-                      <line x1="50%" y1="50%" x2="78%" y2="78%" stroke="#E67230" strokeWidth="2" strokeDasharray="4 4" />
-                      <circle cx="50%" cy="50%" r="58" fill="none" stroke="#E67230" strokeWidth="1" strokeDasharray="2 4" />
-                      <circle cx="50%" cy="50%" r="95" fill="none" stroke="#E67230" strokeWidth="0.8" opacity="0.5" />
-                    </svg>
-
-                    {/* 4 Connected Satellite Nodes */}
-                    <div className="grid grid-cols-2 gap-x-3 sm:gap-x-4 gap-y-10 sm:gap-y-12 relative z-10">
-                      {/* Satellite 1: Doctor Touchpoints & CME */}
-                      <div className="flex items-start gap-2 sm:gap-2.5 bg-white/95 backdrop-blur-xs rounded-xl p-2.5 sm:p-3 border border-[#E8E4DE] shadow-2xs hover:border-[#E67230]/50 transition-colors">
-                        <div className="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-lg bg-[#FFF3EB] text-[#E67230]">
-                          <Stethoscope className="size-3.5 sm:size-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-[#111111] truncate">Doctor Network</p>
-                          <p className="text-[10px] text-[#777777]">Prescriptions &amp; CME</p>
-                        </div>
-                      </div>
-
-                      {/* Satellite 2: Physical Co-Working Clinics */}
-                      <div className="flex items-start gap-2 sm:gap-2.5 bg-white/95 backdrop-blur-xs rounded-xl p-2.5 sm:p-3 border border-[#E8E4DE] shadow-2xs hover:border-[#E67230]/50 transition-colors justify-self-end w-full">
-                        <div className="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-lg bg-[#FFF3EB] text-[#E67230]">
-                          <Building2 className="size-3.5 sm:size-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-[#111111] truncate">Co-working Clinics</p>
-                          <p className="text-[10px] text-[#777777]">OPD &amp; Therapy Hubs</p>
-                        </div>
-                      </div>
-
-                      {/* Center Node (Overlaid Medallion) */}
-                      <div className="col-span-2 flex justify-center -my-5 sm:-my-6 relative z-20">
-                        <div className="flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-[#E67230] to-[#D15F1F] text-white px-4 sm:px-6 py-3 sm:py-3.5 shadow-[0_8px_24px_rgba(230,114,48,0.4)] border-2 border-white ring-4 ring-[#E67230]/20 max-w-[270px] text-center">
-                          <div className="flex items-center gap-1.5 mb-0.5">
-                            <Network className="size-4 text-white" />
-                            <span className="text-xs font-extrabold uppercase tracking-wide">
-                              Cluster Territory Hub
-                            </span>
-                          </div>
-                          <p className="text-[10px] font-medium text-white/90">
-                            Exclusive District Command &amp; Supply
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Satellite 3: Central Depot & GMP Supply */}
-                      <div className="flex items-start gap-2 sm:gap-2.5 bg-white/95 backdrop-blur-xs rounded-xl p-2.5 sm:p-3 border border-[#E8E4DE] shadow-2xs hover:border-[#E67230]/50 transition-colors">
-                        <div className="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-lg bg-[#FFF3EB] text-[#E67230]">
-                          <Truck className="size-3.5 sm:size-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-[#111111] truncate">Central Depot</p>
-                          <p className="text-[10px] text-[#777777]">Direct Pharma Flow</p>
-                        </div>
-                      </div>
-
-                      {/* Satellite 4: Last-Mile Patient Dispatches */}
-                      <div className="flex items-start gap-2 sm:gap-2.5 bg-white/95 backdrop-blur-xs rounded-xl p-2.5 sm:p-3 border border-[#E8E4DE] shadow-2xs hover:border-[#E67230]/50 transition-colors justify-self-end w-full">
-                        <div className="flex size-7 sm:size-8 shrink-0 items-center justify-center rounded-lg bg-[#FFF3EB] text-[#E67230]">
-                          <Boxes className="size-3.5 sm:size-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-[#111111] truncate">Patient Delivery</p>
-                          <p className="text-[10px] text-[#777777]">Doorstep Express Care</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bottom Highlights & Financial Features Strip */}
-                  <div className="mt-4 pt-4 border-t border-[#EFECE6] grid grid-cols-3 gap-2 text-center">
-                    <div className="rounded-lg bg-[#FAF7F2] p-2 sm:p-2.5 border border-[#EBE7DF]">
-                      <p className="text-[11px] font-extrabold text-[#E67230]">100% Refundable</p>
-                      <p className="text-[9px] text-[#777777] uppercase tracking-wider font-semibold">Caution Deposit</p>
-                    </div>
-                    <div className="rounded-lg bg-[#FAF7F2] p-2 sm:p-2.5 border border-[#EBE7DF]">
-                      <p className="text-[11px] font-extrabold text-[#111111]">1 District = 1 Hub</p>
-                      <p className="text-[9px] text-[#777777] uppercase tracking-wider font-semibold">Exclusive Rights</p>
-                    </div>
-                    <div className="rounded-lg bg-[#FAF7F2] p-2 sm:p-2.5 border border-[#EBE7DF]">
-                      <p className="text-[11px] font-extrabold text-[#111111]">Single-Layer</p>
-                      <p className="text-[9px] text-[#777777] uppercase tracking-wider font-semibold">Margin Override</p>
-                    </div>
-                  </div>
-                </div>
+            {/* Trust & Governance Badges */}
+            <div className="mt-8 pt-6 border-t border-[#EBE7DF]/80 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs sm:text-[13px] text-[#66635D]">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="size-4 text-[#E67230] shrink-0" />
+                <span>Statutory AYUSH Council Alignment</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="size-4 text-[#E67230] shrink-0" />
+                <span>100% Refundable Caution Deposit</span>
               </div>
             </div>
           </div>
