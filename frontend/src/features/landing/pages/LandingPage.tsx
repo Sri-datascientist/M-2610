@@ -44,6 +44,9 @@ import {
   UsersRound,
   Video,
   X,
+  Scale,
+  ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -4369,6 +4372,60 @@ export function MeyvedaDoctorsPage() {
   const [doctorName, setDoctorName] = useState("");
   const [doctorDegree, setDoctorDegree] = useState("BAMS");
   const [doctorPincode, setDoctorPincode] = useState("");
+  const [doctorCity, setDoctorCity] = useState("");
+  const [doctorState, setDoctorState] = useState("");
+  const [isDetectingDoctorCity, setIsDetectingDoctorCity] = useState(false);
+  const [doctorCouncil, setDoctorCouncil] = useState<{
+    board_type: string;
+    board_name: string;
+    statutory_act: string;
+    controlling_authority: string;
+    jurisdiction?: string;
+    official_portal?: string;
+    description?: string;
+  } | null>(null);
+
+  // Auto-detect City and Medical Council from PIN Code
+  useEffect(() => {
+    const cleanPin = doctorPincode.trim().replace(/\D/g, "").slice(0, 6);
+    if (cleanPin.length === 6 && /^[1-9][0-9]{5}$/.test(cleanPin)) {
+      let isCancelled = false;
+      setIsDetectingDoctorCity(true);
+      apiClient
+        .get<any>(`/pincode/${cleanPin}`)
+        .then((res) => {
+          if (!isCancelled) {
+            const detectedCity =
+              res?.district ||
+              res?.division ||
+              res?.primary_post_office?.district ||
+              "";
+            const detectedState = res?.state || "";
+            setDoctorCity(detectedCity);
+            setDoctorState(detectedState);
+            setDoctorCouncil(res?.ayush_governance || null);
+          }
+        })
+        .catch(() => {
+          if (!isCancelled) {
+            setDoctorCouncil(null);
+          }
+        })
+        .finally(() => {
+          if (!isCancelled) {
+            setIsDetectingDoctorCity(false);
+          }
+        });
+      return () => {
+        isCancelled = true;
+      };
+    } else {
+      setDoctorCity("");
+      setDoctorState("");
+      setDoctorCouncil(null);
+      setIsDetectingDoctorCity(false);
+    }
+  }, [doctorPincode]);
   const [doctorRegNo, setDoctorRegNo] = useState("");
   const [doctorEmail, setDoctorEmail] = useState("");
   const [doctorPhone, setDoctorPhone] = useState("");
@@ -4635,6 +4692,10 @@ export function MeyvedaDoctorsPage() {
       toast.error("Please enter a valid 6-digit PIN code.");
       return;
     }
+    if (!doctorCity.trim()) {
+      toast.error("Please wait for your city to be auto-verified from your PIN code.");
+      return;
+    }
     if (!doctorRegNo.trim()) {
       toast.error("Please enter your Doctor Registration Number.");
       return;
@@ -4711,6 +4772,9 @@ export function MeyvedaDoctorsPage() {
       setDoctorPhone("");
       setDoctorRegNo("");
       setDoctorPincode("");
+      setDoctorCity("");
+      setDoctorState("");
+      setDoctorCouncil(null);
       setEmailVerified(false);
       setMobileVerified(false);
       setEmailOtpSent(false);
@@ -5848,44 +5912,178 @@ export function MeyvedaDoctorsPage() {
               />
             </div>
 
-            {/* 2. Qualification * (BAMS, BSMS, BNYS, BHMS, BUMS) & PIN Code * */}
+            {/* 2. Qualification * (BAMS, BSMS, BNYS, BHMS, BUMS) */}
+            <div>
+              <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                Qualification *
+              </label>
+              <select
+                value={doctorDegree}
+                onChange={(e) => setDoctorDegree(e.target.value)}
+                className="w-full rounded-md border border-[#EBE7DF] bg-white px-3 py-2.5 text-sm text-[#111111] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors cursor-pointer"
+              >
+                <option value="BAMS">BAMS (Ayurveda)</option>
+                <option value="BSMS">BSMS (Siddha)</option>
+                <option value="BNYS">BNYS (Naturopathy & Yoga)</option>
+                <option value="BHMS">BHMS (Homoeopathy)</option>
+                <option value="BUMS">BUMS (Unani)</option>
+              </select>
+            </div>
+
+            {/* 3. PIN Code & Auto-Fetched City (Locked) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
-                  Qualification *
-                </label>
-                <select
-                  value={doctorDegree}
-                  onChange={(e) => setDoctorDegree(e.target.value)}
-                  className="w-full rounded-md border border-[#EBE7DF] bg-white px-3 py-2.5 text-sm text-[#111111] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors cursor-pointer"
-                >
-                  <option value="BAMS">BAMS (Ayurveda)</option>
-                  <option value="BSMS">BSMS (Siddha)</option>
-                  <option value="BNYS">BNYS (Naturopathy & Yoga)</option>
-                  <option value="BHMS">BHMS (Homoeopathy)</option>
-                  <option value="BUMS">BUMS (Unani)</option>
-                </select>
-              </div>
               <div>
                 <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
                   PIN Code *
                 </label>
-                <input
-                  type="text"
-                  required
-                  maxLength={6}
-                  pattern="[0-9]{6}"
-                  inputMode="numeric"
-                  placeholder=""
-                  autoComplete="off"
-                  value={doctorPincode}
-                  onChange={(e) => setDoctorPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                  className="w-full rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2.5 text-sm font-mono text-[#111111] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    required
+                    maxLength={6}
+                    pattern="[0-9]{6}"
+                    inputMode="numeric"
+                    placeholder="e.g. 600001, 560001"
+                    autoComplete="off"
+                    value={doctorPincode}
+                    onChange={(e) => setDoctorPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    className="w-full rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2.5 text-sm font-mono text-[#111111] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                  />
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                    {isDetectingDoctorCity ? (
+                      <Loader2 className="size-3.5 animate-spin text-[#E67230]" />
+                    ) : doctorPincode.length === 6 && doctorCouncil ? (
+                      <CheckCircle2 className="size-4 text-emerald-600" />
+                    ) : null}
+                  </div>
+                </div>
+                <p className="text-[11px] text-[#777777] mt-1">
+                  Enter 6-digit PIN to auto-fetch City &amp; Council
+                </p>
+              </div>
+
+              {/* City - Read-only / Locked */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs sm:text-sm font-bold text-[#111111]">
+                    City (Auto-locked) *
+                  </label>
+                  {isDetectingDoctorCity ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-[#E67230]">
+                      <Loader2 className="size-3 animate-spin" />
+                      <span>Fetching…</span>
+                    </span>
+                  ) : doctorCity ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-200">
+                      <Lock className="size-2.5 text-emerald-700" />
+                      <span>Locked</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-[#888888]">
+                      Auto-locked
+                    </span>
+                  )}
+                </div>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#777777]">
+                    <Lock className="size-3.5" />
+                  </div>
+                  <input
+                    type="text"
+                    readOnly
+                    tabIndex={-1}
+                    placeholder="Auto-detected from PIN"
+                    value={doctorCity ? (doctorState ? `${doctorCity}, ${doctorState}` : doctorCity) : ""}
+                    className="w-full rounded-md border border-[#EBE7DF] bg-[#F5F3EF] pl-9 pr-8 py-2.5 text-sm font-medium text-[#111111] placeholder:text-[#888888] cursor-not-allowed select-none focus:outline-none"
+                  />
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                    {isDetectingDoctorCity ? (
+                      <Loader2 className="size-3.5 animate-spin text-[#E67230]" />
+                    ) : doctorCity ? (
+                      <CheckCircle2 className="size-4 text-emerald-600" />
+                    ) : (
+                      <Lock className="size-3.5 text-[#999999]" />
+                    )}
+                  </div>
+                </div>
+                <p className="text-[11px] text-[#777777] mt-1">
+                  City is auto-verified and cannot be changed.
+                </p>
               </div>
             </div>
 
-            {/* 3. Doctor Registration Number * */}
+            {/* Statutory Medical Council Card - Directly below PIN code & City */}
+            {doctorCouncil && !isDetectingDoctorCity && (
+              <div className="rounded-xl border border-[#E67230]/35 bg-gradient-to-br from-[#FFFDFB] to-[#FFF6EE] p-3.5 sm:p-4 shadow-2xs space-y-2.5 animate-in fade-in-50 duration-200">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <div className="size-5 rounded-full bg-[#E67230]/15 flex items-center justify-center text-[#E67230]">
+                      <Scale className="size-3" />
+                    </div>
+                    <span className="text-[11px] font-bold text-[#E67230] uppercase tracking-wider">
+                      Statutory Medical Council Jurisdiction
+                    </span>
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white text-[10px] font-bold text-[#111111] border border-[#EBE7DF] shadow-2xs">
+                    <ShieldCheck className="size-3 text-[#E67230]" />
+                    {doctorCouncil.board_type || "State Statutory Board"}
+                  </span>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-extrabold text-[#111111] leading-snug">
+                    {doctorCouncil.board_name}
+                  </h4>
+                  {doctorCouncil.description && (
+                    <p className="mt-1 text-[11px] text-[#555555] leading-relaxed">
+                      {doctorCouncil.description}
+                    </p>
+                  )}
+                </div>
+
+                <div className="rounded-lg bg-white/90 border border-[#EBE7DF] p-2.5 text-[11px] space-y-1">
+                  <div>
+                    <span className="font-bold text-[#111111]">Statutory Act: </span>
+                    <span className="text-[#444444] font-medium">{doctorCouncil.statutory_act}</span>
+                  </div>
+                  {doctorCouncil.controlling_authority && (
+                    <div>
+                      <span className="font-bold text-[#111111]">Controlling Authority: </span>
+                      <span className="text-[#444444] font-medium">{doctorCouncil.controlling_authority}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between pt-0.5 flex-wrap gap-2">
+                  <span className="text-[10px] text-[#666666]">
+                    Registration credentials verified under this council.
+                  </span>
+                  {doctorCouncil.official_portal && (
+                    <a
+                      href={doctorCouncil.official_portal}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] font-bold text-[#E67230] hover:text-[#D15F1F] hover:underline"
+                    >
+                      <span>Official Portal</span>
+                      <ExternalLink className="size-3" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Pulse Loader when resolving Council & City */}
+            {isDetectingDoctorCity && (
+              <div className="rounded-xl border border-[#E67230]/25 bg-[#FFFDFB] p-3 text-center animate-pulse">
+                <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#E67230]">
+                  <Loader2 className="size-3.5 animate-spin text-[#E67230]" />
+                  <span>Resolving Statutory Medical Council &amp; City...</span>
+                </div>
+              </div>
+            )}
+
+            {/* 4. Doctor Registration Number * */}
             <div>
               <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
                 Doctor Registration Number *

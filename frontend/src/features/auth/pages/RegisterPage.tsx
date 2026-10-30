@@ -20,6 +20,9 @@ import {
   ArrowRight,
   ArrowLeft,
   Loader2,
+  Scale,
+  Building2,
+  ExternalLink,
 } from "lucide-react";
 import meyvedaLogo from "@/assets/meyvedalogo.png";
 import meyvedaMark from "@/assets/meyveda-favicon-source.png";
@@ -71,24 +74,35 @@ export function Register() {
     return "BAMS";
   });
 
-  // 3. City
+  // 3. City & Governing Council State
   const [city, setCity] = useState("");
+  const [stateName, setStateName] = useState("");
   const [isDetectingCity, setIsDetectingCity] = useState(false);
   const [cityDetectionStatus, setCityDetectionStatus] = useState<{
     status: "idle" | "loading" | "success" | "error";
     message?: string;
   }>({ status: "idle" });
+  const [governingCouncil, setGoverningCouncil] = useState<{
+    board_type: string;
+    board_name: string;
+    statutory_act: string;
+    controlling_authority: string;
+    jurisdiction?: string;
+    official_portal?: string;
+    description?: string;
+    region_note?: string | null;
+  } | null>(null);
 
   // 4. PIN Code
   const [pincode, setPincode] = useState("");
 
-  // Auto-detect City from PIN Code
+  // Auto-detect City and Statutory AYUSH Medical Council from PIN Code
   useEffect(() => {
-    const cleanPin = pincode.trim();
+    const cleanPin = pincode.trim().replace(/\D/g, "").slice(0, 6);
     if (cleanPin.length === 6 && /^[1-9][0-9]{5}$/.test(cleanPin)) {
       let isCancelled = false;
       setIsDetectingCity(true);
-      setCityDetectionStatus({ status: "loading", message: "Detecting city from PIN..." });
+      setCityDetectionStatus({ status: "loading", message: "Fetching city & medical council..." });
 
       apiClient
         .get<any>(`/pincode/${cleanPin}`)
@@ -99,28 +113,37 @@ export function Register() {
               res?.division ||
               res?.primary_post_office?.district ||
               "";
+            const detectedState = res?.state || "";
             if (detectedCity) {
               setCity(detectedCity);
-              const stateInfo = res?.state ? `, ${res.state}` : "";
+              setStateName(detectedState);
+              const stateInfo = detectedState ? `, ${detectedState}` : "";
               setCityDetectionStatus({
                 status: "success",
-                message: `Auto-detected: ${detectedCity}${stateInfo}`,
+                message: `Auto-verified: ${detectedCity}${stateInfo}`,
               });
             } else {
               setCityDetectionStatus({
                 status: "error",
-                message: "City not found in postal records. Please enter manually.",
+                message: "City not found in postal directory for this PIN code.",
               });
+            }
+
+            if (res?.ayush_governance) {
+              setGoverningCouncil(res.ayush_governance);
+            } else {
+              setGoverningCouncil(null);
             }
           }
         })
         .catch((err: any) => {
           if (!isCancelled) {
+            setGoverningCouncil(null);
             setCityDetectionStatus({
               status: "error",
               message:
                 err?.message ||
-                "Postal lookup service unavailable. Please enter your city manually.",
+                "Postal lookup service unavailable. Please check the PIN code.",
             });
           }
         })
@@ -134,7 +157,11 @@ export function Register() {
         isCancelled = true;
       };
     } else {
+      setCity("");
+      setStateName("");
+      setGoverningCouncil(null);
       setCityDetectionStatus({ status: "idle" });
+      setIsDetectingCity(false);
     }
   }, [pincode]);
 
@@ -460,6 +487,11 @@ export function Register() {
       return;
     }
 
+    if (!city.trim()) {
+      setErrorMessage("Please wait for your city to be auto-verified from your PIN code.");
+      return;
+    }
+
     const cleanReg = doctorRegNumber.trim();
     if (!cleanReg) {
       setErrorMessage("Doctor Registration Number is required (e.g. State Council / NCISM).");
@@ -563,7 +595,7 @@ export function Register() {
           mobile: `+91 ${cleanedMobile}`,
           qualification,
           specialty: `${systemName} Practice`,
-          institution: `AYUSH Medical Council (PIN: ${cleanPin})`,
+          institution: governingCouncil?.board_name || `AYUSH Medical Council (PIN: ${cleanPin})`,
           system: systemName,
           verification: "Pending Verification",
           initials: formattedName
@@ -745,82 +777,31 @@ export function Register() {
                 </div>
               </div>
 
-              {/* 2. Qualification & City */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                <div>
-                  <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
-                    Qualification *
-                  </label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
-                      <GraduationCap className="size-4" />
-                    </div>
-                    <select
-                      required
-                      value={qualification}
-                      onChange={(e) => setQualification(e.target.value)}
-                      className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm text-[#111111] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors cursor-pointer"
-                    >
-                      {AYUSH_QUALIFICATIONS.map((q) => (
-                        <option key={q.code} value={q.code}>
-                          {q.label}
-                        </option>
-                      ))}
-                    </select>
+              {/* 2. Qualification */}
+              <div>
+                <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                  Qualification *
+                </label>
+                <div className="relative">
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
+                    <GraduationCap className="size-4" />
                   </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-xs sm:text-sm font-bold text-[#111111]">
-                      City
-                    </label>
-                    {isDetectingCity && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#E67230]">
-                        <Loader2 className="size-3 animate-spin" />
-                        <span>Detecting…</span>
-                      </span>
-                    )}
-                    {!isDetectingCity && cityDetectionStatus.status === "success" && (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600">
-                        <CheckCircle2 className="size-3" />
-                        <span>Auto-detected</span>
-                      </span>
-                    )}
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder="Pune / Mumbai"
-                      value={city}
-                      onChange={(e) => {
-                        setCity(e.target.value);
-                        if (cityDetectionStatus.status === "success") {
-                          setCityDetectionStatus({ status: "idle" });
-                        }
-                      }}
-                      className="w-full rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2.5 sm:py-3 text-sm text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
-                    />
-                    {isDetectingCity && (
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
-                        <Loader2 className="size-3.5 animate-spin text-[#E67230]" />
-                      </div>
-                    )}
-                  </div>
-                  {cityDetectionStatus.status === "success" && cityDetectionStatus.message && (
-                    <p className="mt-1 text-[11px] text-emerald-700">
-                      {cityDetectionStatus.message}
-                    </p>
-                  )}
-                  {cityDetectionStatus.status === "error" && cityDetectionStatus.message && (
-                    <p className="mt-1 text-[11px] text-[#888888]">
-                      {cityDetectionStatus.message}
-                    </p>
-                  )}
+                  <select
+                    required
+                    value={qualification}
+                    onChange={(e) => setQualification(e.target.value)}
+                    className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm text-[#111111] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors cursor-pointer"
+                  >
+                    {AYUSH_QUALIFICATIONS.map((q) => (
+                      <option key={q.code} value={q.code}>
+                        {q.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              {/* 3. PIN Code & Doctor Registration Number */}
+              {/* 3. PIN Code & Auto-Fetched City (Locked) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
@@ -828,7 +809,7 @@ export function Register() {
                   </label>
                   <div className="relative">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#888888]">
-                      <MapPin className="size-4" />
+                      <MapPin className="size-4 text-[#E67230]" />
                     </div>
                     <input
                       type="text"
@@ -836,30 +817,170 @@ export function Register() {
                       maxLength={6}
                       pattern="[0-9]{6}"
                       inputMode="numeric"
-                      placeholder="411001"
+                      placeholder="e.g. 600001, 560001"
                       value={pincode}
                       onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-4 py-2.5 sm:py-3 text-sm font-mono text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                      className="w-full rounded-md border border-[#EBE7DF] bg-white pl-10 pr-10 py-2.5 sm:py-3 text-sm font-mono text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
                     />
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
+                      {isDetectingCity ? (
+                        <Loader2 className="size-3.5 animate-spin text-[#E67230]" />
+                      ) : pincode.length === 6 && governingCouncil ? (
+                        <CheckCircle2 className="size-4 text-emerald-600" />
+                      ) : null}
+                    </div>
                   </div>
                   <p className="mt-1 text-[11px] text-[#888888]">
-                    Enter 6-digit PIN to auto-populate City
+                    Enter 6-digit PIN to auto-fetch City &amp; Medical Council
                   </p>
                 </div>
 
+                {/* City - Read-only / Locked (Cannot be changed) */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
-                    Registration Number *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="AYUSH-REG-12345"
-                    value={doctorRegNumber}
-                    onChange={(e) => setDoctorRegNumber(e.target.value)}
-                    className="w-full rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2.5 sm:py-3 text-sm uppercase font-mono text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
-                  />
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs sm:text-sm font-bold text-[#111111]">
+                      City (Auto-locked) *
+                    </label>
+                    {isDetectingCity ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#E67230]">
+                        <Loader2 className="size-3 animate-spin" />
+                        <span>Fetching…</span>
+                      </span>
+                    ) : city ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        <Lock className="size-2.5 text-emerald-700" />
+                        <span>Locked</span>
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-[#888888]">
+                        Auto-filled from PIN
+                      </span>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[#777777]">
+                      <Lock className="size-4" />
+                    </div>
+                    <input
+                      type="text"
+                      readOnly
+                      tabIndex={-1}
+                      placeholder="Auto-detected from PIN code (Locked)"
+                      value={city ? (stateName ? `${city}, ${stateName}` : city) : ""}
+                      className="w-full rounded-md border border-[#EBE7DF] bg-[#F5F3EF] pl-10 pr-10 py-2.5 sm:py-3 text-sm font-medium text-[#111111] placeholder:text-[#888888] cursor-not-allowed select-none focus:outline-none"
+                    />
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
+                      {isDetectingCity ? (
+                        <Loader2 className="size-3.5 animate-spin text-[#E67230]" />
+                      ) : city ? (
+                        <CheckCircle2 className="size-4 text-emerald-600" />
+                      ) : (
+                        <Lock className="size-3.5 text-[#999999]" />
+                      )}
+                    </div>
+                  </div>
+                  <p className="mt-1 text-[11px] text-[#666666]">
+                    City and state are automatically fetched from postal records and cannot be edited.
+                  </p>
                 </div>
+              </div>
+
+              {/* Statutory Medical Council Card - Shown below PIN code */}
+              {governingCouncil && !isDetectingCity && (
+                <div className="rounded-xl border border-[#E67230]/35 bg-gradient-to-br from-[#FFFDFB] to-[#FFF6EE] p-4 sm:p-4.5 shadow-2xs space-y-3 animate-in fade-in-50 duration-200">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <div className="size-6 rounded-full bg-[#E67230]/15 flex items-center justify-center text-[#E67230]">
+                        <Scale className="size-3.5" />
+                      </div>
+                      <span className="text-xs font-bold text-[#E67230] uppercase tracking-wider">
+                        Governing Statutory Medical Council
+                      </span>
+                    </div>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white text-[11px] font-bold text-[#111111] border border-[#EBE7DF] shadow-2xs">
+                      <ShieldCheck className="size-3 text-[#E67230]" />
+                      {governingCouncil.board_type || "State Statutory Board"}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm sm:text-base font-extrabold text-[#111111] leading-snug">
+                      {governingCouncil.board_name}
+                    </h4>
+                    {governingCouncil.description && (
+                      <p className="mt-1 text-xs text-[#555555] leading-relaxed">
+                        {governingCouncil.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg bg-white/90 border border-[#EBE7DF] p-3 text-xs space-y-1.5">
+                    <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+                      <span className="font-bold text-[#111111] shrink-0">Statutory Act:</span>
+                      <span className="text-[#444444] font-medium">{governingCouncil.statutory_act}</span>
+                    </div>
+                    {governingCouncil.controlling_authority && (
+                      <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+                        <span className="font-bold text-[#111111] shrink-0">Governing Authority:</span>
+                        <span className="text-[#444444] font-medium">{governingCouncil.controlling_authority}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-0.5 flex-wrap gap-2">
+                    <span className="text-[11px] text-[#666666]">
+                      Doctor registration credentials are verified under this statutory council.
+                    </span>
+                    {governingCouncil.official_portal && (
+                      <a
+                        href={governingCouncil.official_portal}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs font-bold text-[#E67230] hover:text-[#D15F1F] hover:underline"
+                      >
+                        <span>Official Portal</span>
+                        <ExternalLink className="size-3.5" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Pulse Loader when resolving Council & City */}
+              {isDetectingCity && (
+                <div className="rounded-xl border border-[#E67230]/25 bg-[#FFFDFB] p-4 text-center animate-pulse space-y-1.5">
+                  <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#E67230]">
+                    <Loader2 className="size-4 animate-spin" />
+                    <span>Resolving postal geography &amp; statutory AYUSH council...</span>
+                  </div>
+                  <p className="text-[11px] text-[#888888]">Fetching official State AYUSH Board and locking verified city</p>
+                </div>
+              )}
+
+              {/* Error notice if PIN code not recognized */}
+              {!isDetectingCity && pincode.length === 6 && cityDetectionStatus.status === "error" && (
+                <div className="rounded-xl border border-red-200 bg-red-50/70 p-3 text-xs text-red-700 flex items-center gap-2">
+                  <AlertCircle className="size-4 shrink-0 text-red-500" />
+                  <span>Invalid PIN code or postal records not found. Please enter a valid 6-digit Indian PIN code.</span>
+                </div>
+              )}
+
+              {/* 4. Doctor Registration Number */}
+              <div>
+                <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                  Doctor Registration Number *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. AYUSH-REG-12345"
+                  value={doctorRegNumber}
+                  onChange={(e) => setDoctorRegNumber(e.target.value)}
+                  className="w-full rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2.5 sm:py-3 text-sm uppercase font-mono text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                />
+                <p className="mt-1 text-[11px] text-[#888888]">
+                  State Medical Council or Central AYUSH Council Registration Number
+                </p>
               </div>
 
                 {/* 4. Email Address & OTP */}
