@@ -175,3 +175,4 @@ def test_content_manager_restricted_from_admin_endpoints(client, content_manager
     res = client.get("/api/v1/admin/doctors", headers=headers)
     assert res.status_code == 403
     assert res.json()["detail"] == "Insufficient permissions"
+

@@ -3,19 +3,13 @@ import { Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   Home,
-  BookOpen,
   Clock,
-  Search,
-  Tag,
   Share2,
   X,
   User,
-  ShieldCheck,
-  CheckCircle2,
-  Calendar,
+  BookOpen,
 } from "lucide-react";
 import meyvedaLogo from "@/assets/meyvedalogo.png";
-import { MEYVEDA_CONTACT } from "@/lib/contact-info";
 import { apiClient } from "@/services/apiClient";
 import { toast } from "sonner";
 
@@ -28,27 +22,15 @@ interface BlogPostItem {
   author_name: string;
   author_role: string;
   category: string;
-  cover_image_url?: string | null;
   reading_time: string;
   tags?: string[] | null;
-  is_featured: boolean;
   status: string;
   created_at?: string;
 }
 
-const CATEGORIES = [
-  "All",
-  "Clinical Practice",
-  "Ayurvedic Pharmacology",
-  "Integrative Medicine",
-  "Regulatory & ABDM",
-];
-
 export function BlogsPage() {
   const [posts, setPosts] = useState<BlogPostItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedPost, setSelectedPost] = useState<BlogPostItem | null>(null);
 
   useEffect(() => {
@@ -59,20 +41,18 @@ export function BlogsPage() {
         if (Array.isArray(data) && data.length > 0) {
           setPosts(data);
         } else {
-          // Fallback initial sample if server has empty list
           setPosts([
             {
               id: "blog-1",
               title: "Modernizing Clinical Nadi Pariksha: Integrating Classical Pulse Diagnostics with Longitudinal Vitals",
               slug: "modernizing-clinical-nadi-pariksha-classical-pulse",
               author_name: "Dr. Ramesh Vaidya, BAMS",
-              author_role: "Chief Ayurvedic Consultant & Research Lead",
+              author_role: "Chief Ayurvedic Consultant",
               category: "Clinical Practice",
               reading_time: "5 min read",
-              tags: ["Kayachikitsa", "Nadi Pariksha", "Clinical Protocols"],
+              tags: ["Kayachikitsa", "Nadi Pariksha"],
               summary: "How systematic recording of Tridosha imbalances and Rogi-Roga Pariksha transforms subjective pulse analysis into verifiable clinical evidence.",
-              content: "Classical Ayurveda places Nadi Pariksha (pulse examination) at the pinnacle of the Ashtavidha Pariksha. However, in contemporary practice, transmitting and tracking these diagnostic insights across multi-session treatments requires structured documentation.\n\nIn this clinical guide, we explore how standardized Prakriti-Vikriti digital indexing preserves the tactile nuance of pulse dynamics while creating verifiable longitudinal health records for integrative follow-ups. By bridging classical terms (e.g. Sarpa, Manduka, Hamsa gati) with modern patient observation timelines, practitioners build unshakeable credibility with both patients and the wider medical community.",
-              is_featured: true,
+              content: "Classical Ayurveda places Nadi Pariksha (pulse examination) at the pinnacle of the Ashtavidha Pariksha. However, in contemporary practice, transmitting and tracking these diagnostic insights across multi-session treatments requires structured documentation.\n\nIn this clinical guide, we explore how standardized Prakriti-Vikriti digital indexing preserves the tactile nuance of pulse dynamics while creating verifiable longitudinal health records for integrative follow-ups.",
               status: "published",
               created_at: new Date().toISOString(),
             },
@@ -84,10 +64,9 @@ export function BlogsPage() {
               author_role: "Department of Pharmaceutical Quality",
               category: "Ayurvedic Pharmacology",
               reading_time: "6 min read",
-              tags: ["Rasa Shastra", "Heavy Metal Testing", "GMP Compliance"],
+              tags: ["Rasa Shastra", "GMP Compliance"],
               summary: "An analysis of Shodhana and Marana purification cycles, AAS testing protocols, and ensuring patient trust in classical herbo-mineral preparations.",
-              content: "Herbo-mineral formulations in Ayurveda, developed through centuries of Rasa Shastra expertise, require exacting purification (Shodhana) and calcination (Marana) processes.\n\nWhen produced under strict Good Manufacturing Practices (GMP) and verified through Atomic Absorption Spectroscopy (AAS), Bhasmas demonstrate optimal bioavailability and strict adherence to statutory safety limits. We review the essential laboratory criteria every practitioner must review before prescribing, highlighting how Certificate of Analysis (CoA) transparency protects patient wellness.",
-              is_featured: false,
+              content: "Herbo-mineral formulations in Ayurveda, developed through centuries of Rasa Shastra expertise, require exacting purification (Shodhana) and calcination (Marana) processes.\n\nWhen produced under strict Good Manufacturing Practices (GMP) and verified through Atomic Absorption Spectroscopy (AAS), Bhasmas demonstrate optimal bioavailability and strict adherence to statutory safety limits.",
               status: "published",
               created_at: new Date().toISOString(),
             },
@@ -99,10 +78,9 @@ export function BlogsPage() {
               author_role: "Health Informatics Specialist",
               category: "Regulatory & ABDM",
               reading_time: "4 min read",
-              tags: ["ABDM", "Healthcare Identity", "Telemedicine"],
+              tags: ["ABDM", "Telemedicine"],
               summary: "Demystifying Healthcare Professional Registry (HPR) enrollment, statutory compliance, and digital prescription validity under National Health Authority standards.",
-              content: "The Ayushman Bharat Digital Mission (ABDM) has introduced a transformative leap for AYUSH practitioners. By linking state medical council credentials to a verified Healthcare Professional Registry (HPR) ID, doctors gain sovereign ownership of their digital identity.\n\nThis article walks through the key statutory advantages, from digital signature compliance to direct integration with national health claim gateways, ensuring AYUSH clinicians stand on equal footing with all registered medical providers.",
-              is_featured: false,
+              content: "The Ayushman Bharat Digital Mission (ABDM) has introduced a transformative leap for AYUSH practitioners. By linking state medical council credentials to a verified Healthcare Professional Registry (HPR) ID, doctors gain sovereign ownership of their digital identity.\n\nThis guide walks through the key statutory advantages, from digital signature compliance to direct integration with national health claim gateways.",
               status: "published",
               created_at: new Date().toISOString(),
             },
@@ -116,21 +94,6 @@ export function BlogsPage() {
     }
     fetchBlogs();
   }, []);
-
-  const filteredPosts = posts.filter((post) => {
-    const matchesCategory =
-      activeCategory === "All" ||
-      post.category.toLowerCase() === activeCategory.toLowerCase();
-    const matchesSearch =
-      !searchQuery.trim() ||
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.author_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (post.tags && post.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase())));
-    return matchesCategory && matchesSearch;
-  });
-
-  const featuredPost = posts.find((p) => p.is_featured) || posts[0];
 
   const handleShare = (post: BlogPostItem) => {
     if (navigator.share) {
@@ -154,7 +117,6 @@ export function BlogsPage() {
       {/* -------------------------------------------------------------------- */}
       <header className="sticky top-0 z-50 border-b border-[#EBE7DF] bg-[#FAF9F6]/95 backdrop-blur-md transition-all">
         <div className="mx-auto flex h-20 max-w-[1216px] items-center justify-between px-5 sm:px-8 lg:px-12">
-          {/* Official Meyveda Logo */}
           <Link
             to="/"
             aria-label="Meyveda — Return to Home"
@@ -167,7 +129,6 @@ export function BlogsPage() {
             />
           </Link>
 
-          {/* Center Navigation Links */}
           <nav aria-label="Main Navigation" className="hidden items-center gap-6 lg:flex xl:gap-8">
             <Link
               to="/"
@@ -201,7 +162,6 @@ export function BlogsPage() {
             </Link>
           </nav>
 
-          {/* Right Action CTAs */}
           <div className="flex items-center gap-3 sm:gap-4">
             <Link
               to="/login"
@@ -229,158 +189,32 @@ export function BlogsPage() {
       </header>
 
       {/* -------------------------------------------------------------------- */}
-      {/* 2. HERO SECTION                                                      */}
+      {/* 2. COMPACT TITLE & BLOG BOXES                                        */}
       {/* -------------------------------------------------------------------- */}
-      <section className="relative overflow-hidden border-b border-[#EBE7DF] bg-white py-16 sm:py-20 lg:py-24">
-        <div className="relative mx-auto max-w-[1216px] px-5 sm:px-8 lg:px-12 text-center">
-          <p className="mb-3 text-xs sm:text-sm font-bold uppercase tracking-widest text-[#E67230]">
-            MEYVEDA CLINICAL & KNOWLEDGE DESK
-          </p>
-
-          <h1
-            className="text-[36px] sm:text-[48px] lg:text-[58px] font-bold tracking-tight text-[#111111] leading-[1.1] max-w-4xl mx-auto"
-            style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
-          >
-            Perspectives, Protocols & <br className="hidden sm:inline" />
-            <span className="text-[#E67230]">AYUSH Clinical Insights</span>
-          </h1>
-
-          <p className="mx-auto mt-5 max-w-2xl text-base sm:text-lg lg:text-[19px] leading-relaxed text-[#555555]">
-            Evidence-guided clinical perspectives, classical Ayurvedic pharmacology, protocol reviews, and ABDM digital healthcare transformation written for registered practitioners.
-          </p>
-
-          {/* Search Bar */}
-          <div className="mx-auto mt-8 max-w-xl">
-            <div className="relative flex items-center">
-              <Search className="absolute left-4 size-5 text-[#888888]" />
-              <input
-                type="text"
-                placeholder="Search clinical topics, authors, herbs, protocols..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-[#EBE7DF] bg-[#FAF9F6] py-3.5 pl-12 pr-4 text-sm text-[#111111] placeholder-[#888888] shadow-inner transition-all focus:border-[#E67230] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#E67230]/20"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-4 text-xs font-semibold text-[#888888] hover:text-[#111111]"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Category Filter Pills */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`rounded-full px-4 py-1.5 text-xs sm:text-sm font-medium transition-all ${
-                  activeCategory === cat
-                    ? "bg-[#111111] text-white shadow-sm"
-                    : "bg-[#FAF9F6] text-[#555555] border border-[#EBE7DF] hover:bg-white hover:text-[#111111]"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* -------------------------------------------------------------------- */}
-      {/* 3. FEATURED POST SPOTLIGHT (if matches filter)                        */}
-      {/* -------------------------------------------------------------------- */}
-      {featuredPost && activeCategory === "All" && !searchQuery && (
-        <section className="border-b border-[#EBE7DF] bg-[#FAF9F6] py-12 sm:py-16">
-          <div className="mx-auto max-w-[1216px] px-5 sm:px-8 lg:px-12">
-            <div className="rounded-2xl border border-[#E67230]/30 bg-gradient-to-br from-white via-white to-[#FAF4ED] p-6 sm:p-10 shadow-sm transition-all hover:shadow-md">
-              <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E67230] px-3 py-1 font-bold text-white uppercase tracking-wider text-[11px]">
-                  Featured Insight
-                </span>
-                <span className="font-semibold text-[#E67230]">
-                  {featuredPost.category}
-                </span>
-                <span className="text-[#888888]">•</span>
-                <span className="flex items-center gap-1 text-[#666666]">
-                  <Clock className="size-3.5" />
-                  {featuredPost.reading_time}
-                </span>
-              </div>
-
-              <h2
-                className="mt-4 text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[#111111] leading-tight"
-                style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
-              >
-                {featuredPost.title}
-              </h2>
-
-              <p className="mt-4 text-base sm:text-lg leading-relaxed text-[#555555]">
-                {featuredPost.summary}
-              </p>
-
-              {/* Author & CTA Bar */}
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-[#F0ECE1] pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="flex size-10 items-center justify-center rounded-full bg-[#E67230]/10 text-[#E67230]">
-                    <User className="size-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-[#111111]">{featuredPost.author_name}</p>
-                    <p className="text-xs text-[#777777]">{featuredPost.author_role}</p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setSelectedPost(featuredPost)}
-                  className="inline-flex items-center gap-2 rounded-md bg-[#111111] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#E67230]"
-                >
-                  <span>Read Full Article</span>
-                  <ArrowRight className="size-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* -------------------------------------------------------------------- */}
-      {/* 4. BLOG POSTS GRID                                                   */}
-      {/* -------------------------------------------------------------------- */}
-      <section className="py-16 sm:py-20 lg:py-24">
+      <main className="flex-1 py-10 sm:py-12">
         <div className="mx-auto max-w-[1216px] px-5 sm:px-8 lg:px-12">
-          <div className="flex items-center justify-between border-b border-[#EBE7DF] pb-4">
-            <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-[#111111]">
-              {activeCategory === "All" ? "Latest Articles & Monographs" : activeCategory}
-            </h2>
-            <span className="text-sm font-medium text-[#888888]">
-              {filteredPosts.length} {filteredPosts.length === 1 ? "article" : "articles"}
+          {/* Direct, clean title */}
+          <div className="flex items-center justify-between border-b border-[#EBE7DF] pb-5">
+            <h1
+              className="text-3xl sm:text-4xl font-bold tracking-tight text-[#111111]"
+              style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+            >
+              Blogs
+            </h1>
+            <span className="text-xs sm:text-sm font-medium text-[#777777]">
+              {posts.length} {posts.length === 1 ? "post" : "posts"}
             </span>
           </div>
 
-          {filteredPosts.length === 0 ? (
-            <div className="my-16 rounded-2xl border border-dashed border-[#DCD6CA] bg-white p-12 text-center">
-              <BookOpen className="mx-auto size-12 text-[#AAAAAA]" />
-              <h3 className="mt-4 text-lg font-bold text-[#111111]">No articles found</h3>
-              <p className="mt-1 text-sm text-[#666666]">
-                Try adjusting your search criteria or filter to browse other topics.
-              </p>
-              <button
-                onClick={() => {
-                  setActiveCategory("All");
-                  setSearchQuery("");
-                }}
-                className="mt-4 inline-flex items-center rounded-md bg-[#111111] px-4 py-2 text-xs font-bold text-white hover:bg-[#E67230]"
-              >
-                Reset Filters
-              </button>
+          {/* Grid of Blog Boxes */}
+          {posts.length === 0 ? (
+            <div className="my-12 rounded-xl border border-dashed border-[#DCD6CA] bg-white p-12 text-center">
+              <BookOpen className="mx-auto size-10 text-[#AAAAAA]" />
+              <h3 className="mt-3 text-base font-bold text-[#111111]">No blogs found</h3>
             </div>
           ) : (
             <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredPosts.map((post) => (
+              {posts.map((post) => (
                 <div
                   key={post.id}
                   className="flex flex-col justify-between rounded-xl border border-[#EBE7DF] bg-white p-6 shadow-2xs transition-all duration-200 hover:-translate-y-1 hover:border-[#E67230]/40 hover:shadow-md"
@@ -396,12 +230,12 @@ export function BlogsPage() {
                       </span>
                     </div>
 
-                    <h3
+                    <h2
                       className="mt-4 text-lg sm:text-xl font-bold text-[#111111] leading-snug line-clamp-2 hover:text-[#E67230] transition-colors cursor-pointer"
                       onClick={() => setSelectedPost(post)}
                     >
                       {post.title}
-                    </h3>
+                    </h2>
 
                     <p className="mt-3 text-sm leading-relaxed text-[#555555] line-clamp-3">
                       {post.summary}
@@ -431,7 +265,7 @@ export function BlogsPage() {
                         onClick={() => setSelectedPost(post)}
                         className="inline-flex items-center gap-1 text-xs font-bold text-[#E67230] hover:underline"
                       >
-                        Read Post
+                        Read Blog
                         <ArrowRight className="size-3" />
                       </button>
                     </div>
@@ -441,45 +275,10 @@ export function BlogsPage() {
             </div>
           )}
         </div>
-      </section>
+      </main>
 
       {/* -------------------------------------------------------------------- */}
-      {/* 5. CLINICAL CONTRIBUTIONS CTA BANNER                                 */}
-      {/* -------------------------------------------------------------------- */}
-      <section className="border-t border-[#EBE7DF] bg-[#FAF4ED] py-16 sm:py-20">
-        <div className="mx-auto max-w-[1216px] px-5 sm:px-8 lg:px-12 text-center">
-          <p className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#E67230]">
-            CALL FOR CLINICAL RESEARCH & CASE STUDIES
-          </p>
-          <h2
-            className="mt-2 text-2xl sm:text-3xl lg:text-4xl font-bold text-[#111111]"
-            style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
-          >
-            Are You an AYUSH Clinician with Real-World Evidence?
-          </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base leading-relaxed text-[#555555]">
-            Meyveda’s practitioner community welcomes peer-reviewed clinical monographs, case documentation, and pharmacovigilance reports from registered Vaidyas.
-          </p>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-            <Link
-              to="/register"
-              className="inline-flex items-center gap-2 rounded-md bg-[#E67230] px-6 py-3 text-sm font-bold text-white shadow-sm hover:bg-[#D15F1F]"
-            >
-              <span>Join Practitioner Network</span>
-              <ArrowRight className="size-4" />
-            </Link>
-            <Link
-              to="/about"
-              className="inline-flex items-center rounded-md border border-[#DCD6CA] bg-white px-5 py-3 text-sm font-semibold text-[#111111] hover:bg-[#FAF9F6]"
-            >
-              Learn Our Mission
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* -------------------------------------------------------------------- */}
-      {/* 6. BLOG POST READING MODAL                                           */}
+      {/* 3. BLOG POST READING MODAL                                           */}
       {/* -------------------------------------------------------------------- */}
       {selectedPost && (
         <div
@@ -490,7 +289,6 @@ export function BlogsPage() {
             className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white p-6 sm:p-10 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close Button */}
             <button
               onClick={() => setSelectedPost(null)}
               className="absolute right-5 top-5 rounded-full p-2 text-[#888888] hover:bg-[#FAF9F6] hover:text-[#111111]"
@@ -498,7 +296,6 @@ export function BlogsPage() {
               <X className="size-5" />
             </button>
 
-            {/* Modal Header */}
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="rounded-full bg-[#FAF4ED] px-3 py-1 font-bold text-[#E67230]">
                 {selectedPost.category}
@@ -517,7 +314,6 @@ export function BlogsPage() {
               {selectedPost.title}
             </h2>
 
-            {/* Author Attribution */}
             <div className="mt-4 flex items-center gap-3 border-y border-[#F0ECE1] py-3 text-xs sm:text-sm">
               <div className="flex size-9 items-center justify-center rounded-full bg-[#E67230]/10 text-[#E67230]">
                 <User className="size-4.5" />
@@ -528,22 +324,19 @@ export function BlogsPage() {
               </div>
             </div>
 
-            {/* Summary highlight box */}
             <div className="mt-4 rounded-lg border-l-4 border-[#E67230] bg-[#FAF9F6] p-4 text-sm italic text-[#555555]">
               {selectedPost.summary}
             </div>
 
-            {/* Full Body Content */}
             <div className="mt-6 space-y-4 text-sm sm:text-base leading-relaxed text-[#333333]">
               {selectedPost.content.split("\n\n").map((para, idx) => (
                 <p key={idx}>{para}</p>
               ))}
             </div>
 
-            {/* Tags */}
             {selectedPost.tags && selectedPost.tags.length > 0 && (
               <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-[#F0ECE1] pt-4">
-                <span className="text-xs font-semibold text-[#888888]">Indexed Tags:</span>
+                <span className="text-xs font-semibold text-[#888888]">Tags:</span>
                 {selectedPost.tags.map((tag, idx) => (
                   <span
                     key={idx}
@@ -555,21 +348,20 @@ export function BlogsPage() {
               </div>
             )}
 
-            {/* Modal Footer Actions */}
             <div className="mt-8 flex flex-wrap items-center justify-between border-t border-[#EBE7DF] pt-6">
               <button
                 onClick={() => handleShare(selectedPost)}
                 className="inline-flex items-center gap-1.5 rounded-md border border-[#EBE7DF] px-3.5 py-2 text-xs font-semibold text-[#555555] hover:bg-[#FAF9F6] hover:text-[#111111]"
               >
                 <Share2 className="size-3.5" />
-                <span>Share Article</span>
+                <span>Share Blog</span>
               </button>
 
               <button
                 onClick={() => setSelectedPost(null)}
                 className="rounded-md bg-[#111111] px-5 py-2 text-xs font-bold text-white hover:bg-[#E67230]"
               >
-                Close Article
+                Close Blog
               </button>
             </div>
           </div>
@@ -577,62 +369,23 @@ export function BlogsPage() {
       )}
 
       {/* -------------------------------------------------------------------- */}
-      {/* 7. FOOTER                                                            */}
+      {/* 4. FOOTER                                                            */}
       {/* -------------------------------------------------------------------- */}
-      <footer className="border-t border-[#EBE7DF] bg-white py-12 text-[#111111] sm:py-16">
+      <footer className="border-t border-[#EBE7DF] bg-white py-10 text-[#111111]">
         <div className="mx-auto max-w-[1216px] px-5 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-8">
-            <div className="space-y-4">
-              <img
-                src={meyvedaLogo}
-                alt="Meyveda Logo"
-                className="h-9 w-auto object-contain"
-              />
-              <p className="text-xs leading-relaxed text-[#666666]">
-                Modern Clinician Operating System for Sovereign AYUSH Practitioners. Zero Referral Commissions. Complete Practice Independence.
-              </p>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#777777]">
+            <div className="flex items-center gap-3">
+              <img src={meyvedaLogo} alt="Meyveda Logo" className="h-7 w-auto object-contain" />
+              <span>© {new Date().getFullYear()} Meyveda Ayush Pvt Ltd.</span>
             </div>
-
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-[#111111]">Platform</p>
-              <ul className="mt-4 space-y-2.5 text-xs text-[#666666]">
-                <li><Link to="/" className="hover:text-[#E67230] transition-colors">For Doctors</Link></li>
-                <li><Link to="/about" className="hover:text-[#E67230] transition-colors">About Us</Link></li>
-                <li><Link to="/cluster-franchise" className="hover:text-[#E67230] transition-colors">Cluster Franchise</Link></li>
-                <li><Link to="/contact" className="hover:text-[#E67230] transition-colors">Contact Us</Link></li>
-              </ul>
+            <div className="flex gap-6">
+              <Link to="/about" className="hover:text-[#E67230]">About Us</Link>
+              <Link to="/public-relations" className="hover:text-[#E67230]">Public relation</Link>
+              <Link to="/blogs" className="text-[#E67230] font-semibold">Blogs</Link>
+              <Link to="/contact" className="hover:text-[#E67230]">Contact Us</Link>
+              <Link to="/privacy" className="hover:text-[#E67230]">Privacy</Link>
+              <Link to="/terms" className="hover:text-[#E67230]">Terms</Link>
             </div>
-
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-[#111111]">Media & Insights</p>
-              <ul className="mt-4 space-y-2.5 text-xs text-[#666666]">
-                <li><Link to="/public-relations" className="hover:text-[#E67230] transition-colors">Public Relations</Link></li>
-                <li><Link to="/blogs" className="text-[#E67230] font-semibold">Clinical Blogs</Link></li>
-                <li><a href="mailto:editorial@meyveda.com" className="hover:text-[#E67230] transition-colors">Submit Monograph</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-[#111111]">Legal & Compliance</p>
-              <ul className="mt-4 space-y-2.5 text-xs text-[#666666]">
-                <li><Link to="/terms" className="hover:text-[#E67230] transition-colors">Terms of Service</Link></li>
-                <li><Link to="/privacy" className="hover:text-[#E67230] transition-colors">Privacy Policy</Link></li>
-                <li><span className="text-[#999999]">ABDM-HPR Protocol Verified</span></li>
-              </ul>
-            </div>
-
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-[#111111]">Headquarters</p>
-              <address className="mt-4 not-italic text-xs leading-relaxed text-[#666666]">
-                Meyveda Ayush Pvt Ltd<br />
-                {MEYVEDA_CONTACT.address}<br />
-                Email: {MEYVEDA_CONTACT.email}
-              </address>
-            </div>
-          </div>
-
-          <div className="mt-12 border-t border-[#EBE7DF] pt-8 text-center text-xs text-[#888888]">
-            <p>© {new Date().getFullYear()} Meyveda Ayush Pvt Ltd. All statutory rights reserved.</p>
           </div>
         </div>
       </footer>

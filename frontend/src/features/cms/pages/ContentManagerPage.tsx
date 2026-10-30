@@ -465,7 +465,7 @@ export function ContentManagerPage() {
               {data.metrics.total_items}
             </p>
             <p className="mt-1 text-[11px] text-[#666666]">
-              PR Releases + Blog Articles
+              PR Releases + Blog Posts
             </p>
           </div>
 
@@ -678,7 +678,7 @@ export function ContentManagerPage() {
             {filteredBlogs.length === 0 ? (
               <div className="rounded-xl border border-dashed border-[#DCD6CA] bg-white p-12 text-center">
                 <BookOpen className="mx-auto size-10 text-[#AAAAAA]" />
-                <p className="mt-3 text-sm font-bold text-[#111111]">No blog articles found</p>
+                <p className="mt-3 text-sm font-bold text-[#111111]">No blog posts found</p>
                 <button
                   onClick={openNewBlogModal}
                   className="mt-4 inline-flex items-center gap-1 rounded-md bg-[#E67230] px-4 py-2 text-xs font-bold text-white hover:bg-[#D15F1F]"
@@ -939,15 +939,15 @@ export function ContentManagerPage() {
             </button>
 
             <h2 className="text-xl font-bold text-[#111111]">
-              {editingBlog ? "Edit Clinical Blog Post" : "Author New Clinical Blog Post"}
+              {editingBlog ? "Edit Blog Post" : "Author New Blog Post"}
             </h2>
             <p className="mt-1 text-xs text-[#666666]">
-              Articles will appear live on the public `/blogs` portal for clinicians and scholars.
+              Blogs will appear live on the public `/blogs` portal.
             </p>
 
             <form onSubmit={handleSaveBlog} className="mt-6 space-y-4 text-xs">
               <div>
-                <label className="block font-semibold text-[#333333]">Article Title *</label>
+                <label className="block font-semibold text-[#333333]">Blog Title *</label>
                 <input
                   type="text"
                   required
@@ -1033,13 +1033,13 @@ export function ContentManagerPage() {
               </div>
 
               <div>
-                <label className="block font-semibold text-[#333333]">Article Content *</label>
+                <label className="block font-semibold text-[#333333]">Blog Content *</label>
                 <textarea
                   required
                   rows={6}
                   value={blogForm.content}
                   onChange={(e) => setBlogForm({ ...blogForm, content: e.target.value })}
-                  placeholder="Full clinical article body. Blank lines indicate separate paragraphs..."
+                  placeholder="Full blog body. Blank lines indicate separate paragraphs..."
                   className="mt-1 w-full rounded-md border border-[#E5E0D5] p-2.5 text-xs text-[#111111] focus:border-[#E67230] focus:outline-none"
                 />
               </div>
@@ -1083,7 +1083,7 @@ export function ContentManagerPage() {
                   type="submit"
                   className="rounded-md bg-[#E67230] px-5 py-2 font-bold text-white hover:bg-[#D15F1F]"
                 >
-                  {editingBlog ? "Update Article" : "Publish Article"}
+                  {editingBlog ? "Update Blog" : "Publish Blog"}
                 </button>
               </div>
             </form>
@@ -1124,3 +1124,4 @@ export function ContentManagerPage() {
     </div>
   );
 }
+
