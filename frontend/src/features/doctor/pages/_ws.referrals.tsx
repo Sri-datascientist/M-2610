@@ -29,6 +29,11 @@ import { seo } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/services/apiClient";
 import { copyToClipboard } from "@/lib/clipboard";
+import {
+  sanitizeMobileInput,
+  validateIndianMobile,
+  validateAuthenticEmail,
+} from "@/lib/validation";
 
 export interface ReferralsSearchParams {
   tab?: "overview" | "invite" | "history" | undefined;
@@ -262,8 +267,6 @@ export function ReferralsPage() {
 
   const validateInviteForm = (): boolean => {
     const errors: typeof formErrors = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneDigits = inviteMobile.replace(/\D/g, "");
 
     if (!inviteName.trim()) {
       errors.name = "Colleague's full name is required.";
@@ -271,16 +274,16 @@ export function ReferralsPage() {
       errors.name = "Please enter a valid full name (e.g. Dr. Rajesh K. Varma).";
     }
 
-    if (!inviteEmail.trim()) {
-      errors.email = "Colleague's email address is required.";
-    } else if (!emailRegex.test(inviteEmail.trim())) {
-      errors.email = "Please enter a valid email address (e.g. dr.rajesh@example.com).";
+    // Strict Authentic Email validation
+    const emailValidation = validateAuthenticEmail(inviteEmail);
+    if (!emailValidation.valid) {
+      errors.email = emailValidation.error;
     }
 
-    if (!inviteMobile.trim()) {
-      errors.mobile = "Colleague's mobile number is required.";
-    } else if (phoneDigits.length < 10) {
-      errors.mobile = "Please provide a valid 10-digit mobile number.";
+    // Strict Indian Mobile validation (exactly 10 digits starting with 6-9)
+    const mobileValidation = validateIndianMobile(inviteMobile);
+    if (!mobileValidation.valid) {
+      errors.mobile = mobileValidation.error;
     }
 
     if (!inviteQualification.trim()) {
@@ -344,11 +347,15 @@ export function ReferralsPage() {
           referrals: [record, ...s.referrals.filter((r) => r.id !== res.id)],
         }));
 
+        const formattedMobile = inviteMobile.length === 10
+          ? `+91 ${inviteMobile.slice(0, 5)} ${inviteMobile.slice(5)}`
+          : inviteMobile.trim();
+
         setInviteSuccessInfo({
           id: record.id,
           name: record.invitedName || inviteName.trim(),
           email: record.invitedEmail,
-          mobile: inviteMobile.trim(),
+          mobile: formattedMobile,
           qualification: inviteQualification.trim(),
           inviteCode: effectiveInviteCode,
           registrationUrl: effectiveRegistrationUrl,
@@ -781,21 +788,34 @@ export function ReferralsPage() {
                   {/* Question 3: Mobile */}
                   <Field
                     label="3. Colleague's Mobile Number *"
-                    hint="For SMS delivery & registration pre-fill"
+                    hint="10-digit Indian mobile number starting with 6, 7, 8, or 9"
                     error={formErrors.mobile}
                   >
-                    <input
-                      type="tel"
-                      required
-                      className={cn(inputCls, formErrors.mobile && "border-destructive")}
-                      value={inviteMobile}
-                      onChange={(e) => {
-                        setInviteMobile(e.target.value);
-                        if (formErrors.mobile) setFormErrors((prev) => ({ ...prev, mobile: undefined }));
-                      }}
-                      placeholder="e.g. +91 98765 43210"
-                      aria-label="Colleague's mobile number"
-                    />
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-xs font-bold text-muted-foreground select-none pointer-events-none">
+                        +91
+                      </span>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={10}
+                        required
+                        className={cn(
+                          inputCls,
+                          "pl-12 font-mono tracking-wide",
+                          formErrors.mobile && "border-destructive"
+                        )}
+                        value={inviteMobile}
+                        onChange={(e) => {
+                          const val = sanitizeMobileInput(e.target.value);
+                          setInviteMobile(val);
+                          if (formErrors.mobile) setFormErrors((prev) => ({ ...prev, mobile: undefined }));
+                        }}
+                        placeholder="98765 43210"
+                        aria-label="Colleague's 10-digit mobile number"
+                      />
+                    </div>
                   </Field>
 
                   {/* Question 4: Qualification */}

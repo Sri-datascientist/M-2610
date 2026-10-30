@@ -23,6 +23,11 @@ import meyvedaLogo from "@/assets/meyvedalogo.png";
 import { apiClient } from "@/services/apiClient";
 import { copyToClipboard } from "@/lib/clipboard";
 import { MEYVEDA_CONTACT } from "@/lib/contact-info";
+import {
+  sanitizeMobileInput,
+  validateIndianMobile,
+  validateAuthenticEmail,
+} from "@/lib/validation";
 
 const CATEGORIES = [
   "General Inquiry",
@@ -99,17 +104,17 @@ export function ContactUsPage() {
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(cleanEmail)) {
-      setErrorMsg("Please provide a valid email address.");
-      toast.error("Invalid email address.");
+    const emailValidation = validateAuthenticEmail(cleanEmail);
+    if (!emailValidation.valid) {
+      setErrorMsg(emailValidation.error || "Please provide a valid email address.");
+      toast.error(emailValidation.error || "Invalid email address.");
       return;
     }
 
-    const phoneDigits = cleanPhone.replace(/[^0-9]/g, "");
-    if (phoneDigits.length < 10) {
-      setErrorMsg("Please provide a valid 10-digit phone or mobile number.");
-      toast.error("Invalid phone number.");
+    const mobileValidation = validateIndianMobile(cleanPhone);
+    if (!mobileValidation.valid) {
+      setErrorMsg(mobileValidation.error || "Please provide a valid 10-digit mobile number.");
+      toast.error(mobileValidation.error || "Invalid mobile number.");
       return;
     }
 
@@ -486,14 +491,22 @@ export function ContactUsPage() {
                           <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-1.5">
                             Mobile / WhatsApp <span className="text-[#E67230]">*</span>
                           </label>
-                          <input
-                            type="tel"
-                            required
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            placeholder="e.g. +91 98765 43210"
-                            className="w-full rounded-xl border border-[#D5D0C6] bg-white px-4 py-2.5 text-sm text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-2 focus:ring-[#E67230]/20 focus:outline-none transition-all"
-                          />
+                          <div className="relative">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-xs font-bold text-[#777777] select-none pointer-events-none">
+                              +91
+                            </span>
+                            <input
+                              type="tel"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              maxLength={10}
+                              required
+                              value={phone}
+                              onChange={(e) => setPhone(sanitizeMobileInput(e.target.value))}
+                              placeholder="98765 43210"
+                              className="w-full rounded-xl border border-[#D5D0C6] bg-white pl-12 pr-4 py-2.5 text-sm font-mono text-[#111111] placeholder:text-[#999999] focus:border-[#E67230] focus:ring-2 focus:ring-[#E67230]/20 focus:outline-none transition-all"
+                            />
+                          </div>
                         </div>
                       </div>
 

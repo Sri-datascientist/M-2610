@@ -32,6 +32,11 @@ import { seo } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/services/apiClient";
 import { setStoredToken, setStoredUser } from "@/lib/api";
+import {
+  sanitizeMobileInput,
+  validateIndianMobile,
+  validateAuthenticEmail,
+} from "@/lib/validation";
 
 export const Route = createFileRoute("/register")({
   head: () =>
@@ -254,8 +259,11 @@ export function Register() {
   /*                         EMAIL OTP HANDLERS                               */
   /* ------------------------------------------------------------------------ */
   const handleSendEmailOtp = async () => {
-    if (!email.includes("@")) {
-      setErrorMessage("Please enter a valid email address.");
+    const emailVal = validateAuthenticEmail(email);
+    if (!emailVal.valid) {
+      const msg = emailVal.error || "Please enter a valid email address.";
+      setErrorMessage(msg);
+      toast.error(msg);
       return;
     }
     setErrorMessage(null);
@@ -269,7 +277,7 @@ export function Register() {
         demo_otp?: string | null;
         expires_in?: number;
       }>("/auth/send-email-otp", {
-        email: email.trim().toLowerCase(),
+        email: emailVal.cleanEmail,
       });
 
       setEmailOtpSent(true);
@@ -331,12 +339,14 @@ export function Register() {
   /*                        MOBILE OTP HANDLERS                               */
   /* ------------------------------------------------------------------------ */
   const handleSendMobileOtp = async () => {
-    const cleaned = mobile.replace(/\D/g, "");
-    if (cleaned.length < 10) {
-      setErrorMessage("Please enter a valid 10-digit Indian mobile number.");
+    const mobileVal = validateIndianMobile(mobile);
+    if (!mobileVal.valid) {
+      const msg = mobileVal.error || "Please enter a valid 10-digit Indian mobile number.";
+      setErrorMessage(msg);
+      toast.error(msg);
       return;
     }
-    const finalMobile = cleaned.slice(-10);
+    const finalMobile = mobileVal.cleanDigits;
     setErrorMessage(null);
     setMobileSending(true);
 

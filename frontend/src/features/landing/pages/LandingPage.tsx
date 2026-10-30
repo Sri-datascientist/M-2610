@@ -53,6 +53,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import { apiClient } from "@/services/apiClient";
 import { setStoredToken } from "@/lib/api";
+import { validateIndianMobile, validateAuthenticEmail } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -3369,341 +3370,322 @@ const CORE_VAIDYA_SERVICES: CoreVaidyaService[] = [
   },
 ];
 
-type SlotPosition = "top" | "right" | "bottom" | "left";
-
-const SLOT_COORDINATES: Record<SlotPosition, (r: number) => { x: number; y: number }> = {
-  top: (r) => ({ x: 0, y: -r }),
-  right: (r) => ({ x: r, y: 0 }),
-  bottom: (r) => ({ x: 0, y: r }),
-  left: (r) => ({ x: -r, y: 0 }),
-};
-
-// Position mapping for clockwise rotation and interchange:
-// Step 0: 01 Supply Chain at TOP, 02 Virtual Clinic at RIGHT, 03 Package Service at BOTTOM, 04 Practitioners Forum at LEFT
-// Step 1: 02 Virtual Clinic comes to TOP, 01 Supply Chain moves to RIGHT (interchanging), 04 Practitioners Forum at BOTTOM, 03 Package Service at LEFT
-// Step 2: 03 Package Service comes to TOP, 02 Virtual Clinic at RIGHT, 01 Supply Chain at BOTTOM, 04 Practitioners Forum at LEFT
-// Step 3: 04 Practitioners Forum comes to TOP, 03 Package Service at RIGHT, 02 Virtual Clinic at BOTTOM, 01 Supply Chain at LEFT
-const STEP_POSITIONS: Record<number, Record<number, SlotPosition>> = {
-  0: { 0: "top", 1: "right", 2: "bottom", 3: "left" },
-  1: { 1: "top", 0: "right", 3: "bottom", 2: "left" },
-  2: { 2: "top", 1: "right", 0: "bottom", 3: "left" },
-  3: { 3: "top", 2: "right", 1: "bottom", 0: "left" },
-};
-
 export function CoreVaidyaSection() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [activeStep, setActiveStep] = useState(0);
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
-  const [radius, setRadius] = useState(175);
+  const [selectedId, setSelectedId] = useState<string>("supply-chain");
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const checkMedia = () => {
-      setIsDesktop(window.innerWidth >= 768);
-      setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-      setRadius(window.innerWidth >= 1024 ? 186 : 166);
-    };
-    checkMedia();
-    window.addEventListener("resize", checkMedia);
-    return () => window.removeEventListener("resize", checkMedia);
-  }, []);
-
-  useEffect(() => {
-    if (!isDesktop || reducedMotion) return;
-
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          if (!containerRef.current) {
-            ticking = false;
-            return;
-          }
-          const rect = containerRef.current.getBoundingClientRect();
-          const totalDistance = containerRef.current.offsetHeight - window.innerHeight;
-          if (totalDistance > 0) {
-            const current = -rect.top;
-            const progress = Math.max(0, Math.min(1, current / totalDistance));
-            const step = Math.min(3, Math.max(0, Math.floor(progress * 4)));
-            setActiveStep(step);
-          }
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isDesktop, reducedMotion]);
-
-  const scrollToStep = (stepIndex: number) => {
-    setActiveStep(stepIndex);
-    if (!containerRef.current || !isDesktop || reducedMotion) return;
-
-    const totalDistance = containerRef.current.offsetHeight - window.innerHeight;
-    if (totalDistance <= 0) return;
-
-    const rect = containerRef.current.getBoundingClientRect();
-    const currentScrollY = window.scrollY || window.pageYOffset;
-    const containerTopY = currentScrollY + rect.top;
-    const targetFraction = (stepIndex + 0.5) / 4;
-    const targetY = containerTopY + targetFraction * totalDistance;
-
-    window.scrollTo({
-      top: targetY,
-      behavior: "smooth",
-    });
-  };
-
-  const activeService = CORE_VAIDYA_SERVICES[activeStep] ?? CORE_VAIDYA_SERVICES[0]!;
+  const activeId = hoveredId || selectedId;
+  const activeService =
+    CORE_VAIDYA_SERVICES.find((s) => s.id === activeId) ?? CORE_VAIDYA_SERVICES[0]!;
 
   return (
     <section
-      ref={containerRef}
       id="core-vaidya"
       aria-labelledby="core-vaidya-title"
-      className={
-        isDesktop && !reducedMotion
-          ? "relative h-[320vh] border-b border-[#EBE7DF] bg-[#FAF9F6]"
-          : "relative border-b border-[#EBE7DF] bg-[#FAF9F6] py-14 sm:py-16"
-      }
+      className="scroll-mt-20 border-b border-[#EBE7DF] bg-[#FAF9F6] relative overflow-hidden py-14 sm:py-16 lg:py-20"
     >
+      {/* Subtle background ambient radial gradient */}
       <div
-        className={
-          isDesktop && !reducedMotion
-            ? "sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden"
-            : "w-full"
-        }
-      >
-        {/* Subtle background ambient radial gradient */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply"
-          style={{
-            background:
-              "radial-gradient(ellipse 70% 60% at 30% 50%, rgba(230, 114, 48, 0.08) 0%, rgba(250, 249, 246, 0) 70%)",
-          }}
-        />
+        className="pointer-events-none absolute inset-0 opacity-40 mix-blend-multiply"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 60% at 30% 50%, rgba(230, 114, 48, 0.08) 0%, rgba(250, 249, 246, 0) 70%)",
+        }}
+      />
 
-        <div className="relative mx-auto w-full max-w-[1320px] px-5 sm:px-8 lg:px-12">
-          {/* ================================================================= */}
-          {/* DESKTOP & TABLET: Left-hand Bigger Radial Circles + Right-hand Details */}
-          {/* ================================================================= */}
-          <div className="hidden md:grid md:grid-cols-12 gap-8 lg:gap-14 items-center">
-            {/* LEFT COLUMN (Col 1 to 7): Bigger Circular Elements Diagram */}
-            <div className="md:col-span-7 lg:col-span-7 flex justify-center items-center py-4">
-              <div className="relative w-[480px] h-[480px] lg:w-[530px] lg:h-[530px] flex items-center justify-center">
-                {/* Outer Decorative Dashed Orbit Ring - Rotates Clockwise on Scroll */}
-                <div
-                  className="absolute inset-[36px] lg:inset-[40px] rounded-full border border-dashed border-[#E67230]/40 pointer-events-none"
-                  style={{
-                    transform: `rotate(${activeStep * 90}deg)`,
-                    transition: "transform 0.7s cubic-bezier(0.34, 1.25, 0.64, 1)",
-                  }}
-                  aria-hidden="true"
-                />
+      <div className="relative mx-auto w-full max-w-[1320px] px-5 sm:px-8 lg:px-12">
+        {/* ================================================================= */}
+        {/* DESKTOP & TABLET: Left-hand Bigger Radial Circles + Right-hand Details */}
+        {/* ================================================================= */}
+        <div className="hidden md:grid md:grid-cols-12 gap-8 lg:gap-14 items-center">
+          {/* LEFT COLUMN (Col 1 to 7): Bigger Circular Elements Diagram */}
+          <div className="md:col-span-7 lg:col-span-7 flex justify-center items-center py-4">
+            <div className="relative w-[480px] h-[480px] lg:w-[530px] lg:h-[530px] flex items-center justify-center">
+              {/* Outer Decorative Dashed Orbit Ring */}
+              <div
+                className="absolute inset-[36px] lg:inset-[40px] rounded-full border border-dashed border-[#E67230]/35 pointer-events-none animate-[spin_120s_linear_infinite]"
+                aria-hidden="true"
+              />
 
-                {/* Inner Subtle Guide Orbit Ring */}
-                <div
-                  className="absolute inset-[78px] lg:inset-[86px] rounded-full border border-[#EBE7DF] pointer-events-none"
-                  aria-hidden="true"
-                />
+              {/* Inner Subtle Guide Orbit Ring */}
+              <div
+                className="absolute inset-[78px] lg:inset-[86px] rounded-full border border-[#EBE7DF] pointer-events-none"
+                aria-hidden="true"
+              />
 
-                {/* Central Meyveda Logo Hub */}
-                <div className="relative z-20 flex flex-col items-center justify-center size-[116px] lg:size-[128px] rounded-full bg-white shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-[#EBE7DF] p-3.5 transition-transform duration-300 hover:scale-105">
-                  <img
-                    src={justMeyvedDownLogo}
-                    alt="Meyveda Logo"
-                    className="max-h-[68px] max-w-[82px] w-auto h-auto object-contain select-none"
-                  />
-                  <span className="sr-only">Meyveda Ecosystem Core</span>
-                </div>
-
-                {/* 4 Interactive Orange-Gradient Circles - Clockwise Rotating Position Array */}
-                {CORE_VAIDYA_SERVICES.map((service, index) => {
-                  const slot = STEP_POSITIONS[activeStep]?.[index] ?? "top";
-                  const { x, y } = SLOT_COORDINATES[slot](radius);
-                  const isCurrent = activeStep === index;
-
-                  return (
-                    <button
-                      key={service.id}
-                      type="button"
-                      id={`core-vaidya-circle-${service.id}`}
-                      aria-label={`View details for ${service.title}`}
-                      aria-pressed={isCurrent}
-                      onClick={() => scrollToStep(index)}
-                      className={`absolute top-1/2 left-1/2 z-30 size-[148px] lg:size-[168px] rounded-full p-3.5 flex flex-col items-center justify-center text-center cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-[#E67230] focus-visible:ring-offset-2 ${
-                        isCurrent
-                          ? "z-40 border-[2.5px] border-white ring-4 ring-[#E67230]/35 shadow-xl"
-                          : "border border-white/50 opacity-95 hover:opacity-100 hover:border-white"
-                      }`}
-                      style={{
-                        transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${isCurrent ? 1.08 : 0.98})`,
-                        transition:
-                          "transform 0.7s cubic-bezier(0.34, 1.25, 0.64, 1), box-shadow 0.4s ease, border-color 0.4s ease, opacity 0.3s ease",
-                        background: isCurrent
-                          ? "linear-gradient(135deg, #F98F4B 0%, #E67230 50%, #C95618 100%)"
-                          : "linear-gradient(135deg, #F37E38 0%, #E67230 100%)",
-                        boxShadow: isCurrent
-                          ? service.subtleGlow
-                          : "0 8px 24px -4px rgba(230, 114, 48, 0.28)",
-                      }}
-                    >
-                      <span className="text-white font-extrabold text-[13.5px] lg:text-[15px] leading-[1.22] tracking-tight drop-shadow-xs select-none px-2 pointer-events-none">
-                        {service.title}
-                      </span>
-                      {isCurrent && (
-                        <span className="mt-1 text-[10px] font-semibold tracking-wider uppercase text-white/90 bg-black/15 px-2 py-0.5 rounded-full pointer-events-none">
-                          Active
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* RIGHT COLUMN (Col 8 to 12): Section Title & Description on Right-Hand Side */}
-            <div className="md:col-span-5 lg:col-span-5 flex flex-col justify-center">
-              {/* Section Eyebrow, Main Heading & Subtitle */}
-              <div className="mb-6 lg:mb-8 text-left">
-                <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230]">
-                  MEMBER SERVICES · FOR MEMBER PRACTITIONERS
-                </p>
-                <h2
-                  id="core-vaidya-title"
-                  className="mt-2 text-3xl sm:text-4xl lg:text-[40px] font-extrabold tracking-tight text-[#111111] leading-[1.18]"
-                >
-                  Core Vaidya
-                </h2>
-                <p className="mt-3 text-base sm:text-lg text-[#555555] leading-relaxed">
-                  Connected care, coordinated supplies and a community of peers around your practice.
-                </p>
-              </div>
-
-              {/* Interactive Selected Service Detail Card */}
-              <div className="rounded-2xl border border-[#EBE7DF] bg-white p-7 lg:p-8 shadow-sm transition-all duration-300 min-h-[220px] flex flex-col justify-center">
-                {/* Card Meta Tag */}
-                <div className="flex items-center gap-2.5 mb-3.5">
-                  <span className="flex size-7 items-center justify-center rounded-full bg-[#E67230]/10 text-xs font-bold text-[#E67230]">
-                    {activeService.number}
-                  </span>
-                  <span className="text-xs font-bold tracking-wider uppercase text-[#E67230]">
-                    Connected Service
-                  </span>
-                </div>
-
-                {/* Title */}
-                <h3
-                  key={`title-${activeService.id}`}
-                  className="text-2xl lg:text-[24px] font-bold tracking-tight text-[#111111] transition-all duration-200"
-                >
-                  {activeService.title}
-                </h3>
-
-                {/* Description */}
-                <p
-                  key={`desc-${activeService.id}`}
-                  className="mt-3.5 text-base sm:text-[16px] leading-relaxed text-[#555555] transition-all duration-200"
-                >
-                  {activeService.description}
-                </p>
-              </div>
-
-              {/* Quick-switch indicator pills & scroll guide */}
-              <div className="mt-5 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {CORE_VAIDYA_SERVICES.map((s, idx) => (
-                    <button
-                      key={s.id}
-                      type="button"
-                      aria-label={`Select ${s.title}`}
-                      onClick={() => scrollToStep(idx)}
-                      className={`h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                        activeStep === idx
-                          ? "w-9 bg-[#E67230]"
-                          : "w-2.5 bg-[#EBE7DF] hover:bg-[#E67230]/50"
-                      }`}
-                    />
-                  ))}
-                  <span className="ml-2 text-xs font-semibold text-[#888888] tabular-nums">
-                    0{activeStep + 1} / 04
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-1.5 text-xs text-[#888888]">
-                  <RotateCw className="size-3.5 text-[#E67230] animate-[spin_10s_linear_infinite]" />
-                  <span>Scroll rotates clockwise</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ================================================================= */}
-          {/* MOBILE LAYOUT (< md): Compact Connected Radial & Card Flow        */}
-          {/* ================================================================= */}
-          <div className="block md:hidden py-4">
-            {/* Central Logo in compact connected layout */}
-            <div className="flex justify-center mb-5">
-              <div className="flex flex-col items-center justify-center size-[88px] rounded-full bg-white shadow-md border border-[#EBE7DF] p-2.5">
+              {/* Central Meyveda Logo Hub */}
+              <div className="relative z-20 flex flex-col items-center justify-center size-[116px] lg:size-[128px] rounded-full bg-white shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-[#EBE7DF] p-3.5 transition-transform duration-300 hover:scale-105">
                 <img
                   src={justMeyvedDownLogo}
                   alt="Meyveda Logo"
-                  className="max-h-[48px] max-w-[60px] w-auto h-auto object-contain select-none"
+                  className="max-h-[68px] max-w-[82px] w-auto h-auto object-contain select-none"
                 />
+                <span className="sr-only">Meyveda Ecosystem Core</span>
               </div>
-            </div>
 
-            {/* 4 Interactive Circles in 2x2 Connected Grid */}
-            <div className="grid grid-cols-2 gap-3 max-w-[340px] mx-auto mb-5">
-              {CORE_VAIDYA_SERVICES.map((service, idx) => {
-                const isCurrent = activeStep === idx;
+              {/* 4 Interactive Orange-Gradient Circles - Bigger Scale */}
+              {/* 1. TOP: Supply Chain Management */}
+              {(() => {
+                const service = CORE_VAIDYA_SERVICES[0]!;
+                const isCurrent = activeId === service.id;
                 return (
                   <button
-                    key={service.id}
                     type="button"
-                    id={`core-vaidya-mobile-circle-${service.id}`}
-                    aria-pressed={isCurrent}
-                    onClick={() => setActiveStep(idx)}
-                    className={`aspect-square rounded-full p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#E67230] ${
+                    id={`core-vaidya-circle-${service.id}`}
+                    aria-label={`View details for ${service.title}`}
+                    aria-pressed={selectedId === service.id}
+                    onClick={() => setSelectedId(service.id)}
+                    onMouseEnter={() => setHoveredId(service.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                    onFocus={() => setSelectedId(service.id)}
+                    className={`absolute top-0 left-1/2 -translate-x-1/2 z-30 size-[152px] lg:size-[170px] rounded-full p-3.5 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-[#E67230] focus-visible:ring-offset-2 ${
                       isCurrent
-                        ? "scale-105 border-2 border-white ring-2 ring-[#E67230]"
-                        : "border border-white/40 opacity-90"
+                        ? "scale-106 z-40 border-[2.5px] border-white ring-4 ring-[#E67230]/35 shadow-xl"
+                        : "scale-100 hover:scale-104 border border-white/50 opacity-95 hover:opacity-100"
                     }`}
                     style={{
                       background: isCurrent
                         ? "linear-gradient(135deg, #F98F4B 0%, #E67230 50%, #C95618 100%)"
                         : "linear-gradient(135deg, #F37E38 0%, #E67230 100%)",
-                      boxShadow: isCurrent ? service.subtleGlow : "0 4px 14px rgba(230, 114, 48, 0.25)",
+                      boxShadow: isCurrent ? service.subtleGlow : "0 8px 24px -4px rgba(230, 114, 48, 0.28)",
                     }}
                   >
-                    <span className="text-white font-extrabold text-[12px] leading-[1.2] tracking-tight drop-shadow-xs select-none">
+                    <span className="text-white font-extrabold text-[14px] lg:text-[15.5px] leading-[1.22] tracking-tight drop-shadow-xs select-none px-2">
                       {service.title}
                     </span>
                   </button>
                 );
-              })}
+              })()}
+
+              {/* 2. RIGHT: Virtual Clinic */}
+              {(() => {
+                const service = CORE_VAIDYA_SERVICES[1]!;
+                const isCurrent = activeId === service.id;
+                return (
+                  <button
+                    type="button"
+                    id={`core-vaidya-circle-${service.id}`}
+                    aria-label={`View details for ${service.title}`}
+                    aria-pressed={selectedId === service.id}
+                    onClick={() => setSelectedId(service.id)}
+                    onMouseEnter={() => setHoveredId(service.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                    onFocus={() => setSelectedId(service.id)}
+                    className={`absolute top-1/2 right-0 -translate-y-1/2 z-30 size-[152px] lg:size-[170px] rounded-full p-3.5 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-[#E67230] focus-visible:ring-offset-2 ${
+                      isCurrent
+                        ? "scale-106 z-40 border-[2.5px] border-white ring-4 ring-[#E67230]/35 shadow-xl"
+                        : "scale-100 hover:scale-104 border border-white/50 opacity-95 hover:opacity-100"
+                    }`}
+                    style={{
+                      background: isCurrent
+                        ? "linear-gradient(135deg, #E67230 0%, #D45E1D 50%, #B84E14 100%)"
+                        : "linear-gradient(135deg, #E67230 0%, #C8561A 100%)",
+                      boxShadow: isCurrent ? service.subtleGlow : "0 8px 24px -4px rgba(216, 100, 35, 0.28)",
+                    }}
+                  >
+                    <span className="text-white font-extrabold text-[14px] lg:text-[15.5px] leading-[1.22] tracking-tight drop-shadow-xs select-none px-2">
+                      {service.title}
+                    </span>
+                  </button>
+                );
+              })()}
+
+              {/* 3. BOTTOM: Package Service Management */}
+              {(() => {
+                const service = CORE_VAIDYA_SERVICES[2]!;
+                const isCurrent = activeId === service.id;
+                return (
+                  <button
+                    type="button"
+                    id={`core-vaidya-circle-${service.id}`}
+                    aria-label={`View details for ${service.title}`}
+                    aria-pressed={selectedId === service.id}
+                    onClick={() => setSelectedId(service.id)}
+                    onMouseEnter={() => setHoveredId(service.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                    onFocus={() => setSelectedId(service.id)}
+                    className={`absolute bottom-0 left-1/2 -translate-x-1/2 z-30 size-[152px] lg:size-[170px] rounded-full p-3.5 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-[#E67230] focus-visible:ring-offset-2 ${
+                      isCurrent
+                        ? "scale-106 z-40 border-[2.5px] border-white ring-4 ring-[#E67230]/35 shadow-xl"
+                        : "scale-100 hover:scale-104 border border-white/50 opacity-95 hover:opacity-100"
+                    }`}
+                    style={{
+                      background: isCurrent
+                        ? "linear-gradient(135deg, #DD6724 0%, #BE561A 50%, #9F400F 100%)"
+                        : "linear-gradient(135deg, #CC5B1C 0%, #AE4E18 100%)",
+                      boxShadow: isCurrent ? service.subtleGlow : "0 8px 24px -4px rgba(190, 86, 26, 0.28)",
+                    }}
+                  >
+                    <span className="text-white font-extrabold text-[14px] lg:text-[15.5px] leading-[1.22] tracking-tight drop-shadow-xs select-none px-2">
+                      {service.title}
+                    </span>
+                  </button>
+                );
+              })()}
+
+              {/* 4. LEFT: Practitioners Forum & Co-practice */}
+              {(() => {
+                const service = CORE_VAIDYA_SERVICES[3]!;
+                const isCurrent = activeId === service.id;
+                return (
+                  <button
+                    type="button"
+                    id={`core-vaidya-circle-${service.id}`}
+                    aria-label={`View details for ${service.title}`}
+                    aria-pressed={selectedId === service.id}
+                    onClick={() => setSelectedId(service.id)}
+                    onMouseEnter={() => setHoveredId(service.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                    onFocus={() => setSelectedId(service.id)}
+                    className={`absolute top-1/2 left-0 -translate-y-1/2 z-30 size-[152px] lg:size-[170px] rounded-full p-3.5 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-[#E67230] focus-visible:ring-offset-2 ${
+                      isCurrent
+                        ? "scale-106 z-40 border-[2.5px] border-white ring-4 ring-[#E67230]/35 shadow-xl"
+                        : "scale-100 hover:scale-104 border border-white/50 opacity-95 hover:opacity-100"
+                    }`}
+                    style={{
+                      background: isCurrent
+                        ? "linear-gradient(135deg, #F37B32 0%, #D86221 50%, #A84915 100%)"
+                        : "linear-gradient(135deg, #E67230 0%, #AE4E18 100%)",
+                      boxShadow: isCurrent ? service.subtleGlow : "0 8px 24px -4px rgba(174, 78, 24, 0.28)",
+                    }}
+                  >
+                    <span className="text-white font-extrabold text-[14px] lg:text-[15.5px] leading-[1.22] tracking-tight drop-shadow-xs select-none px-2">
+                      {service.title}
+                    </span>
+                  </button>
+                );
+              })()}
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN (Col 8 to 12): Section Title & Description on Right-Hand Side */}
+          <div className="md:col-span-5 lg:col-span-5 flex flex-col justify-center">
+            {/* Section Eyebrow, Main Heading & Subtitle */}
+            <div className="mb-6 lg:mb-8 text-left">
+              <p className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#E67230]">
+                MEMBER SERVICES · FOR MEMBER PRACTITIONERS
+              </p>
+              <h2
+                id="core-vaidya-title"
+                className="mt-2 text-3xl sm:text-4xl lg:text-[40px] font-extrabold tracking-tight text-[#111111] leading-[1.18]"
+              >
+                Core Vaidya
+              </h2>
+              <p className="mt-3 text-base sm:text-lg text-[#555555] leading-relaxed">
+                Connected care, coordinated supplies and a community of peers around your practice.
+              </p>
             </div>
 
-            {/* Active Description Card for Mobile */}
-            <div className="rounded-2xl border border-[#EBE7DF] bg-white p-4.5 shadow-sm max-w-[400px] mx-auto">
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="flex size-5.5 items-center justify-center rounded-full bg-[#E67230]/10 text-xs font-bold text-[#E67230]">
+            {/* Interactive Selected Service Detail Card */}
+            <div className="rounded-2xl border border-[#EBE7DF] bg-white p-7 lg:p-8 shadow-sm transition-all duration-300">
+              {/* Card Meta Tag */}
+              <div className="flex items-center gap-2.5 mb-4">
+                <span className="flex size-7 items-center justify-center rounded-full bg-[#E67230]/10 text-xs font-bold text-[#E67230]">
                   {activeService.number}
                 </span>
-                <span className="text-[10.5px] font-bold tracking-wider uppercase text-[#E67230]">
-                  Selected Service
+                <span className="text-xs font-bold tracking-wider uppercase text-[#E67230]">
+                  Connected Service
                 </span>
               </div>
-              <h3 className="text-base font-bold text-[#111111]">
+
+              {/* Title */}
+              <h3
+                key={`title-${activeService.id}`}
+                className="text-2xl lg:text-[24px] font-bold tracking-tight text-[#111111] transition-all duration-200"
+              >
                 {activeService.title}
               </h3>
-              <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#555555]">
+
+              {/* Description */}
+              <p
+                key={`desc-${activeService.id}`}
+                className="mt-3.5 text-base sm:text-[16px] leading-relaxed text-[#555555] transition-all duration-200"
+              >
                 {activeService.description}
               </p>
             </div>
+
+            {/* Quick-switch indicator pills below card */}
+            <div className="mt-4 flex items-center gap-2 justify-start">
+              {CORE_VAIDYA_SERVICES.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  aria-label={`Select ${s.title}`}
+                  onClick={() => setSelectedId(s.id)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    activeId === s.id
+                      ? "w-8 bg-[#E67230]"
+                      : "w-2.5 bg-[#EBE7DF] hover:bg-[#E67230]/50"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ================================================================= */}
+        {/* MOBILE LAYOUT (< md): Compact Connected Radial & Card Flow        */}
+        {/* ================================================================= */}
+        <div className="block md:hidden py-4">
+          {/* Central Logo in compact connected layout */}
+          <div className="flex justify-center mb-5">
+            <div className="flex flex-col items-center justify-center size-[88px] rounded-full bg-white shadow-md border border-[#EBE7DF] p-2.5">
+              <img
+                src={justMeyvedDownLogo}
+                alt="Meyveda Logo"
+                className="max-h-[48px] max-w-[60px] w-auto h-auto object-contain select-none"
+              />
+            </div>
+          </div>
+
+          {/* 4 Interactive Circles in 2x2 Connected Grid */}
+          <div className="grid grid-cols-2 gap-3 max-w-[340px] mx-auto mb-5">
+            {CORE_VAIDYA_SERVICES.map((service) => {
+              const isCurrent = activeId === service.id;
+              return (
+                <button
+                  key={service.id}
+                  type="button"
+                  id={`core-vaidya-mobile-circle-${service.id}`}
+                  aria-pressed={selectedId === service.id}
+                  onClick={() => setSelectedId(service.id)}
+                  className={`aspect-square rounded-full p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#E67230] ${
+                    isCurrent
+                      ? "scale-105 border-2 border-white ring-2 ring-[#E67230]"
+                      : "border border-white/40 opacity-90"
+                  }`}
+                  style={{
+                    background: isCurrent
+                      ? "linear-gradient(135deg, #F98F4B 0%, #E67230 50%, #C95618 100%)"
+                      : "linear-gradient(135deg, #F37E38 0%, #E67230 100%)",
+                    boxShadow: isCurrent ? service.subtleGlow : "0 4px 14px rgba(230, 114, 48, 0.25)",
+                  }}
+                >
+                  <span className="text-white font-extrabold text-[12px] leading-[1.2] tracking-tight drop-shadow-xs select-none">
+                    {service.title}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Active Description Card for Mobile */}
+          <div className="rounded-2xl border border-[#EBE7DF] bg-white p-4.5 shadow-sm max-w-[400px] mx-auto">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="flex size-5.5 items-center justify-center rounded-full bg-[#E67230]/10 text-xs font-bold text-[#E67230]">
+                {activeService.number}
+              </span>
+              <span className="text-[10.5px] font-bold tracking-wider uppercase text-[#E67230]">
+                Selected Service
+              </span>
+            </div>
+            <h3 className="text-base font-bold text-[#111111]">
+              {activeService.title}
+            </h3>
+            <p className="mt-1.5 text-xs sm:text-sm leading-relaxed text-[#555555]">
+              {activeService.description}
+            </p>
           </div>
         </div>
       </div>
@@ -4538,11 +4520,12 @@ export function MeyvedaDoctorsPage() {
 
   // 1. Send Email OTP
   const handleSendEmailOtp = async () => {
-    const trimmedEmail = doctorEmail.trim().toLowerCase();
-    if (!trimmedEmail || !trimmedEmail.includes("@") || !trimmedEmail.includes(".")) {
-      toast.error("Please enter a valid email address.");
+    const emailVal = validateAuthenticEmail(doctorEmail);
+    if (!emailVal.valid) {
+      toast.error(emailVal.error || "Please enter a valid email address.");
       return;
     }
+    const trimmedEmail = emailVal.cleanEmail;
     setEmailSending(true);
 
     try {
@@ -4617,12 +4600,12 @@ export function MeyvedaDoctorsPage() {
 
   // 3. Send Mobile OTP
   const handleSendMobileOtp = async () => {
-    const cleaned = doctorPhone.replace(/\D/g, "");
-    if (cleaned.length < 10) {
-      toast.error("Please enter a valid 10-digit mobile number.");
+    const mobileVal = validateIndianMobile(doctorPhone);
+    if (!mobileVal.valid) {
+      toast.error(mobileVal.error || "Please enter a valid 10-digit Indian mobile number.");
       return;
     }
-    const finalMobile = cleaned.slice(-10);
+    const finalMobile = mobileVal.cleanDigits;
     setMobileSending(true);
 
     try {

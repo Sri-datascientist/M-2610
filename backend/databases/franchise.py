@@ -143,22 +143,56 @@ def submit_franchise_enquiry(
             detail="PIN code incorrect.",
         )
 
-    # Validate phone
+    # Validate phone (Indian 10-digit mobile)
     clean_mobile = payload.mobile.strip()
     digits_only = re.sub(r"\D", "", clean_mobile)
-    if len(digits_only) < 10:
+    if len(digits_only) == 12 and digits_only.startswith("91"):
+        digits_only = digits_only[2:]
+    elif len(digits_only) == 11 and digits_only.startswith("0"):
+        digits_only = digits_only[1:]
+
+    if len(digits_only) != 10:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Please provide a valid 10-digit mobile number.",
+            detail=f"Mobile number must be exactly 10 digits (received {len(digits_only)} digits).",
         )
+    if digits_only[0] not in "6789":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Indian mobile numbers must start with 6, 7, 8, or 9.",
+        )
+    if len(set(digits_only)) == 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mobile number cannot consist of identical repeated digits.",
+        )
+    formatted_mobile = f"+91 {digits_only[:5]} {digits_only[5:]}"
+
+    # Validate email if provided
+    clean_email_val = payload.email.strip().lower() if payload.email and payload.email.strip() else None
+    if clean_email_val:
+        if not re.match(r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", clean_email_val):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Please provide a valid email address.",
+            )
+        parts = clean_email_val.split("@")
+        if len(parts) == 2:
+            local_p, domain_p = parts
+            alpha_c = "".join([c for c in local_p if c.isalpha()])
+            if len(alpha_c) >= 5 and sum(1 for c in alpha_c if c in "aeiouy") == 0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Please provide a valid, deliverable email address.",
+                )
 
     # Create record
     enquiry_id = f"FR-ENQ-{uuid.uuid4().hex[:8].upper()}"
     record = FranchiseEnquiry(
         id=enquiry_id,
         full_name=payload.full_name.strip(),
-        mobile=clean_mobile,
-        email=payload.email.strip() if payload.email and payload.email.strip() else None,
+        mobile=formatted_mobile,
+        email=clean_email_val,
         territory_pincode=clean_pin,
         interested_tier=payload.interested_tier.strip(),
         message=payload.message.strip() if payload.message and payload.message.strip() else None,

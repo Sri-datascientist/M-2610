@@ -34,6 +34,11 @@ import meyvedaLogo from "@/assets/meyvedalogo.png";
 import { apiClient } from "@/services/apiClient";
 import { copyToClipboard } from "@/lib/clipboard";
 import { seo } from "@/lib/seo";
+import {
+  sanitizeMobileInput,
+  validateIndianMobile,
+  validateAuthenticEmail,
+} from "@/lib/validation";
 
 export type FranchiseTier =
   | "State Cluster Head"
@@ -181,22 +186,22 @@ export function ClusterFranchisePage() {
     const errors: typeof formErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const pinRegex = /^[1-9][0-9]{5}$/;
-    const phoneDigits = mobile.replace(/\D/g, "");
-
     if (!fullName.trim()) {
       errors.fullName = "Full name is required.";
     } else if (fullName.trim().length < 2) {
       errors.fullName = "Please enter your full name.";
     }
 
-    if (!mobile.trim()) {
-      errors.mobile = "Mobile number is required.";
-    } else if (phoneDigits.length < 10) {
-      errors.mobile = "Please enter a valid 10-digit mobile number.";
+    const mobileVal = validateIndianMobile(mobile);
+    if (!mobileVal.valid) {
+      errors.mobile = mobileVal.error;
     }
 
-    if (email.trim() && !emailRegex.test(email.trim())) {
-      errors.email = "Please enter a valid email address.";
+    if (email.trim()) {
+      const emailVal = validateAuthenticEmail(email.trim());
+      if (!emailVal.valid) {
+        errors.email = emailVal.error;
+      }
     }
 
     if (!territoryPincode.trim()) {
@@ -1213,18 +1218,27 @@ Timestamp: ${d.timestamp}`;
                     <label htmlFor={mobileInputId} className="block font-semibold text-[#111111]">
                       Mobile <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      id={mobileInputId}
-                      type="tel"
-                      required
-                      value={mobile}
-                      onChange={(e) => {
-                        setMobile(e.target.value);
-                        if (formErrors.mobile) setFormErrors((p) => ({ ...p, mobile: undefined }));
-                      }}
-                      placeholder="e.g. 9876543210"
-                      className="w-full h-11 sm:h-12 rounded-lg border border-[#EBE7DF] bg-[#FAF9F6]/40 px-3.5 text-[#111111] placeholder:text-[#999999] focus:bg-white focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-all"
-                    />
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-xs font-bold text-[#777777] select-none pointer-events-none">
+                        +91
+                      </span>
+                      <input
+                        id={mobileInputId}
+                        type="tel"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={10}
+                        required
+                        value={mobile}
+                        onChange={(e) => {
+                          const val = sanitizeMobileInput(e.target.value);
+                          setMobile(val);
+                          if (formErrors.mobile) setFormErrors((p) => ({ ...p, mobile: undefined }));
+                        }}
+                        placeholder="98765 43210"
+                        className="w-full h-11 sm:h-12 rounded-lg border border-[#EBE7DF] bg-[#FAF9F6]/40 pl-12 pr-3.5 font-mono text-[#111111] placeholder:text-[#999999] focus:bg-white focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-all"
+                      />
+                    </div>
                     {formErrors.mobile && (
                       <p className="text-xs text-red-600 font-medium">{formErrors.mobile}</p>
                     )}

@@ -1,4 +1,5 @@
 from datetime import datetime
+import re
 from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.security import HTTPAuthorizationCredentials
@@ -155,6 +156,120 @@ def _build_referral_record(
     )
 
 
+DISPOSABLE_OR_FAKE_DOMAINS = {
+    "fake.com",
+    "test.com",
+    "dummy.com",
+    "sample.com",
+    "invalid.com",
+    "tempmail.com",
+    "mailinator.com",
+    "throwawaymail.com",
+    "guerrillamail.com",
+    "sharklasers.com",
+    "yopmail.com",
+    "10minutemail.com",
+    "trashmail.com",
+    "dispostable.com",
+    "getairmail.com",
+    "mohmal.com",
+    "burnermail.io",
+    "nada.ltd",
+}
+
+EMAIL_RFC_PATTERN = re.compile(
+    r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$"
+)
+CONSONANT_RUN_PATTERN = re.compile(r"[bcdfghjklmnpqrstvwxz]{6,}", re.IGNORECASE)
+REPEATED_CHAR_PATTERN = re.compile(r"(.)\1{3,}")
+
+
+def validate_referral_email(raw_email: str) -> str:
+    clean = (raw_email or "").strip().lower()
+    if not clean:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Colleague's email address is required",
+        )
+    if not EMAIL_RFC_PATTERN.match(clean):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please provide a valid email address (e.g. dr.rajesh@example.com)",
+        )
+    parts = clean.split("@")
+    if len(parts) != 2:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid email format",
+        )
+    local_part, domain = parts
+    domain_parts = domain.split(".")
+    tld = domain_parts[-1]
+    if len(tld) < 2 or not tld.isalpha():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email address has an invalid domain extension",
+        )
+    if domain in DISPOSABLE_OR_FAKE_DOMAINS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Disposable, fake, or temporary email domains are not accepted",
+        )
+    alpha_chars = "".join([c for c in local_part if c.isalpha()])
+    if len(alpha_chars) >= 5:
+        vowel_count = sum(1 for c in alpha_chars if c in "aeiouy")
+        if vowel_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Please enter a valid, deliverable email address (keyboard mashing detected)",
+            )
+    if CONSONANT_RUN_PATTERN.search(local_part):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please enter a realistic email address (unusual consonant sequence detected)",
+        )
+    if REPEATED_CHAR_PATTERN.search(local_part):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email address contains excessive repeated characters",
+        )
+    return clean
+
+
+def validate_referral_mobile(raw_mobile: str, required: bool = False) -> str:
+    clean = (raw_mobile or "").strip()
+    if not clean:
+        if required:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Colleague's mobile number is required",
+            )
+        return "+91 98765 43210"
+
+    digits = re.sub(r"\D", "", clean)
+    if len(digits) == 12 and digits.startswith("91"):
+        digits = digits[2:]
+    elif len(digits) == 11 and digits.startswith("0"):
+        digits = digits[1:]
+
+    if len(digits) != 10:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Mobile number must be exactly 10 digits (received {len(digits)} digits)",
+        )
+    if digits[0] not in "6789":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Indian mobile numbers must start with 6, 7, 8, or 9",
+        )
+    if len(set(digits)) == 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Mobile number cannot consist of identical repeated digits",
+        )
+    return f"+91 {digits[:5]} {digits[5:]}"
+
+
 # --- Endpoints ---
 
 @router.post(
@@ -219,9 +334,11 @@ async def create_referral(
             detail="Colleague's email address is required",
         )
 
-    norm_contact = target_contact.lower()
+    # Strict validation of colleague's email (anti-gibberish, anti-disposable, RFC 5322)
+    norm_contact = validate_referral_email(target_contact)
     norm_name = target_name
-    norm_mobile = target_mobile or "+91 98765 43210"
+    # Strict validation of colleague's mobile (Indian 10-digit number)
+    norm_mobile = validate_referral_mobile(target_mobile, required=bool(target_mobile))
 
     # Prevent self-referral
     user_record = db.query(User).filter(User.id == doctor.user_id).first() if doctor.user_id else None

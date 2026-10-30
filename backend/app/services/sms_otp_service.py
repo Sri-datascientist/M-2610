@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import os
+import re
 import secrets
 import threading
 from datetime import datetime, timedelta, timezone
@@ -246,7 +247,24 @@ class SmsOtpService:
         return MockConsoleSmsProvider()
 
     def send_sms_otp(self, mobile: str) -> dict[str, any]:
-        clean_mobile = normalize_phone(mobile)
+        digits = re.sub(r"\D", "", mobile or "")
+        if len(digits) == 12 and digits.startswith("91"):
+            digits = digits[2:]
+        elif len(digits) == 11 and digits.startswith("0"):
+            digits = digits[1:]
+
+        if len(digits) != 10 or digits[0] not in "6789":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Please enter a valid 10-digit Indian mobile number starting with 6, 7, 8, or 9.",
+            )
+        if len(set(digits)) == 1:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mobile number cannot consist of identical repeated digits.",
+            )
+
+        clean_mobile = f"91{digits}"
         now = datetime.now(timezone.utc)
 
         with self._lock:

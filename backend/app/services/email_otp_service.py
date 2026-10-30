@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import os
+import re
 import secrets
 import threading
 from datetime import datetime, timedelta, timezone
@@ -14,6 +15,80 @@ from fastapi import HTTPException, status
 from app.config import settings
 
 logger = logging.getLogger(__name__)
+
+DISPOSABLE_OR_FAKE_DOMAINS = {
+    "fake.com",
+    "test.com",
+    "dummy.com",
+    "sample.com",
+    "invalid.com",
+    "tempmail.com",
+    "mailinator.com",
+    "throwawaymail.com",
+    "guerrillamail.com",
+    "sharklasers.com",
+    "yopmail.com",
+    "10minutemail.com",
+    "trashmail.com",
+    "dispostable.com",
+    "getairmail.com",
+    "mohmal.com",
+    "burnermail.io",
+    "nada.ltd",
+}
+
+EMAIL_RFC_PATTERN = re.compile(
+    r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$"
+)
+CONSONANT_RUN_PATTERN = re.compile(r"[bcdfghjklmnpqrstvwxz]{6,}", re.IGNORECASE)
+REPEATED_CHAR_PATTERN = re.compile(r"(.)\1{3,}")
+
+
+def validate_authentic_email(email: str) -> str:
+    norm = (email or "").strip().lower()
+    if not norm or not EMAIL_RFC_PATTERN.match(norm):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please provide a valid email address (e.g. doctor@hospital.org).",
+        )
+    parts = norm.split("@")
+    if len(parts) != 2:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid email address format.",
+        )
+    local_part, domain = parts
+    domain_parts = domain.split(".")
+    tld = domain_parts[-1]
+    if len(tld) < 2 or not tld.isalpha():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email address has an invalid domain extension.",
+        )
+    if domain in DISPOSABLE_OR_FAKE_DOMAINS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Disposable, fake, or temporary email domains are not accepted.",
+        )
+    alpha_chars = "".join([c for c in local_part if c.isalpha()])
+    if len(alpha_chars) >= 5:
+        vowel_count = sum(1 for c in alpha_chars if c in "aeiouy")
+        if vowel_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Please enter a valid, deliverable email address (keyboard mashing detected).",
+            )
+    if CONSONANT_RUN_PATTERN.search(local_part):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please enter a realistic email address (unusual consonant sequence detected).",
+        )
+    if REPEATED_CHAR_PATTERN.search(local_part):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email address contains excessive repeated characters.",
+        )
+    return norm
 
 
 class EmailOtpSession:
@@ -155,7 +230,7 @@ class EmailOtpService:
         return MockConsoleEmailProvider()
 
     def send_email_otp(self, email: str) -> dict[str, any]:
-        norm_email = email.strip().lower()
+        norm_email = validate_authentic_email(email)
         now = datetime.now(timezone.utc)
 
         with self._lock:

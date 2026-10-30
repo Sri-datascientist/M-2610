@@ -332,7 +332,10 @@ def test_referral_authorization_restrictions(client, doctor_fixture, admin_fixtu
     assert resp.status_code == 403
 
 
-def test_create_colleague_invitation_with_email_dispatch(client, doctor_fixture, db_session):
+def test_create_colleague_invitation_with_email_dispatch(client, doctor_fixture, db_session, monkeypatch):
+    from app.services.email_otp_service import email_otp_service, MockConsoleEmailProvider
+    monkeypatch.setattr(email_otp_service, "_get_provider", lambda: MockConsoleEmailProvider())
+
     (doc1_user, doc1), _ = doctor_fixture
     headers = auth_header(doc1_user)
 
@@ -354,4 +357,70 @@ def test_create_colleague_invitation_with_email_dispatch(client, doctor_fixture,
     assert data["invite_code"] is not None
     assert "register?ref=" in (data["registration_url"] or "")
     assert data["email_dispatched"] is True
+
+
+def test_referral_rejects_gibberish_and_fake_email(client, doctor_fixture):
+    (doc1_user, doc1), _ = doctor_fixture
+    headers = auth_header(doc1_user)
+
+    # 1. Keyboard mash with no vowels (e.g. gcjhljstsh34@gmail.com)
+    payload_gibberish = {
+        "name": "Dr. Komla",
+        "email": "gcjhljstsh34@gmail.com",
+        "mobile": "+91 98765 43210",
+        "qualification": "BAMS",
+    }
+    resp = client.post("/api/v1/referrals", json=payload_gibberish, headers=headers)
+    assert resp.status_code == 400
+    assert "deliverable email" in resp.json()["detail"].lower() or "realistic email" in resp.json()["detail"].lower()
+
+    # 2. Fake / disposable domain (e.g. mailinator.com)
+    payload_fake = {
+        "name": "Dr. Ramesh",
+        "email": "dr.ramesh@mailinator.com",
+        "mobile": "+91 98765 43210",
+        "qualification": "BAMS",
+    }
+    resp = client.post("/api/v1/referrals", json=payload_fake, headers=headers)
+    assert resp.status_code == 400
+    assert "disposable" in resp.json()["detail"].lower() or "fake" in resp.json()["detail"].lower()
+
+
+def test_referral_rejects_invalid_mobile_number(client, doctor_fixture):
+    (doc1_user, doc1), _ = doctor_fixture
+    headers = auth_header(doc1_user)
+
+    # 1. 15 digits (e.g. 564747446475647 from user screenshot)
+    payload_15digits = {
+        "name": "Dr. Komla",
+        "email": "dr.komla.ayur@gmail.com",
+        "mobile": "564747446475647",
+        "qualification": "BAMS",
+    }
+    resp = client.post("/api/v1/referrals", json=payload_15digits, headers=headers)
+    assert resp.status_code == 400
+    assert "10 digits" in resp.json()["detail"].lower()
+
+    # 2. Starts with invalid prefix (e.g. 5432109876)
+    payload_invalid_prefix = {
+        "name": "Dr. Komla",
+        "email": "dr.komla.ayur@gmail.com",
+        "mobile": "5432109876",
+        "qualification": "BAMS",
+    }
+    resp = client.post("/api/v1/referrals", json=payload_invalid_prefix, headers=headers)
+    assert resp.status_code == 400
+    assert "start with 6, 7, 8, or 9" in resp.json()["detail"].lower()
+
+    # 3. All identical repeated digits (e.g. 9999999999)
+    payload_repeated = {
+        "name": "Dr. Komla",
+        "email": "dr.komla.ayur@gmail.com",
+        "mobile": "9999999999",
+        "qualification": "BAMS",
+    }
+    resp = client.post("/api/v1/referrals", json=payload_repeated, headers=headers)
+    assert resp.status_code == 400
+    assert "identical repeated digits" in resp.json()["detail"].lower()
+
 

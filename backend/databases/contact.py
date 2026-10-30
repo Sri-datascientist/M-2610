@@ -178,14 +178,51 @@ def submit_contact_message(payload: ContactSubmission, db: Session = Depends(get
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="Please provide a valid email address (e.g. name@domain.com)."
         )
+    parts = clean_email.split("@")
+    if len(parts) == 2:
+        local_part, domain = parts
+        domain_parts = domain.split(".")
+        tld = domain_parts[-1]
+        if len(tld) < 2 or not tld.isalpha():
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Email address must have a valid domain extension."
+            )
+        alpha_chars = "".join([c for c in local_part if c.isalpha()])
+        if len(alpha_chars) >= 5 and sum(1 for c in alpha_chars if c in "aeiouy") == 0:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Please provide a valid, deliverable email address (avoid keyboard mashing)."
+            )
+        if re.search(r"[bcdfghjklmnpqrstvwxz]{6,}", local_part, re.IGNORECASE):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Please provide a valid email address (unusual consonant sequence detected)."
+            )
 
     # 3. Clean & Validate Phone Number
     digits = re.sub(r"[^0-9]", "", payload.phone)
-    if len(digits) < 10:
+    if len(digits) == 12 and digits.startswith("91"):
+        digits = digits[2:]
+    elif len(digits) == 11 and digits.startswith("0"):
+        digits = digits[1:]
+
+    if len(digits) != 10:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Please enter a valid phone number with at least 10 digits."
+            detail=f"Please enter a valid 10-digit mobile number (received {len(digits)} digits)."
         )
+    if digits[0] not in "6789":
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Indian mobile numbers must start with 6, 7, 8, or 9."
+        )
+    if len(set(digits)) == 1:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Mobile number cannot consist of identical repeated digits."
+        )
+    clean_phone = f"+91 {digits[:5]} {digits[5:]}"
 
     # 4. Clean Subject & Message
     clean_subject = payload.subject.strip()
@@ -208,7 +245,7 @@ def submit_contact_message(payload: ContactSubmission, db: Session = Depends(get
         id=msg_id,
         full_name=clean_name,
         email=clean_email,
-        phone=payload.phone.strip(),
+        phone=clean_phone,
         category=payload.category.strip() or "General Inquiry",
         subject=clean_subject,
         message=clean_message,
