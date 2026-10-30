@@ -22,7 +22,9 @@ import { ClusterFranchisePage } from "@/features/landing";
 import { ContactUsPage } from "@/features/landing";
 import { AboutUsPage } from "@/features/landing";
 import { PublicRelationsPage } from "@/features/landing";
+import { PublicRelationDetailPage } from "@/features/landing";
 import { BlogsPage } from "@/features/landing";
+import { BlogDetailPage } from "@/features/landing";
 import { ContentManagerPage } from "@/features/cms";
 
 // Auth Features
@@ -227,6 +229,18 @@ export const publicRelationsAliasRoute = createRoute({
   component: PublicRelationsPage,
 });
 
+export const publicRelationDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/public-relations/$slug",
+  component: PublicRelationDetailPage,
+});
+
+export const publicRelationDetailAliasRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/pr/$slug",
+  component: PublicRelationDetailPage,
+});
+
 export const blogsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/blogs",
@@ -237,6 +251,18 @@ export const blogsAliasRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/blog",
   component: BlogsPage,
+});
+
+export const blogDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/blogs/$slug",
+  component: BlogDetailPage,
+});
+
+export const blogDetailAliasRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/blog/$slug",
+  component: BlogDetailPage,
 });
 
 export const contentManagerRoute = createRoute({
@@ -662,8 +688,12 @@ export const routeTree = rootRoute.addChildren([
   aboutAliasRoute,
   publicRelationsRoute,
   publicRelationsAliasRoute,
+  publicRelationDetailRoute,
+  publicRelationDetailAliasRoute,
   blogsRoute,
   blogsAliasRoute,
+  blogDetailRoute,
+  blogDetailAliasRoute,
   contentManagerRoute,
   contentManagerAliasRoute,
   loginRoute,
