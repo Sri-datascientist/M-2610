@@ -5,23 +5,15 @@ import {
   Home,
   ShieldCheck,
   Building2,
-  BookOpen,
   Award,
   MapPin,
   Mail,
   Phone,
   CheckCircle2,
-  HeartHandshake,
-  Network,
-  Users,
   Compass,
   Scale,
-  Activity,
-  FileCheck2,
   Boxes,
-  Stethoscope,
   ChevronRight,
-  Lock,
   Globe2,
   LineChart,
 } from "lucide-react";
@@ -328,132 +320,41 @@ export function AboutUsPage() {
         {/* ================================================================== */}
         <section id="who-we-are" className="py-16 sm:py-24 border-b border-[#EBE7DF] bg-[#FAF9F6]">
           <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-              {/* Left Column: Mission Narrative */}
-              <div className="lg:col-span-7 space-y-6">
-                <div>
-                  <p className="mb-2.5 text-xs font-bold uppercase tracking-wider text-[#E67230]">
-                    WHO WE ARE · YOUR CLINICIAN-FIRST PARTNER
-                  </p>
-                  <h2
-                    className="text-balance text-3xl font-extrabold leading-[1.14] tracking-tight text-[#111111] sm:text-4xl lg:text-[42px]"
-                    style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
-                  >
-                    Your Clinician-First Partner
-                  </h2>
-                </div>
-
-                <p className="text-base sm:text-lg text-[#555555] leading-relaxed">
-                  <strong className="font-bold text-[#111111]">Meyveda Ayush Pvt Ltd</strong> is an
-                  AYUSH-focused practitioner enablement ecosystem and digital-and-physical practice toolkit.
-                  Rather than positioning as an abstract algorithm or commercial middleman, Meyveda serves as a
-                  grounded, clinician-first partner designed to help registered AYUSH practitioners (Vaidyas)
-                  launch, operate, and scale their careers with absolute professional dignity.
+            <div className="max-w-3xl space-y-6">
+              <div>
+                <p className="mb-2.5 text-xs font-bold uppercase tracking-wider text-[#E67230]">
+                  WHO WE ARE · YOUR CLINICIAN-FIRST PARTNER
                 </p>
-
-                {/* The Clean Division of Responsibility Charter Callout */}
-                <div className="rounded-xl border-l-4 border-[#E67230] border-y border-r border-[#EBE7DF] bg-white p-6 sm:p-7 space-y-3">
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#E67230] flex items-center gap-1.5">
-                    <Scale className="size-3.5" />
-                    <span>The Meyveda Practice Charter</span>
-                  </p>
-                  <blockquote className="text-base sm:text-lg italic font-medium text-[#111111] leading-relaxed">
-                    &ldquo;We establish a clean division of responsibility: every non-medical, operational,
-                    administrative, and logistical task stays with us, leaving all clinical decisions and patient
-                    care entirely in your hands.&rdquo;
-                  </blockquote>
-                  <p className="text-xs font-medium text-[#777777]">
-                    — Meyveda Clinician Enablement Commitment
-                  </p>
-                </div>
-
-                {/* Division Breakdown Matrix */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                  <div className="rounded-xl border border-[#EBE7DF] bg-white p-4.5 space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-bold text-[#E67230] uppercase tracking-wide">
-                      <CheckCircle2 className="size-4 shrink-0" />
-                      <span>What Stays With Meyveda</span>
-                    </div>
-                    <ul className="text-xs text-[#666666] space-y-1.5">
-                      <li>• E-Prescriptions &amp; Digital Case Records (HPR)</li>
-                      <li>• Zero-inventory pharmacy supply &amp; patient dispatch</li>
-                      <li>• Multi-center calendar scheduling &amp; billing</li>
-                      <li>• Classical formulation monograph vetting</li>
-                    </ul>
-                  </div>
-
-                  <div className="rounded-xl border border-[#EBE7DF] bg-white p-4.5 space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-bold text-[#111111] uppercase tracking-wide">
-                      <Stethoscope className="size-4 text-[#E67230] shrink-0" />
-                      <span>What Stays 100% With You</span>
-                    </div>
-                    <ul className="text-xs text-[#666666] space-y-1.5">
-                      <li>• Diagnostic evaluation &amp; constitutional analysis</li>
-                      <li>• Independent clinical decision making</li>
-                      <li>• Formulation choice &amp; dosage protocols</li>
-                      <li>• Ongoing patient relationship &amp; care stewardship</li>
-                    </ul>
-                  </div>
-                </div>
+                <h2
+                  className="text-balance text-3xl font-extrabold leading-[1.14] tracking-tight text-[#111111] sm:text-4xl lg:text-[42px]"
+                  style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+                >
+                  Your Clinician-First Partner
+                </h2>
               </div>
 
-              {/* Right Column: Visual Trust & Operational Credentials */}
-              <div className="lg:col-span-5 space-y-6">
-                <div className="rounded-2xl border border-[#EBE7DF] bg-white p-7 sm:p-8 space-y-6">
-                  <div className="flex items-center justify-between pb-4 border-b border-[#EBE7DF]">
-                    <span className="text-xs font-bold uppercase tracking-wider text-[#111111]">
-                      Corporate Governance
-                    </span>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#E67230] bg-[#FAF9F6] border border-[#EBE7DF] px-2.5 py-1 rounded-md">
-                      Registered AYUSH Entity
-                    </span>
-                  </div>
+              <p className="text-base sm:text-lg text-[#555555] leading-relaxed">
+                <strong className="font-bold text-[#111111]">Meyveda Ayush Pvt Ltd</strong> is an
+                AYUSH-focused practitioner enablement ecosystem and digital-and-physical practice toolkit.
+                Rather than positioning as an abstract algorithm or commercial middleman, Meyveda serves as a
+                grounded, clinician-first partner designed to help registered AYUSH practitioners (Vaidyas)
+                launch, operate, and scale their careers with absolute professional dignity.
+              </p>
 
-                  <div className="space-y-4 text-xs sm:text-sm text-[#555555]">
-                    <div className="flex items-start gap-3">
-                      <Building2 className="size-4.5 text-[#E67230] shrink-0 mt-0.5" />
-                      <div>
-                        <strong className="text-[#111111] block">Meyveda Ayush Pvt Ltd</strong>
-                        <span>Incorporated to build sovereign healthcare operating infrastructure.</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <ShieldCheck className="size-4.5 text-[#E67230] shrink-0 mt-0.5" />
-                      <div>
-                        <strong className="text-[#111111] block">No Referral Commissions</strong>
-                        <span>Zero pay-to-play listings. Practitioners are never ranked by revenue.</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <MapPin className="size-4.5 text-[#E67230] shrink-0 mt-0.5" />
-                      <div>
-                        <strong className="text-[#111111] block">Operating Headquarters</strong>
-                        <span>{MEYVEDA_CONTACT.address}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-3">
-                      <FileCheck2 className="size-4.5 text-[#E67230] shrink-0 mt-0.5" />
-                      <div>
-                        <strong className="text-[#111111] block">ABDM-HPR Protocol Readiness</strong>
-                        <span>Unified digital architecture recognized by national health gateways.</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Connect link */}
-                  <div className="pt-4 border-t border-[#EBE7DF]">
-                    <Link
-                      to="/contact"
-                      className="inline-flex items-center gap-2 text-xs font-bold text-[#E67230] hover:text-[#D15F1F] transition-colors"
-                    >
-                      <span>Connect with our leadership team</span>
-                      <ArrowRight className="size-3.5" />
-                    </Link>
-                  </div>
-                </div>
+              {/* The Clean Division of Responsibility Charter Callout */}
+              <div className="rounded-xl border-l-4 border-[#E67230] border-y border-r border-[#EBE7DF] bg-white p-6 sm:p-7 space-y-3">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#E67230] flex items-center gap-1.5">
+                  <Scale className="size-3.5" />
+                  <span>The Meyveda Practice Charter</span>
+                </p>
+                <blockquote className="text-base sm:text-lg italic font-medium text-[#111111] leading-relaxed">
+                  &ldquo;We establish a clean division of responsibility: every non-medical, operational,
+                  administrative, and logistical task stays with us, leaving all clinical decisions and patient
+                  care entirely in your hands.&rdquo;
+                </blockquote>
+                <p className="text-xs font-medium text-[#777777]">
+                  — Meyveda Clinician Enablement Commitment
+                </p>
               </div>
             </div>
           </div>
