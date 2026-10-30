@@ -1,6 +1,7 @@
-import { Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { Bell, Menu, PanelLeft, X, Lock, Home } from "lucide-react";
+import { Link, Outlet, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Bell, Menu, PanelLeft, X, Lock, Home, LogOut } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Avatar, BrandMark, SidebarLogo, focusRing } from "@/components/portal/brand";
 import { CatalogProvider } from "@/features/admin/catalog-state";
 import { DoctorUsageProvider } from "@/features/admin/doctor-usage-state";
@@ -77,7 +78,22 @@ export function AdminLayout() {
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const { admin, ready, notifications, ensureDemoSession, syncAdmin } = useStore();
+  const { admin, ready, notifications, ensureDemoSession, syncAdmin, signOut } = useStore();
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    signOut();
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("meyveda-admin");
+      localStorage.removeItem("meyveda-admin");
+      localStorage.removeItem("meyveda_admin_token");
+      localStorage.removeItem("meyveda_auth_token");
+      localStorage.removeItem("meyveda_user_role");
+      localStorage.removeItem("meyveda_user_email");
+    }
+    toast.success("Successfully signed out of Administrator Console");
+    void navigate({ to: "/login", search: { portal: "admin" } as any });
+  };
   const unread = notifications?.items ? notifications.items.filter((item) => !item.read).length : 0;
   const initials = admin
     ? admin.name
@@ -189,6 +205,21 @@ export function AdminLayout() {
                           <nav className="flex flex-1 flex-col overflow-y-auto">
                             <NavGroups collapsed={collapsed} />
                           </nav>
+                          <div className="mt-auto pt-3 border-t border-sidebar-border/40">
+                            <button
+                              type="button"
+                              onClick={handleSignOut}
+                              className={cn(
+                                "flex w-full items-center gap-3 rounded-xl border border-border/50 bg-card/60 px-3 py-2 text-xs font-semibold text-muted-foreground transition-all hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive cursor-pointer",
+                                collapsed && "justify-center px-0",
+                              )}
+                              title="Sign Out of Admin Console"
+                              aria-label="Sign Out"
+                            >
+                              <LogOut className="h-4 w-4 shrink-0" />
+                              {!collapsed && <span>Sign Out</span>}
+                            </button>
+                          </div>
                         </aside>
 
                         <div className={cn(collapsed ? "md:pl-20" : "md:pl-20 lg:pl-64")}>
@@ -263,6 +294,19 @@ export function AdminLayout() {
                               >
                                 <Avatar initials={initials} size="sm" />
                               </Link>
+                              <button
+                                type="button"
+                                onClick={handleSignOut}
+                                className={cn(
+                                  "inline-flex items-center gap-1.5 rounded-lg border border-border/60 px-2.5 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive cursor-pointer",
+                                  focusRing,
+                                )}
+                                title="Sign Out of Admin Console"
+                                aria-label="Sign Out"
+                              >
+                                <LogOut className="h-3.5 w-3.5" />
+                                <span className="hidden sm:inline">Sign Out</span>
+                              </button>
                             </div>
                           </header>
 
@@ -345,6 +389,21 @@ export function AdminLayout() {
                           <nav className="flex flex-1 flex-col overflow-y-auto">
                               <NavGroups collapsed={false} onClick={() => setOpen(false)} />
                             </nav>
+                            <div className="mt-auto pt-4 border-t border-border/40">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpen(false);
+                                  handleSignOut();
+                                }}
+                                className="flex w-full items-center gap-3 rounded-xl border border-border/50 bg-card px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all hover:border-destructive/40 hover:bg-destructive/10 hover:text-destructive cursor-pointer"
+                                title="Sign Out of Admin Console"
+                                aria-label="Sign Out"
+                              >
+                                <LogOut className="h-4 w-4 shrink-0" />
+                                <span>Sign Out</span>
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>

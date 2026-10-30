@@ -159,7 +159,9 @@ function useStoreValue() {
     sessionStorage.removeItem(SESSION_KEY);
     localStorage.removeItem(SESSION_KEY);
     localStorage.removeItem("meyveda_user_role");
+    localStorage.removeItem("meyveda_user_email");
     localStorage.removeItem("meyveda_auth_token");
+    localStorage.removeItem("meyveda_admin_token");
     setAdmin(null);
   };
   const updateSession = (next: Admin) => {
