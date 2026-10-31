@@ -333,7 +333,7 @@ export function AboutUsPage() {
 
               <p className="text-base sm:text-lg text-[#555555] leading-relaxed">
                 <strong className="font-bold text-[#111111]">Meyveda Ayush Pvt Ltd</strong> is an
-                AYUSH-focused practitioner enablement ecosystem and digital-and-physical practice toolkit.
+                AYUSH-focused practitioner enablement ecosystem and Phygital practice toolkit.
                 Rather than positioning as an abstract algorithm or commercial middleman, Meyveda serves as a
                 grounded, clinician-first partner designed to help registered AYUSH practitioners (Vaidyas)
                 launch, operate, and scale their careers with absolute professional dignity.
@@ -478,30 +478,26 @@ export function AboutUsPage() {
                     type="button"
                     onClick={() => setActivePillarId(pillar.id)}
                     aria-pressed={isSelected}
-                    className={`rounded-xl border p-4 sm:p-5 text-left transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#E67230] ${
-                      isSelected
+                    className={`rounded-xl border p-4 sm:p-5 text-left transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#E67230] ${isSelected
                         ? "border-[#E67230] bg-white ring-1 ring-[#E67230] shadow-xs"
                         : "border-[#EBE7DF] bg-white hover:border-[#D5D0C6] hover:bg-[#FAF9F6]"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <span
-                        className={`font-mono text-xs font-bold ${
-                          isSelected ? "text-[#E67230]" : "text-[#888888]"
-                        }`}
+                        className={`font-mono text-xs font-bold ${isSelected ? "text-[#E67230]" : "text-[#888888]"
+                          }`}
                       >
                         {pillar.number}
                       </span>
                       <IconComponent
-                        className={`size-4.5 ${
-                          isSelected ? "text-[#E67230]" : "text-[#777777]"
-                        }`}
+                        className={`size-4.5 ${isSelected ? "text-[#E67230]" : "text-[#777777]"
+                          }`}
                       />
                     </div>
                     <p
-                      className={`text-sm sm:text-base font-bold leading-snug ${
-                        isSelected ? "text-[#111111]" : "text-[#444444]"
-                      }`}
+                      className={`text-sm sm:text-base font-bold leading-snug ${isSelected ? "text-[#111111]" : "text-[#444444]"
+                        }`}
                     >
                       {pillar.title}
                     </p>

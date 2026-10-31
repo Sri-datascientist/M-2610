@@ -20,6 +20,7 @@ import {
   ExternalLink,
   ChevronRight,
   ShieldAlert,
+  MessageCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -256,10 +257,13 @@ export function ReferralsPage() {
   };
 
   const handleCopyLink = async () => {
-    const ok = await copyToClipboard(targetLink);
+    const inviteShareMessage = `Namaste Doctor, I invite you to join Meyveda — verified AYUSH clinical network & research repository. Register with my invite code ${targetCode}: ${targetLink}`;
+    const ok = await copyToClipboard(inviteShareMessage);
     if (ok) {
       setCopiedLink(true);
-      toast.success("Referral link copied to clipboard");
+      toast.success("Invite invitation text copied to clipboard", {
+        description: `Includes invite code ${targetCode} & 1-click registration link.`,
+      });
       setTimeout(() => setCopiedLink(false), 2500);
     } else {
       toast.error("Unable to copy to clipboard. Please copy manually.");
@@ -536,14 +540,24 @@ export function ReferralsPage() {
                     className={cn(inputCls, "font-mono text-xs bg-muted truncate")}
                     aria-label="Direct Registration URL"
                   />
-                  <Btn variant="outline" onClick={handleCopyLink} aria-label="Copy referral link">
+                  <Btn variant="outline" onClick={handleCopyLink} aria-label="Copy referral invitation text">
                     {copiedLink ? (
                       <Check className="h-4 w-4 text-primary" />
                     ) : (
                       <Copy className="h-4 w-4" />
                     )}
-                    {copiedLink ? "Copied" : "Copy Link"}
+                    {copiedLink ? "Copied" : "Copy Invite"}
                   </Btn>
+                  <a
+                    href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Namaste Doctor, I invite you to join Meyveda — verified AYUSH clinical network & research repository. Register with my invite code ${targetCode}: ${targetLink}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition-colors"
+                    title="Share via WhatsApp"
+                  >
+                    <MessageCircle className="h-4 w-4" />
+                    <span className="hidden sm:inline">WhatsApp</span>
+                  </a>
                 </div>
               </div>
             </div>
@@ -705,17 +719,28 @@ export function ReferralsPage() {
                       variant="outline"
                       className="shrink-0 text-xs bg-white border-[#EBE7DF] hover:border-[#E67230] hover:text-[#E67230]"
                       onClick={async () => {
-                        const ok = await copyToClipboard(inviteSuccessInfo.registrationUrl);
+                        const inviteMsg = `Namaste Doctor, I invite you to join Meyveda — verified AYUSH clinical network & research repository. Register with my invite code ${inviteSuccessInfo.inviteCode}: ${inviteSuccessInfo.registrationUrl}`;
+                        const ok = await copyToClipboard(inviteMsg);
                         if (ok) {
-                          toast.success("Direct registration link copied to clipboard");
+                          toast.success("Personalized invitation message copied to clipboard");
                         } else {
                           toast.error("Unable to copy to clipboard");
                         }
                       }}
                     >
                       <Copy className="h-3.5 w-3.5 mr-1" />
-                      Copy Link
+                      Copy Invite
                     </Btn>
+                    <a
+                      href={`https://api.whatsapp.com/send?text=${encodeURIComponent(`Namaste Doctor, I invite you to join Meyveda — verified AYUSH clinical network & research repository. Register with my invite code ${inviteSuccessInfo.inviteCode}: ${inviteSuccessInfo.registrationUrl}`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 text-xs font-bold text-white shadow-xs hover:bg-emerald-700 transition-colors shrink-0"
+                      title="Share via WhatsApp"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      <span className="hidden sm:inline">WhatsApp</span>
+                    </a>
                   </div>
                 </div>
 
