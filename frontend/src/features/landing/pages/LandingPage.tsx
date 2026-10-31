@@ -68,6 +68,7 @@ import juniorDoctorImage from "@/assets/meyveda-doctor-hero.jpg";
 import meyvedaLogo from "@/assets/meyvedalogo.png";
 import justMeyvedaLogo from "@/assets/just_meyveda.png";
 import justMeyvedDownLogo from "@/assets/just_meyved_down.png";
+import reinventYourLogo from "@/assets/REINVENT_YOU_transparent.png";
 import rishiVideo from "@/assets/Rishi.mp4";
 import stage1Image from "@/assets/1.png";
 import stage2Image from "@/assets/2.png";
@@ -5269,15 +5270,21 @@ export function MeyvedaDoctorsPage() {
               Dear <strong className="font-bold text-[#E65C24]">AYUSH</strong> Practitioners,
             </p>
 
-            {/* Headline — Refined editorial display font contrasting tastefully with body typography */}
+            {/* Headline with Brand Graphic */}
             <h1
               id="hero-title"
-              className="text-[36px] sm:text-[44px] lg:text-[48px] xl:text-[52px] font-bold leading-[1.06] tracking-tight text-[#111111]"
-              style={{ fontFamily: 'var(--font-display), "Cormorant Garamond", Georgia, serif' }}
+              className="relative h-[38px] sm:h-[46px] lg:h-[50px] xl:h-[54px]"
             >
-              <span className="block tracking-[-0.01em]">
-                REINVENT YOU<span className="text-[#E67230]">R</span>
-              </span>
+              <span className="sr-only">REINVENT YOUR</span>
+              <img
+                src={reinventYourLogo}
+                alt="REINVENT YOUR"
+                width={3312}
+                height={653}
+                className="absolute -top-[7px] sm:-top-[8px] lg:-top-[9px] xl:-top-[9px] left-0 h-[60px] sm:h-[72px] lg:h-[80px] xl:h-[86px] w-auto max-w-full object-contain object-left pointer-events-none select-none"
+                loading="eager"
+                decoding="async"
+              />
             </h1>
 
             {/* Black rectangular box with animated AYUSH system carousel */}
