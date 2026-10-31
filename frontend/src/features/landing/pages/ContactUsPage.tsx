@@ -218,16 +218,16 @@ export function ContactUsPage() {
               Public relation
             </Link>
             <Link
-              to="/contact"
-              className="whitespace-nowrap py-2 text-[15px] font-bold text-[#E67230] border-b-2 border-[#E67230]"
-            >
-              Contact us
-            </Link>
-            <Link
               to="/blogs"
               className="whitespace-nowrap py-2 text-[15px] font-semibold text-[#555555] transition-colors hover:text-[#111111]"
             >
               Blogs
+            </Link>
+            <Link
+              to="/contact"
+              className="whitespace-nowrap py-2 text-[15px] font-bold text-[#E67230] border-b-2 border-[#E67230]"
+            >
+              Contact us
             </Link>
           </nav>
 

@@ -70,7 +70,7 @@ import meyvedaLogo from "@/assets/meyvedalogo.png";
 import justMeyvedaLogo from "@/assets/just_meyveda.png";
 import justMeyvedDownLogo from "@/assets/just_meyved_down.png";
 import reinventYourLogo from "@/assets/REINVENT_YOU_transparent.png";
-import rishiVideo from "@/assets/Rishi.mp4";
+import rishiVideo from "@/assets/Rishi_hero.mp4";
 import stage1Image from "@/assets/1.png";
 import stage2Image from "@/assets/2.png";
 import stage3Image from "@/assets/3.png";
@@ -1290,9 +1290,8 @@ function SectionHeader({
       </h2>
       {description && (
         <p
-          className={`mt-4 text-base leading-7 text-[#6B6B6B] sm:text-lg sm:leading-8 ${
-            centered ? "mx-auto max-w-2xl" : "max-w-xl"
-          }`}
+          className={`mt-4 text-base leading-7 text-[#6B6B6B] sm:text-lg sm:leading-8 ${centered ? "mx-auto max-w-2xl" : "max-w-xl"
+            }`}
         >
           {description}
         </p>
@@ -1397,9 +1396,8 @@ export function WorkspaceOverviewPage({
                     onClick={() => setSelectedAppointmentIndex(index)}
                     role="button"
                     tabIndex={0}
-                    className={`flex flex-col gap-2 py-3 transition-colors sm:flex-row sm:items-center sm:justify-between ${
-                      isSelected ? "bg-[#FAF9F6] -mx-2 px-2 rounded-lg" : ""
-                    }`}
+                    className={`flex flex-col gap-2 py-3 transition-colors sm:flex-row sm:items-center sm:justify-between ${isSelected ? "bg-[#FAF9F6] -mx-2 px-2 rounded-lg" : ""
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <span className="font-mono text-xs font-bold text-[#6B6B6B]">
@@ -1523,16 +1521,14 @@ export function WorkspaceOverviewPage({
                     key={item.date}
                     type="button"
                     onClick={() => setSelectedDay(item.date)}
-                    className={`flex flex-col items-center gap-1 rounded-md p-1.5 text-center transition-all ${
-                      isChosen
+                    className={`flex flex-col items-center gap-1 rounded-md p-1.5 text-center transition-all ${isChosen
                         ? "bg-[#F47C0B] text-white shadow-xs"
                         : "text-[#111111] hover:bg-white"
-                    }`}
+                      }`}
                   >
                     <span
-                      className={`text-[9px] font-bold ${
-                        isChosen ? "text-white" : "text-[#6B6B6B]"
-                      }`}
+                      className={`text-[9px] font-bold ${isChosen ? "text-white" : "text-[#6B6B6B]"
+                        }`}
                     >
                       {item.day}
                     </span>
@@ -1717,11 +1713,10 @@ export function WorkspaceAppointmentsPage({
                     onClick={() => setSelectedAppointmentIndex(index)}
                     role="button"
                     tabIndex={0}
-                    className={`rounded-xl border p-3.5 transition-all text-left ${
-                      isSelected
+                    className={`rounded-xl border p-3.5 transition-all text-left ${isSelected
                         ? "border-[#F47C0B]/60 bg-[#FFFDF9] shadow-xs"
                         : "border-[#EBE7DF] bg-[#FAF9F6] hover:bg-white hover:border-[#F47C0B]/40"
-                    }`}
+                      }`}
                   >
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-start gap-3">
@@ -1794,16 +1789,14 @@ export function WorkspaceAppointmentsPage({
                     key={item.date}
                     type="button"
                     onClick={() => setSelectedDay(item.date)}
-                    className={`flex flex-col items-center gap-1 rounded-md p-1.5 text-center transition-all ${
-                      isChosen
+                    className={`flex flex-col items-center gap-1 rounded-md p-1.5 text-center transition-all ${isChosen
                         ? "bg-[#F47C0B] text-white shadow-xs"
                         : "text-[#111111] hover:bg-white"
-                    }`}
+                      }`}
                   >
                     <span
-                      className={`text-[9px] font-bold ${
-                        isChosen ? "text-white" : "text-[#6B6B6B]"
-                      }`}
+                      className={`text-[9px] font-bold ${isChosen ? "text-white" : "text-[#6B6B6B]"
+                        }`}
                     >
                       {item.day}
                     </span>
@@ -1914,11 +1907,10 @@ export function WorkspaceClinicalCasesPage({
                 key={c.id}
                 type="button"
                 onClick={() => setSelectedCaseId(c.id)}
-                className={`w-full rounded-xl border p-3.5 text-left transition-all ${
-                  isSelected
+                className={`w-full rounded-xl border p-3.5 text-left transition-all ${isSelected
                     ? "border-[#F47C0B]/60 bg-[#FFFDF9] shadow-xs"
                     : "border-[#EBE7DF] bg-[#FAF9F6] hover:bg-white hover:border-[#F47C0B]/40"
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -2270,11 +2262,10 @@ export function WorkspaceCommunicationPage() {
                 key={thread.id}
                 type="button"
                 onClick={() => setSelectedThreadId(thread.id)}
-                className={`w-full rounded-xl border p-3.5 text-left transition-all ${
-                  isSelected
+                className={`w-full rounded-xl border p-3.5 text-left transition-all ${isSelected
                     ? "border-[#F47C0B]/60 bg-[#FFFDF9] shadow-xs"
                     : "border-[#EBE7DF] bg-[#FAF9F6] hover:bg-white hover:border-[#F47C0B]/40"
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-black text-[#111111]">{thread.patient}</span>
@@ -3183,11 +3174,10 @@ function PracticeSuiteScrollSection({
                     <a
                       href={item.href}
                       onClick={(e) => handleNavClick(e, item.href)}
-                      className={`group relative flex h-full flex-col justify-start rounded-2xl border bg-white p-5 sm:p-6 transition-all duration-300 hover:border-[#E67230]/60 hover:bg-[#FFFBF8] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E67230] motion-reduce:transition-none ${
-                        isActive
+                      className={`group relative flex h-full flex-col justify-start rounded-2xl border bg-white p-5 sm:p-6 transition-all duration-300 hover:border-[#E67230]/60 hover:bg-[#FFFBF8] hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E67230] motion-reduce:transition-none ${isActive
                           ? "border-[#E67230]/60 shadow-xs ring-1 ring-[#E67230]/25"
                           : "border-[#EBE7DF] shadow-2xs"
-                      }`}
+                        }`}
                     >
                       <div>
                         {/* Top Dedicated Visual Preview Area */}
@@ -3239,11 +3229,10 @@ function PracticeSuiteScrollSection({
                     role="tab"
                     aria-selected={activeSlideIndex === idx}
                     aria-label={`Scroll to capability ${idx + 1}: ${feature.title}`}
-                    className={`h-2 rounded-full transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E67230] ${
-                      activeSlideIndex === idx
+                    className={`h-2 rounded-full transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E67230] ${activeSlideIndex === idx
                         ? "w-8 bg-[#E67230]"
                         : "w-2 bg-[#EBE7DF] hover:bg-[#888888]"
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -3443,9 +3432,9 @@ export function CoreVaidyaSection() {
   const activeSlideIndex =
     isDesktop && !reducedMotion
       ? Math.min(
-          CORE_VAIDYA_SERVICES.length - 1,
-          Math.max(0, Math.round(scrollProgress * (CORE_VAIDYA_SERVICES.length - 1))),
-        )
+        CORE_VAIDYA_SERVICES.length - 1,
+        Math.max(0, Math.round(scrollProgress * (CORE_VAIDYA_SERVICES.length - 1))),
+      )
       : CORE_VAIDYA_SERVICES.findIndex((s) => s.id === (hoveredId || selectedId));
 
   const safeSlideIndex = activeSlideIndex >= 0 ? activeSlideIndex : 0;
@@ -3556,11 +3545,10 @@ export function CoreVaidyaSection() {
                           onClick={() => scrollToService(idx)}
                           onMouseEnter={() => setHoveredId(service.id)}
                           onMouseLeave={() => setHoveredId(null)}
-                          className={`w-full h-full rounded-full p-3.5 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-[#E67230] focus-visible:ring-offset-2 ${
-                            isCurrent
+                          className={`w-full h-full rounded-full p-3.5 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 ease-out focus:outline-none focus-visible:ring-4 focus-visible:ring-[#E67230] focus-visible:ring-offset-2 ${isCurrent
                               ? "z-40 border-[2.5px] border-white ring-4 ring-[#E67230]/40 shadow-xl opacity-100"
                               : "border border-white/50 opacity-65 hover:opacity-90 hover:scale-103 shadow-md"
-                          }`}
+                            }`}
                           style={{
                             transform: `rotate(${-currentRotation}deg) scale(${isCurrent ? 1.06 : 1.0})`,
                             willChange: "transform",
@@ -3640,11 +3628,10 @@ export function CoreVaidyaSection() {
                     aria-selected={safeSlideIndex === idx}
                     aria-label={`Select service ${s.number}: ${s.title}`}
                     onClick={() => scrollToService(idx)}
-                    className={`h-2 rounded-full transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E67230] ${
-                      safeSlideIndex === idx
+                    className={`h-2 rounded-full transition-all duration-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E67230] ${safeSlideIndex === idx
                         ? "w-8 bg-[#E67230]"
                         : "w-2.5 bg-[#EBE7DF] hover:bg-[#E67230]/50"
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -3690,11 +3677,10 @@ export function CoreVaidyaSection() {
                     id={`core-vaidya-mobile-circle-${service.id}`}
                     aria-pressed={isCurrent}
                     onClick={() => setSelectedId(service.id)}
-                    className={`aspect-square rounded-full p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#E67230] ${
-                      isCurrent
+                    className={`aspect-square rounded-full p-3 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#E67230] ${isCurrent
                         ? "scale-105 border-2 border-white ring-2 ring-[#E67230] opacity-100 shadow-lg"
                         : "border border-white/40 opacity-65 hover:opacity-90 shadow-sm"
-                    }`}
+                      }`}
                     style={{
                       background: isCurrent
                         ? "linear-gradient(135deg, #F98F4B 0%, #E67230 50%, #C95618 100%)"
@@ -3955,11 +3941,10 @@ export function ManagedServicesTreeSection() {
                   type="button"
                   aria-label={`Go to ${s.title}`}
                   onClick={() => setCurrentIndex(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    currentIndex === index
+                  className={`h-2 rounded-full transition-all duration-300 ${currentIndex === index
                       ? "w-8 bg-[#E67230]"
                       : "w-2.5 bg-[#EBE7DF] hover:bg-[#E67230]/50"
-                  }`}
+                    }`}
                 />
               ))}
             </div>
@@ -4237,11 +4222,10 @@ export function ManagedServicesTreeSection() {
                     top: `${service.topPercent}%`,
                     width: `${service.sizePercent}%`,
                   }}
-                  className={`absolute -translate-x-1/2 -translate-y-1/2 z-30 aspect-square rounded-full cursor-pointer transition-all duration-300 p-0 focus:outline-none ${
-                    isSelected
+                  className={`absolute -translate-x-1/2 -translate-y-1/2 z-30 aspect-square rounded-full cursor-pointer transition-all duration-300 p-0 focus:outline-none ${isSelected
                       ? "ring-4 ring-[#E67230]/70 ring-offset-2 ring-offset-[#FAF9F6] shadow-md"
                       : "ring-0 hover:ring-2 hover:ring-[#E67230]/40"
-                  }`}
+                    }`}
                 >
                   <span className="sr-only">{service.title}</span>
                 </button>
@@ -4324,11 +4308,10 @@ export function ManagedServicesTreeSection() {
                   type="button"
                   aria-label={`Go to ${s.title}`}
                   onClick={() => setCurrentIndex(index)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    currentIndex === index
+                  className={`h-2 rounded-full transition-all duration-300 ${currentIndex === index
                       ? "w-8 bg-[#E67230]"
                       : "w-2.5 bg-[#EBE7DF] hover:bg-[#E67230]/50"
-                  }`}
+                    }`}
                 />
               ))}
             </div>
@@ -6492,7 +6475,7 @@ export function MeyvedaDoctorsPage() {
               <RegisterPrimaryButton
                 size="lg"
                 className="w-full"
-                onClick={() => {}}
+                onClick={() => { }}
                 disabled={isSubmitting || !emailVerified || !mobileVerified}
               >
                 {isSubmitting

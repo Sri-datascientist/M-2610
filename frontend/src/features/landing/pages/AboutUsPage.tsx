@@ -179,16 +179,16 @@ export function AboutUsPage() {
               Public relation
             </Link>
             <Link
-              to="/contact"
-              className="whitespace-nowrap py-2 text-[15px] font-semibold text-[#555555] transition-colors hover:text-[#111111]"
-            >
-              Contact us
-            </Link>
-            <Link
               to="/blogs"
               className="whitespace-nowrap py-2 text-[15px] font-semibold text-[#555555] transition-colors hover:text-[#111111]"
             >
               Blogs
+            </Link>
+            <Link
+              to="/contact"
+              className="whitespace-nowrap py-2 text-[15px] font-semibold text-[#555555] transition-colors hover:text-[#111111]"
+            >
+              Contact us
             </Link>
           </nav>
 
