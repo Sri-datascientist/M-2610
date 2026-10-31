@@ -694,7 +694,6 @@ export function ContentManagerPage() {
                     <thead className="border-b border-[#E5E0D5] bg-[#FAF9F6] text-[#555555]">
                       <tr>
                         <th className="py-3.5 pl-6 pr-3 font-semibold">Title & Summary</th>
-                        <th className="px-3 py-3.5 font-semibold">Category</th>
                         <th className="px-3 py-3.5 font-semibold">Author</th>
                         <th className="px-3 py-3.5 font-semibold">Reading Time</th>
                         <th className="px-3 py-3.5 font-semibold">Status</th>
@@ -710,11 +709,6 @@ export function ContentManagerPage() {
                               <p className="mt-0.5 text-[#666666] line-clamp-1">{item.summary}</p>
                               <p className="mt-1 font-mono text-[10px] text-[#999999]">slug: /{item.slug}</p>
                             </div>
-                          </td>
-                          <td className="px-3 py-4">
-                            <span className="rounded-full bg-[#FAF4ED] px-2.5 py-0.5 font-semibold text-[#E67230]">
-                              {item.category}
-                            </span>
                           </td>
                           <td className="px-3 py-4 text-[#555555]">
                             <p className="font-semibold text-[#111111]">{item.author_name}</p>
@@ -972,21 +966,7 @@ export function ContentManagerPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div>
-                  <label className="block font-semibold text-[#333333]">Category</label>
-                  <select
-                    value={blogForm.category}
-                    onChange={(e) => setBlogForm({ ...blogForm, category: e.target.value })}
-                    className="mt-1 w-full rounded-md border border-[#E5E0D5] p-2.5 text-xs text-[#111111] focus:border-[#E67230] focus:outline-none"
-                  >
-                    <option>Clinical Practice</option>
-                    <option>Ayurvedic Pharmacology</option>
-                    <option>Integrative Medicine</option>
-                    <option>Regulatory & ABDM</option>
-                  </select>
-                </div>
-
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block font-semibold text-[#333333]">Reading Time</label>
                   <input
