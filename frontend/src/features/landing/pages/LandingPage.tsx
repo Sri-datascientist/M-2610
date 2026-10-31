@@ -52,6 +52,7 @@ import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-r
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth-context";
 import { apiClient } from "@/services/apiClient";
+import { cn } from "@/lib/utils";
 import { setStoredToken } from "@/lib/api";
 import { validateIndianMobile, validateAuthenticEmail } from "@/lib/validation";
 import { Button } from "@/components/ui/button";
@@ -4472,6 +4473,8 @@ export function MeyvedaDoctorsPage() {
   const [doctorPhone, setDoctorPhone] = useState("");
   const [doctorPassword, setDoctorPassword] = useState("");
   const [showDoctorPassword, setShowDoctorPassword] = useState(false);
+  const [doctorConfirmPassword, setDoctorConfirmPassword] = useState("");
+  const [showDoctorConfirmPassword, setShowDoctorConfirmPassword] = useState(false);
   const [doctorInviteCode, setDoctorInviteCode] = useState(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -4753,6 +4756,10 @@ export function MeyvedaDoctorsPage() {
 
     if (!doctorPassword || doctorPassword.length < 6) {
       toast.error("Password must be at least 6 characters long.");
+      return;
+    }
+    if (doctorPassword !== doctorConfirmPassword) {
+      toast.error("Passwords do not match. Please verify your confirm password.");
       return;
     }
 
@@ -6339,29 +6346,68 @@ export function MeyvedaDoctorsPage() {
               )}
             </div>
 
-            {/* 6. Password */}
-            <div>
-              <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
-                Password *
-              </label>
-              <div className="relative">
-                <input
-                  type={showDoctorPassword ? "text" : "password"}
-                  required
-                  placeholder=""
-                  autoComplete="new-password"
-                  value={doctorPassword}
-                  onChange={(e) => setDoctorPassword(e.target.value)}
-                  className="w-full rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2.5 pr-10 text-sm text-[#111111] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowDoctorPassword(!showDoctorPassword)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-[#777777] hover:text-[#111111] cursor-pointer"
-                  tabIndex={-1}
-                >
-                  {showDoctorPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </button>
+            {/* 6. Password & Confirm Password */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                  Password *
+                </label>
+                <div className="relative">
+                  <input
+                    type={showDoctorPassword ? "text" : "password"}
+                    required
+                    placeholder="Min. 6 characters"
+                    autoComplete="new-password"
+                    value={doctorPassword}
+                    onChange={(e) => setDoctorPassword(e.target.value)}
+                    className="w-full rounded-md border border-[#EBE7DF] bg-white px-3.5 py-2.5 pr-10 text-sm text-[#111111] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230] focus:outline-none transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowDoctorPassword(!showDoctorPassword)}
+                    className="absolute top-1/2 right-3 -translate-y-1/2 text-[#777777] hover:text-[#111111] cursor-pointer"
+                    tabIndex={-1}
+                    aria-label="Toggle password visibility"
+                  >
+                    {showDoctorPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs sm:text-sm font-bold text-[#111111] mb-1.5">
+                  Confirm Password *
+                </label>
+                <div className="relative">
+                  <input
+                    type={showDoctorConfirmPassword ? "text" : "password"}
+                    required
+                    placeholder="Re-enter password"
+                    autoComplete="new-password"
+                    value={doctorConfirmPassword}
+                    onChange={(e) => setDoctorConfirmPassword(e.target.value)}
+                    className={cn(
+                      "w-full rounded-md border bg-white px-3.5 py-2.5 pr-10 text-sm text-[#111111] focus:outline-none transition-colors",
+                      doctorConfirmPassword && doctorPassword !== doctorConfirmPassword
+                        ? "border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                        : "border-[#EBE7DF] focus:border-[#E67230] focus:ring-1 focus:ring-[#E67230]"
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowDoctorConfirmPassword(!showDoctorConfirmPassword)}
+                    className="absolute top-1/2 right-3 -translate-y-1/2 text-[#777777] hover:text-[#111111] cursor-pointer"
+                    tabIndex={-1}
+                    aria-label="Toggle confirm password visibility"
+                  >
+                    {showDoctorConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
+                {doctorConfirmPassword && doctorPassword !== doctorConfirmPassword && (
+                  <p className="mt-1 text-[11px] font-medium text-red-500">
+                    Passwords do not match
+                  </p>
+                )}
               </div>
             </div>
 
