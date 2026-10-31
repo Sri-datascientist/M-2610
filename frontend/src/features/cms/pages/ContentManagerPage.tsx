@@ -893,16 +893,6 @@ export function ContentManagerPage() {
                   />
                   <span className="font-semibold text-[#333333]">Publish immediately</span>
                 </label>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={prForm.is_featured}
-                    onChange={(e) => setPrForm({ ...prForm, is_featured: e.target.checked })}
-                    className="size-4 rounded text-[#E67230] focus:ring-[#E67230]"
-                  />
-                  <span className="font-semibold text-[#333333]">Feature in top spotlight banner</span>
-                </label>
               </div>
 
               <div className="mt-6 flex items-center justify-end gap-3 border-t border-[#E5E0D5] pt-4">
@@ -1058,16 +1048,6 @@ export function ContentManagerPage() {
                     className="size-4 rounded text-[#E67230] focus:ring-[#E67230]"
                   />
                   <span className="font-semibold text-[#333333]">Publish immediately</span>
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={blogForm.is_featured}
-                    onChange={(e) => setBlogForm({ ...blogForm, is_featured: e.target.checked })}
-                    className="size-4 rounded text-[#E67230] focus:ring-[#E67230]"
-                  />
-                  <span className="font-semibold text-[#333333]">Feature in top spotlight banner</span>
                 </label>
               </div>
 
